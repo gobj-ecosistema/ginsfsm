@@ -380,7 +380,7 @@ PUBLIC json_t *schema2json(
     const char **key
 );
 
-const sdata_desc_t* sdata_schema(hsdata hs);
+PUBLIC const sdata_desc_t* sdata_schema(hsdata hs);
 PUBLIC const sdata_desc_t * sdata_it_desc(const sdata_desc_t *schema, const char *name);
 
 

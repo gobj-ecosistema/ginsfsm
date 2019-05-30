@@ -169,6 +169,7 @@ typedef struct _GObj_t {
     dl_list_t dl_subscriptions; // external subscriptions to events of this gobj.
     dl_list_t dl_subscribings;  // subscriptions of this gobj to events of others gobj.
 
+    json_t *user_data;
     void *priv;
     hsdata hsdata_attr;
     hgobj yuno;             // yuno belongs this gobj
@@ -1730,6 +1731,11 @@ PRIVATE hgobj _gobj_create(
     }
 
     /*--------------------------------*
+     *      Alloc user_data
+     *--------------------------------*/
+    gobj->user_data = json_object();
+
+    /*--------------------------------*
      *      Exec mt_create
      *--------------------------------*/
     gobj->obflag |= obflag_created;
@@ -2331,6 +2337,11 @@ PUBLIC void gobj_destroy(hgobj gobj_)
             gobj->gclass->gmt.mt_destroy(gobj);
         }
     }
+
+    /*--------------------------------*
+     *      Free user_data
+     *--------------------------------*/
+    JSON_DECREF(gobj->user_data);
 
     /*----------------------------------------------*
      *  Info after mt_destroy():
@@ -6522,6 +6533,78 @@ PUBLIC void *gobj_danger_attr_ptr2(hgobj gobj, const char *name, const sdata_des
 
 /***************************************************************************
  *  ATTR: read str
+ *  Return is yours! Must be decref. New api (May/2019), js style
+ ***************************************************************************/
+PUBLIC json_t *gobj_read_attr(
+    hgobj gobj,
+    const char *name
+)
+{
+    hsdata hs = gobj_hsdata2(gobj, name, FALSE);
+    if(!hs) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", gobj_short_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "GClass Attribute NOT FOUND",
+            "gclass",       "%s", gobj_gclass_name(gobj),
+            "attr",         "%s", name?name:"",
+            NULL
+        );
+        return 0;
+    }
+
+    json_t *jn_value = 0;
+    const sdata_desc_t *it = sdata_it_desc(sdata_schema(hs), name);
+
+    if(ASN_IS_STRING(it->type)) {
+        jn_value = json_string(sdata_read_str(hs, name));
+    } else if(ASN_IS_BOOLEAN(it->type)) {
+        jn_value = sdata_read_bool(hs, name)?json_true():json_false();
+    } else if(ASN_IS_UNSIGNED32(it->type)) {
+        jn_value = json_integer(sdata_read_uint32(hs, name));
+    } else if(ASN_IS_SIGNED32(it->type)) {
+        jn_value = json_integer(sdata_read_int32(hs, name));
+    } else if(ASN_IS_UNSIGNED64(it->type)) {
+        jn_value = json_integer(sdata_read_uint64(hs, name));
+    } else if(ASN_IS_SIGNED64(it->type)) {
+        jn_value = json_integer(sdata_read_int64(hs, name));
+    } else if(ASN_IS_DOUBLE(it->type)) {
+        jn_value = json_real(sdata_read_real(hs, name));
+    } else if(ASN_IS_JSON(it->type)) {
+        jn_value = sdata_read_json(hs, name);
+        JSON_INCREF(jn_value);
+    } else if(ASN_IS_POINTER(it->type)) {
+        jn_value = json_integer((json_int_t)sdata_read_pointer(hs, name));
+    } else {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", gobj_short_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "GClass Attribute Type NOT VALID",
+            "gclass",       "%s", gobj_gclass_name(gobj),
+            "attr",         "%s", name?name:"",
+            NULL
+        );
+    }
+
+    return jn_value;
+}
+
+/***************************************************************************
+ *  ATTR: read str
+ *  Return is yours! Must be decref.  New api (May/2019), js style
+ ***************************************************************************/
+PUBLIC json_t *gobj_read_user_data(
+    hgobj gobj,
+    const char *name
+)
+{
+    return json_object_get(((GObj_t *)gobj)->user_data, name);
+}
+
+/***************************************************************************
+ *  ATTR: read str
  ***************************************************************************/
 PUBLIC const char *gobj_read_str_attr(hgobj gobj, const char *name)
 {
@@ -6836,6 +6919,83 @@ PUBLIC SData_Value_t gobj_read_default_attr_value(hgobj gobj, const char* name) 
 
 /***************************************************************************
  *  ATTR: write
+ *  New api (May/2019), js style
+ ***************************************************************************/
+PUBLIC int gobj_write_attr(
+    hgobj gobj,
+    const char *name,
+    json_t *value  // owned
+)
+{
+    hsdata hs = gobj_hsdata2(gobj, name, FALSE);
+    if(!hs) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", gobj_short_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "GClass Attribute NOT FOUND",
+            "gclass",       "%s", gobj_gclass_name(gobj),
+            "attr",         "%s", name?name:"",
+            NULL
+        );
+        JSON_DECREF(value);
+        return -1;
+    }
+
+    int ret;
+    const sdata_desc_t *it = sdata_it_desc(sdata_schema(hs), name);
+
+    if(ASN_IS_STRING(it->type)) {
+        ret = sdata_write_str(hs, name, json_string_value(value));
+    } else if(ASN_IS_BOOLEAN(it->type)) {
+        ret = sdata_write_bool(hs, name, json_boolean_value(value));
+    } else if(ASN_IS_UNSIGNED32(it->type)) {
+        ret = sdata_write_uint32(hs, name, json_integer_value(value));
+    } else if(ASN_IS_SIGNED32(it->type)) {
+        ret = sdata_write_int32(hs, name, json_integer_value(value));
+    } else if(ASN_IS_UNSIGNED64(it->type)) {
+        ret = sdata_write_uint64(hs, name, json_integer_value(value));
+    } else if(ASN_IS_SIGNED64(it->type)) {
+        ret = sdata_write_int64(hs, name, json_integer_value(value));
+    } else if(ASN_IS_DOUBLE(it->type)) {
+        ret = sdata_write_real(hs, name, json_real_value(value));
+    } else if(ASN_IS_JSON(it->type)) {
+        ret = sdata_write_json(hs, name, value); // WARNING json is incref
+        JSON_DECREF(value);
+    } else if(ASN_IS_POINTER(it->type)) {
+        ret = sdata_write_pointer(hs, name, (void *)json_integer_value(value));
+    } else {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", gobj_short_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "GClass Attribute Type NOT VALID",
+            "gclass",       "%s", gobj_gclass_name(gobj),
+            "attr",         "%s", name?name:"",
+            NULL
+        );
+        ret = -1;
+    }
+
+    JSON_DECREF(value);
+    return ret;
+}
+
+/***************************************************************************
+ *  ATTR: write
+ *  New api (May/2019), js style
+ ***************************************************************************/
+PUBLIC int gobj_write_user_data(
+    hgobj gobj,
+    const char *name,
+    json_t *value // owned
+)
+{
+    return json_object_set_new(((GObj_t *)gobj)->user_data, name, value);
+}
+
+/***************************************************************************
+ *  ATTR: write
  ***************************************************************************/
 PUBLIC int gobj_write_str_attr(hgobj gobj, const char *name, const char *value)
 {
@@ -6852,7 +7012,7 @@ PUBLIC int gobj_write_str_attr(hgobj gobj, const char *name, const char *value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -6873,7 +7033,7 @@ PUBLIC int gobj_write_bool_attr(hgobj gobj, const char *name, BOOL value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -6894,7 +7054,7 @@ PUBLIC int gobj_write_int32_attr(hgobj gobj, const char *name, int32_t value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -6915,7 +7075,7 @@ PUBLIC int gobj_write_uint32_attr(hgobj gobj, const char *name, uint32_t value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -6936,7 +7096,7 @@ PUBLIC int gobj_write_int64_attr(hgobj gobj, const char *name, int64_t value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -6957,7 +7117,7 @@ PUBLIC int gobj_write_uint64_attr(hgobj gobj, const char *name, uint64_t value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -6978,7 +7138,7 @@ PUBLIC int gobj_write_integer_attr(hgobj gobj, const char *name, uint64_t value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -6999,7 +7159,7 @@ PUBLIC int gobj_write_real_attr(hgobj gobj, const char *name, double value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -7020,7 +7180,7 @@ PUBLIC int gobj_write_json_attr(hgobj gobj, const char *name, json_t *value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************
@@ -7041,7 +7201,7 @@ PUBLIC int gobj_write_pointer_attr(hgobj gobj, const char *name, void *value)
         "attr",         "%s", name?name:"",
         NULL
     );
-    return 0;
+    return -1;
 }
 
 /***************************************************************************

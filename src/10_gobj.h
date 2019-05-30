@@ -918,9 +918,19 @@ PUBLIC hsdata gobj_hsdata2(hgobj gobj, const char *name, BOOL verbose);
 PUBLIC void *gobj_danger_attr_ptr(hgobj gobj, const char *name);
 PUBLIC void *gobj_danger_attr_ptr2(hgobj gobj_, const char *name, const sdata_desc_t **pit);
 
-/*
+/*------------------------------*
  *  Attributes read functions
- */
+ *------------------------------*/
+
+PUBLIC json_t *gobj_read_attr( // Return is yours! Must be decref.
+    hgobj gobj,
+    const char *name
+);
+PUBLIC json_t *gobj_read_user_data( // Return is yours! Must be decref.
+    hgobj gobj,
+    const char *name
+);
+
 PUBLIC const char *gobj_read_str_attr(hgobj gobj, const char *name);
 PUBLIC BOOL gobj_read_bool_attr(hgobj gobj, const char *name);
 PUBLIC int32_t gobj_read_int32_attr(hgobj gobj, const char *name);
@@ -937,10 +947,22 @@ PUBLIC const sdata_desc_t * gobj_read_iter_schema(hgobj gobj, const char *name);
 PUBLIC BOOL gobj_is_readable_attr(hgobj gobj, const char *name); // True is attr is SDF_RD (public readable)
 PUBLIC SData_Value_t gobj_read_default_attr_value(hgobj gobj, const char* name);  // Only for basic types
 
-/*
+/*-------------------------------------------------------*
  *  Attributes write functions
  *  The write functions will cause mt_writing() call.
- */
+ *-------------------------------------------------------*/
+
+PUBLIC int gobj_write_attr(
+    hgobj gobj,
+    const char *name,
+    json_t *value  // owned
+);
+PUBLIC int gobj_write_user_data(
+    hgobj gobj,
+    const char *name,
+    json_t *value // owned
+);
+
 PUBLIC int gobj_write_str_attr(hgobj gobj, const char *name, const char *value);
 PUBLIC int gobj_write_bool_attr(hgobj gobj, const char *name, BOOL value);
 PUBLIC int gobj_write_int32_attr(hgobj gobj, const char *name, int32_t value);
