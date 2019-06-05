@@ -6474,7 +6474,7 @@ PUBLIC hsdata gobj_hsdata2(hgobj gobj_, const char *name, BOOL verbose)
         return gobj_hsdata2(gobj->bottom_gobj, name, verbose);
     }
     if(verbose) {
-        log_error(LOG_OPT_TRACE_STACK,
+        log_warning(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_short_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6497,7 +6497,7 @@ PUBLIC void *gobj_danger_attr_ptr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_it_pointer(hs, name, 0);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6519,7 +6519,7 @@ PUBLIC void *gobj_danger_attr_ptr2(hgobj gobj, const char *name, const sdata_des
     if(hs) {
         return sdata_it_pointer(hs, name, pit);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6542,7 +6542,7 @@ PUBLIC json_t *gobj_read_attr(
 {
     hsdata hs = gobj_hsdata2(gobj, name, FALSE);
     if(!hs) {
-        log_error(LOG_OPT_TRACE_STACK,
+        log_warning(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_short_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6615,7 +6615,7 @@ PUBLIC const char *gobj_read_str_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_str(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6647,7 +6647,7 @@ PUBLIC BOOL gobj_read_bool_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_bool(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6668,7 +6668,7 @@ PUBLIC int32_t gobj_read_int32_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_int32(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6692,7 +6692,7 @@ PUBLIC uint32_t gobj_read_uint32_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_uint32(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6713,7 +6713,7 @@ PUBLIC int64_t gobj_read_int64_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_int64(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6734,7 +6734,7 @@ PUBLIC uint64_t gobj_read_uint64_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_uint64(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6755,7 +6755,7 @@ PUBLIC uint64_t gobj_read_integer_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_integer(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6776,7 +6776,7 @@ PUBLIC double gobj_read_real_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_real(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6797,7 +6797,7 @@ PUBLIC json_t *gobj_read_json_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_json(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6818,7 +6818,7 @@ PUBLIC void *gobj_read_pointer_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_pointer(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6839,7 +6839,7 @@ PUBLIC dl_list_t *gobj_read_dl_list_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_dl_list(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6860,7 +6860,7 @@ PUBLIC dl_list_t *gobj_read_iter_attr(hgobj gobj, const char *name)
     if(hs) {
         return sdata_read_iter(hs, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6885,7 +6885,7 @@ PUBLIC const sdata_desc_t * gobj_read_iter_schema(hgobj gobj_, const char *name)
     } else if(gobj && gobj->bottom_gobj) {
         return gobj_read_iter_schema(gobj->bottom_gobj, name);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6929,7 +6929,7 @@ PUBLIC int gobj_write_attr(
 {
     hsdata hs = gobj_hsdata2(gobj, name, FALSE);
     if(!hs) {
-        log_error(LOG_OPT_TRACE_STACK,
+        log_warning(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_short_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7003,7 +7003,7 @@ PUBLIC int gobj_write_str_attr(hgobj gobj, const char *name, const char *value)
     if(hs) {
         return sdata_write_str(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7024,7 +7024,7 @@ PUBLIC int gobj_write_bool_attr(hgobj gobj, const char *name, BOOL value)
     if(hs) {
         return sdata_write_bool(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7045,7 +7045,7 @@ PUBLIC int gobj_write_int32_attr(hgobj gobj, const char *name, int32_t value)
     if(hs) {
         return sdata_write_int32(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7066,7 +7066,7 @@ PUBLIC int gobj_write_uint32_attr(hgobj gobj, const char *name, uint32_t value)
     if(hs) {
         return sdata_write_uint32(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7087,7 +7087,7 @@ PUBLIC int gobj_write_int64_attr(hgobj gobj, const char *name, int64_t value)
     if(hs) {
         return sdata_write_int64(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7108,7 +7108,7 @@ PUBLIC int gobj_write_uint64_attr(hgobj gobj, const char *name, uint64_t value)
     if(hs) {
         return sdata_write_uint64(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7129,7 +7129,7 @@ PUBLIC int gobj_write_integer_attr(hgobj gobj, const char *name, uint64_t value)
     if(hs) {
         return sdata_write_integer(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7150,7 +7150,7 @@ PUBLIC int gobj_write_real_attr(hgobj gobj, const char *name, double value)
     if(hs) {
         return sdata_write_real(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7171,7 +7171,7 @@ PUBLIC int gobj_write_json_attr(hgobj gobj, const char *name, json_t *value)
     if(hs) {
         return sdata_write_json(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -7192,7 +7192,7 @@ PUBLIC int gobj_write_pointer_attr(hgobj gobj, const char *name, void *value)
     if(hs) {
         return sdata_write_pointer(hs, name, value);
     }
-    log_error(LOG_OPT_TRACE_STACK,
+    log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_short_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
