@@ -1238,11 +1238,12 @@ PUBLIC int gobj_print_childs(dl_list_t *dl_childs, int verbose_level);
 /*
  *  Stats functions
  */
-PUBLIC json_int_t gobj_set_stat(hgobj gobj, const char *key, json_int_t value); // return old value
-PUBLIC json_int_t gobj_incr_stat(hgobj gobj, const char *key, json_int_t value); // return new value
-PUBLIC json_int_t gobj_decr_stat(hgobj gobj, const char *key, json_int_t value); // return new value
-PUBLIC json_int_t gobj_get_stat(hgobj gobj, const char *key);
-PUBLIC json_t *gobj_jn_stats(hgobj gobj);
+PUBLIC json_int_t gobj_set_stat(hgobj gobj, const char *path, json_int_t value); // return old value
+PUBLIC json_int_t gobj_incr_stat(hgobj gobj, const char *path, json_int_t value); // return new value
+PUBLIC json_int_t gobj_decr_stat(hgobj gobj, const char *path, json_int_t value); // return new value
+PUBLIC json_int_t gobj_get_stat(hgobj gobj, const char *path);
+PUBLIC json_t *gobj_jn_stats(hgobj gobj);  // WARNING the json return is NOT YOURS!
+
 
 
 #ifdef __cplusplus
