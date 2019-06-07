@@ -169,7 +169,8 @@ typedef struct _GObj_t {
     dl_list_t dl_subscriptions; // external subscriptions to events of this gobj.
     dl_list_t dl_subscribings;  // subscriptions of this gobj to events of others gobj.
 
-    json_t *user_data;
+    json_t *jn_user_data;
+    json_t *jn_stats_data;
     void *priv;
     hsdata hsdata_attr;
     hgobj yuno;             // yuno belongs this gobj
@@ -1733,7 +1734,12 @@ PRIVATE hgobj _gobj_create(
     /*--------------------------------*
      *      Alloc user_data
      *--------------------------------*/
-    gobj->user_data = json_object();
+    gobj->jn_user_data = json_object();
+
+    /*--------------------------------*
+     *      Alloc stats_data
+     *--------------------------------*/
+    gobj->jn_stats_data = json_object();
 
     /*--------------------------------*
      *      Exec mt_create
@@ -2339,9 +2345,10 @@ PUBLIC void gobj_destroy(hgobj gobj_)
     }
 
     /*--------------------------------*
-     *      Free user_data
+     *  Free user_data, stats_data
      *--------------------------------*/
-    JSON_DECREF(gobj->user_data);
+    JSON_DECREF(gobj->jn_user_data);
+    JSON_DECREF(gobj->jn_stats_data);
 
     /*----------------------------------------------*
      *  Info after mt_destroy():
@@ -6600,7 +6607,7 @@ PUBLIC json_t *gobj_read_user_data(
     const char *name
 )
 {
-    return json_object_get(((GObj_t *)gobj)->user_data, name);
+    return json_object_get(((GObj_t *)gobj)->jn_user_data, name);
 }
 
 /***************************************************************************
@@ -6991,7 +6998,7 @@ PUBLIC int gobj_write_user_data(
     json_t *value // owned
 )
 {
-    return json_object_set_new(((GObj_t *)gobj)->user_data, name, value);
+    return json_object_set_new(((GObj_t *)gobj)->jn_user_data, name, value);
 }
 
 /***************************************************************************
@@ -10035,3 +10042,55 @@ PUBLIC int gobj_print_childs(dl_list_t *dl_childs, int verbose_level)
     return 0;
 }
 
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_int_t gobj_set_stat(hgobj gobj, const char *key, json_int_t value)
+{
+    if(!gobj) {
+        return 0;
+    }
+    json_int_t old_value = json_integer_value(json_object_get(((GObj_t *)gobj)->jn_stats_data, key));
+    json_object_set_new(((GObj_t *)gobj)->jn_stats_data, key, json_integer(value));
+
+    return old_value;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_int_t gobj_incr_stat(hgobj gobj, const char *key, json_int_t value)
+{
+    if(!gobj) {
+        return 0;
+    }
+    json_int_t cur_value = json_integer_value(json_object_get(((GObj_t *)gobj)->jn_stats_data, key));
+    cur_value += value;
+    json_object_set_new(((GObj_t *)gobj)->jn_stats_data, key, json_integer(cur_value));
+    return cur_value;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_int_t gobj_decr_stat(hgobj gobj, const char *key, json_int_t value)
+{
+    if(!gobj) {
+        return 0;
+    }
+    json_int_t cur_value = json_integer_value(json_object_get(((GObj_t *)gobj)->jn_stats_data, key));
+    cur_value -= value;
+    json_object_set_new(((GObj_t *)gobj)->jn_stats_data, key, json_integer(cur_value));
+    return cur_value;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_int_t gobj_get_stat(hgobj gobj, const char *key)
+{
+    if(!gobj) {
+        return 0;
+    }
+    return json_integer_value(json_object_get(((GObj_t *)gobj)->jn_stats_data, key));
+}

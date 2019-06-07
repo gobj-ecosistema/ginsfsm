@@ -1235,6 +1235,14 @@ PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
 PUBLIC int gobj_print_subscriptions(hgobj gobj);
 PUBLIC int gobj_print_childs(dl_list_t *dl_childs, int verbose_level);
 
+/*
+ *  Stats functions
+ */
+PUBLIC json_int_t gobj_set_stat(hgobj gobj, const char *key, json_int_t value); // return old value
+PUBLIC json_int_t gobj_incr_stat(hgobj gobj, const char *key, json_int_t value); // return new value
+PUBLIC json_int_t gobj_decr_stat(hgobj gobj, const char *key, json_int_t value); // return new value
+PUBLIC json_int_t gobj_get_stat(hgobj gobj, const char *key);
+
 
 #ifdef __cplusplus
 }
