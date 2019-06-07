@@ -1242,6 +1242,7 @@ PUBLIC json_int_t gobj_set_stat(hgobj gobj, const char *key, json_int_t value); 
 PUBLIC json_int_t gobj_incr_stat(hgobj gobj, const char *key, json_int_t value); // return new value
 PUBLIC json_int_t gobj_decr_stat(hgobj gobj, const char *key, json_int_t value); // return new value
 PUBLIC json_int_t gobj_get_stat(hgobj gobj, const char *key);
+PUBLIC json_t *gobj_jn_stats(hgobj gobj);
 
 
 #ifdef __cplusplus
