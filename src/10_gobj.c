@@ -10045,13 +10045,14 @@ PUBLIC int gobj_print_childs(dl_list_t *dl_childs, int verbose_level)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_int_t gobj_set_stat(hgobj gobj, const char *path, json_int_t value)
+PUBLIC json_int_t gobj_set_stat(hgobj gobj_, const char *path, json_int_t value)
 {
+    GObj_t * gobj = gobj_;
     if(!gobj) {
         return 0;
     }
-    json_int_t old_value = kw_get_int(((GObj_t *)gobj)->jn_stats, path, 0, 0);
-    kw_set_dict_value(((GObj_t *)gobj)->jn_stats, path, json_integer(value));
+    json_int_t old_value = kw_get_int(gobj->jn_stats, path, 0, 0);
+    kw_set_dict_value(gobj->jn_stats, path, json_integer(value));
 
     return old_value;
 }
@@ -10059,15 +10060,16 @@ PUBLIC json_int_t gobj_set_stat(hgobj gobj, const char *path, json_int_t value)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_int_t gobj_incr_stat(hgobj gobj, const char *path, json_int_t value)
+PUBLIC json_int_t gobj_incr_stat(hgobj gobj_, const char *path, json_int_t value)
 {
+    GObj_t * gobj = gobj_;
     if(!gobj) {
         return 0;
     }
 
-    json_int_t cur_value = kw_get_int(((GObj_t *)gobj)->jn_stats, path, 0, 0);
+    json_int_t cur_value = kw_get_int(gobj->jn_stats, path, 0, 0);
     cur_value += value;
-    kw_set_dict_value(((GObj_t *)gobj)->jn_stats, path, json_integer(cur_value));
+    kw_set_dict_value(gobj->jn_stats, path, json_integer(cur_value));
 
     return cur_value;
 }
@@ -10075,14 +10077,15 @@ PUBLIC json_int_t gobj_incr_stat(hgobj gobj, const char *path, json_int_t value)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_int_t gobj_decr_stat(hgobj gobj, const char *path, json_int_t value)
+PUBLIC json_int_t gobj_decr_stat(hgobj gobj_, const char *path, json_int_t value)
 {
+    GObj_t * gobj = gobj_;
     if(!gobj) {
         return 0;
     }
-    json_int_t cur_value = kw_get_int(((GObj_t *)gobj)->jn_stats, path, 0, 0);
+    json_int_t cur_value = kw_get_int(gobj->jn_stats, path, 0, 0);
     cur_value -= value;
-    kw_set_dict_value(((GObj_t *)gobj)->jn_stats, path, json_integer(cur_value));
+    kw_set_dict_value(gobj->jn_stats, path, json_integer(cur_value));
 
     return cur_value;
 }
