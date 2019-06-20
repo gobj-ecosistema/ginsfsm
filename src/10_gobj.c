@@ -356,7 +356,7 @@ PRIVATE int print_attr_not_found(void *user_data, const char *attr)
     hgobj gobj = user_data;
     if(strcasecmp(attr, "__json_config_variables__")!=0) {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -371,7 +371,7 @@ PRIVATE int print_required_attr_not_found(void *user_data, const char *attr)
 {
     hgobj gobj = user_data;
     log_error(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "Required Attribute NOT FOUND",
@@ -1132,6 +1132,7 @@ PRIVATE json_t *webix_trans_filter(
 
 /***************************************************************************
  *  Authenticate
+ *  Return webix response ({"result": 0,...} 0 successful authentication, -1 error)
  ***************************************************************************/
 PUBLIC json_t *gobj_authenticate(hgobj gobj_, const char *service, json_t *kw, hgobj src)
 {
@@ -1150,7 +1151,9 @@ PUBLIC json_t *gobj_authenticate(hgobj gobj_, const char *service, json_t *kw, h
     if(!gobj->gclass->gmt.mt_authenticate) {
         // Authentication not needed
         KW_DECREF(kw);
-        return 0;
+        return json_pack("{s:i}",
+            "result", 0
+        );
     }
 
     return gobj->gclass->gmt.mt_authenticate(gobj, service, kw, src);
@@ -2600,7 +2603,7 @@ PUBLIC hsdata gobj_create_resource(hgobj gobj_, const char *resource, json_t *kw
     }
     if(!gobj->gclass->gmt.mt_create_resource) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
             "msg",          "%s", "mt_create_resource not defined",
@@ -2631,7 +2634,7 @@ PUBLIC int gobj_update_resource(hgobj gobj_, hsdata hs)
     }
     if(!hs) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj_update_resource(): hsdata NULL",
@@ -2641,7 +2644,7 @@ PUBLIC int gobj_update_resource(hgobj gobj_, hsdata hs)
     }
     if(!gobj->gclass->gmt.mt_update_resource) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "mt_update_resource not defined",
@@ -2671,7 +2674,7 @@ PUBLIC int gobj_delete_resource(hgobj gobj_, hsdata hs)
     }
     if(!hs) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj_delete_resource(): hsdata NULL",
@@ -2681,7 +2684,7 @@ PUBLIC int gobj_delete_resource(hgobj gobj_, hsdata hs)
     }
     if(!gobj->gclass->gmt.mt_delete_resource) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "mt_delete_resource not defined",
@@ -2711,7 +2714,7 @@ PUBLIC int gobj_add_child_resource_link(hgobj gobj_, hsdata hs_parent, hsdata hs
     }
     if(!gobj->gclass->gmt.mt_add_child_resource_link) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "mt_add_child_resource_link not defined",
@@ -2741,7 +2744,7 @@ PUBLIC int gobj_delete_child_resource_link(hgobj gobj_, hsdata hs_parent, hsdata
     }
     if(!gobj->gclass->gmt.mt_delete_child_resource_link) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "mt_delete_child_resource_link not defined",
@@ -2772,7 +2775,7 @@ PUBLIC dl_list_t * gobj_list_resource(hgobj gobj_, const char *resource, json_t 
     }
     if(!gobj->gclass->gmt.mt_list_resource) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "mt_list_resource not defined",
@@ -2806,7 +2809,7 @@ PUBLIC hsdata gobj_get_resource(
     }
     if(!gobj->gclass->gmt.mt_get_resource) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
             "msg",          "%s", "mt_get_resource not defined",
@@ -2850,7 +2853,7 @@ PUBLIC void * gobj_exec_local_method(hgobj gobj_, const char *lmethod, void *dat
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_INTERNAL_ERROR,
         "msg",          "%s", "local method NOT EXIST",
-        "full-name",    "%s", gobj_short_name(gobj),
+        "full-name",    "%s", gobj_full_name(gobj),
         "lmethod",      "%s", lmethod,
         NULL
     );
@@ -4869,8 +4872,8 @@ PUBLIC hsdata gobj_subscribe_event(
                     "msgset",       "%s", MSGSET_PARAMETER_ERROR,
                     "msg",          "%s", "event NOT in output event list",
                     "event",        "%s", event,
-                    "publisher",    "%s", gobj_short_name(publisher),
-                    "subscriber",   "%s", gobj_short_name(subscriber),
+                    "publisher",    "%s", gobj_full_name(publisher),
+                    "subscriber",   "%s", gobj_full_name(subscriber),
                     NULL
                 );
             }
@@ -4897,8 +4900,8 @@ PUBLIC hsdata gobj_subscribe_event(
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "subscription(s) REPEATED, will be deleted and overrided",
             "event",        "%s", event,
-            "publisher",    "%s", gobj_short_name(publisher),
-            "subscriber",   "%s", gobj_short_name(subscriber),
+            "publisher",    "%s", gobj_full_name(publisher),
+            "subscriber",   "%s", gobj_full_name(subscriber),
             NULL
         );
         gobj_unsubscribe_list(dl_subs, FALSE, FALSE);
@@ -5245,7 +5248,7 @@ PUBLIC int gobj_publish_event(
     if(!ev) {
         if(!(publisher->gclass->gcflag & gcflag_no_check_ouput_events)) {
             log_error(0,
-                "gobj",         "%s", gobj_short_name(publisher),
+                "gobj",         "%s", gobj_full_name(publisher),
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_PARAMETER_ERROR,
                 "msg",          "%s", "event NOT in output event list",
@@ -5555,12 +5558,12 @@ PUBLIC int gobj_send_event(
             );
         } else {
             log_error(0,
-                "gobj",         "%s", gobj_short_name(dst),
+                "gobj",         "%s", gobj_full_name(dst),
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_PARAMETER_ERROR,
                 "msg",          "%s", "Event NOT DEFINED in input_events array",
                 "event",        "%s", event,
-                "src",          "%s", gobj_short_name(src),
+                "src",          "%s", gobj_full_name(src),
                 NULL
             );
         }
@@ -5711,7 +5714,7 @@ PUBLIC int gobj_send_event_to_gclass_instances(
     }
     if(empty_string(gclass_name)) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gclass_name NULL",
@@ -5767,7 +5770,7 @@ PUBLIC int gobj_send_event_to_named_child(
     }
     if(empty_string(name)) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "name NULL",
@@ -5950,8 +5953,8 @@ PUBLIC hgobj gobj_set_bottom_gobj(hgobj gobj_, hgobj bottom_gobj)
                     "function",     "%s", __FUNCTION__,
                     "msgset",       "%s", MSGSET_PARAMETER_ERROR,
                     "msg",          "%s", "bottom_gobj already set",
-                    "prev_gobj",    "%s", gobj_short_name(gobj->bottom_gobj),
-                    "new_gobj",     "%s", gobj_short_name(bottom_gobj),
+                    "prev_gobj",    "%s", gobj_full_name(gobj->bottom_gobj),
+                    "new_gobj",     "%s", gobj_full_name(bottom_gobj),
                     NULL
                 );
             }
@@ -6198,7 +6201,7 @@ PUBLIC int gobj_load_persistent_attrs(hgobj gobj_)
 
     if(!(gobj->obflag & obflag_unique_name)) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "Cannot load writable-persistent attrs in no named-gobjs",
@@ -6221,7 +6224,7 @@ PUBLIC int gobj_save_persistent_attrs(hgobj gobj_)
 
     if(!(gobj->obflag & obflag_unique_name)) {
         log_error(0,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "Cannot save writable-persistent attrs in no named-gobjs",
@@ -6300,7 +6303,7 @@ PUBLIC const sdata_desc_t * gobj_tattr_desc(hgobj gobj_)
 
     if(!gobj) {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj NULL",
@@ -6321,7 +6324,7 @@ PUBLIC const sdata_desc_t * gobj_attr_desc(hgobj gobj_, const char *name)
 
     if(!gobj) {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj NULL",
@@ -6368,7 +6371,7 @@ PUBLIC BOOL gobj_has_attr(hgobj gobj, const char *name)
 {
     if(!gobj) {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj NULL",
@@ -6482,7 +6485,7 @@ PUBLIC hsdata gobj_hsdata2(hgobj gobj_, const char *name, BOOL verbose)
     }
     if(verbose) {
         log_warning(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6505,7 +6508,7 @@ PUBLIC void *gobj_danger_attr_ptr(hgobj gobj, const char *name)
         return sdata_it_pointer(hs, name, 0);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6527,7 +6530,7 @@ PUBLIC void *gobj_danger_attr_ptr2(hgobj gobj, const char *name, const sdata_des
         return sdata_it_pointer(hs, name, pit);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6550,7 +6553,7 @@ PUBLIC json_t *gobj_read_attr(
     hsdata hs = gobj_hsdata2(gobj, name, FALSE);
     if(!hs) {
         log_warning(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6585,7 +6588,7 @@ PUBLIC json_t *gobj_read_attr(
         jn_value = json_integer((json_int_t)sdata_read_pointer(hs, name));
     } else {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute Type NOT VALID",
@@ -6623,7 +6626,7 @@ PUBLIC const char *gobj_read_str_attr(hgobj gobj, const char *name)
         return sdata_read_str(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6655,7 +6658,7 @@ PUBLIC BOOL gobj_read_bool_attr(hgobj gobj, const char *name)
         return sdata_read_bool(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6676,7 +6679,7 @@ PUBLIC int32_t gobj_read_int32_attr(hgobj gobj, const char *name)
         return sdata_read_int32(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6700,7 +6703,7 @@ PUBLIC uint32_t gobj_read_uint32_attr(hgobj gobj, const char *name)
         return sdata_read_uint32(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6721,7 +6724,7 @@ PUBLIC int64_t gobj_read_int64_attr(hgobj gobj, const char *name)
         return sdata_read_int64(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6742,7 +6745,7 @@ PUBLIC uint64_t gobj_read_uint64_attr(hgobj gobj, const char *name)
         return sdata_read_uint64(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6763,7 +6766,7 @@ PUBLIC uint64_t gobj_read_integer_attr(hgobj gobj, const char *name)
         return sdata_read_integer(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6784,7 +6787,7 @@ PUBLIC double gobj_read_real_attr(hgobj gobj, const char *name)
         return sdata_read_real(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6805,7 +6808,7 @@ PUBLIC json_t *gobj_read_json_attr(hgobj gobj, const char *name)
         return sdata_read_json(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6826,7 +6829,7 @@ PUBLIC void *gobj_read_pointer_attr(hgobj gobj, const char *name)
         return sdata_read_pointer(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6847,7 +6850,7 @@ PUBLIC dl_list_t *gobj_read_dl_list_attr(hgobj gobj, const char *name)
         return sdata_read_dl_list(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6868,7 +6871,7 @@ PUBLIC dl_list_t *gobj_read_iter_attr(hgobj gobj, const char *name)
         return sdata_read_iter(hs, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6893,7 +6896,7 @@ PUBLIC const sdata_desc_t * gobj_read_iter_schema(hgobj gobj_, const char *name)
         return gobj_read_iter_schema(gobj->bottom_gobj, name);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6937,7 +6940,7 @@ PUBLIC int gobj_write_attr(
     hsdata hs = gobj_hsdata2(gobj, name, FALSE);
     if(!hs) {
         log_warning(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -6973,7 +6976,7 @@ PUBLIC int gobj_write_attr(
         ret = sdata_write_pointer(hs, name, (void *)json_integer_value(value));
     } else {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute Type NOT VALID",
@@ -7011,7 +7014,7 @@ PUBLIC int gobj_write_str_attr(hgobj gobj, const char *name, const char *value)
         return sdata_write_str(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7032,7 +7035,7 @@ PUBLIC int gobj_write_bool_attr(hgobj gobj, const char *name, BOOL value)
         return sdata_write_bool(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7053,7 +7056,7 @@ PUBLIC int gobj_write_int32_attr(hgobj gobj, const char *name, int32_t value)
         return sdata_write_int32(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7074,7 +7077,7 @@ PUBLIC int gobj_write_uint32_attr(hgobj gobj, const char *name, uint32_t value)
         return sdata_write_uint32(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7095,7 +7098,7 @@ PUBLIC int gobj_write_int64_attr(hgobj gobj, const char *name, int64_t value)
         return sdata_write_int64(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7116,7 +7119,7 @@ PUBLIC int gobj_write_uint64_attr(hgobj gobj, const char *name, uint64_t value)
         return sdata_write_uint64(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7137,7 +7140,7 @@ PUBLIC int gobj_write_integer_attr(hgobj gobj, const char *name, uint64_t value)
         return sdata_write_integer(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7158,7 +7161,7 @@ PUBLIC int gobj_write_real_attr(hgobj gobj, const char *name, double value)
         return sdata_write_real(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7179,7 +7182,7 @@ PUBLIC int gobj_write_json_attr(hgobj gobj, const char *name, json_t *value)
         return sdata_write_json(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7200,7 +7203,7 @@ PUBLIC int gobj_write_pointer_attr(hgobj gobj, const char *name, void *value)
         return sdata_write_pointer(hs, name, value);
     }
     log_warning(LOG_OPT_TRACE_STACK,
-        "gobj",         "%s", gobj_short_name(gobj),
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
@@ -7868,7 +7871,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "new_state UNKNOWN",
-        "full-name",    "%s", gobj_short_name(gobj),
+        "full-name",    "%s", gobj_full_name(gobj),
         "new_state",    "%s", new_state,
         "cur_state",    "%s", gobj_current_state(gobj),
         NULL
@@ -7928,7 +7931,7 @@ PUBLIC int gobj_cmp_current_state(hgobj gobj_, const char *state)
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "state UNKNOWN",
-        "full-name",    "%s", gobj_short_name(gobj),
+        "full-name",    "%s", gobj_full_name(gobj),
         "state",        "%s", state,
         NULL
     );
@@ -8201,7 +8204,7 @@ PUBLIC json_t *gobj_stats(hgobj gobj_, const char *stats, json_t *kw, hgobj src)
         return __global_stats_parser_fn__(gobj, stats, kw, src);
     } else {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "Stats not available",
@@ -8306,7 +8309,7 @@ PUBLIC json_t *gobj_command(hgobj gobj_, const char *command,  json_t *kw, hgobj
             return __global_command_parser_fn__(gobj, command, kw, src);
         } else {
             log_error(LOG_OPT_TRACE_STACK,
-                "gobj",         "%s", gobj_short_name(gobj),
+                "gobj",         "%s", gobj_full_name(gobj),
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_PARAMETER_ERROR,
                 "msg",          "%s", "Global command parser function not available",
@@ -8318,7 +8321,7 @@ PUBLIC json_t *gobj_command(hgobj gobj_, const char *command,  json_t *kw, hgobj
         }
     } else {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_short_name(gobj),
+            "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "Command table not available",

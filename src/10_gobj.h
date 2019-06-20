@@ -237,7 +237,7 @@ typedef struct { // General methods (Yuneta framework methods)
     mt_delete_child_resource_link_fn mt_delete_child_resource_link;
     mt_get_resource_fn mt_get_resource;
     future_method_fn mt_future24;
-    mt_authenticate_fn mt_authenticate;
+    mt_authenticate_fn mt_authenticate; // Return webix
     mt_list_childs_fn mt_list_childs;
     mt_stats_updated_fn mt_stats_updated;       // Return 0 if own the stats, or -1 if not.
     mt_disable_fn mt_disable;
@@ -397,7 +397,16 @@ PUBLIC hgobj gobj_service_factory(
     const char *name,
     json_t * jn_service_config // owned
 );
-PUBLIC json_t *gobj_authenticate(hgobj gobj, const char *service, json_t *kw, hgobj src);
+
+/*
+ *  Return webix response ({"result": 0,...} 0 successful authentication, -1 error)
+ */
+PUBLIC json_t *gobj_authenticate(
+    hgobj gobj,
+    const char *service,
+    json_t *kw,
+    hgobj src
+);
 
 /*--------------------------------------------*
  *  Creation functions
