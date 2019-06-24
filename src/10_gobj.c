@@ -1149,10 +1149,10 @@ PUBLIC json_t *gobj_authenticate(hgobj gobj_, const char *service, json_t *kw, h
         return 0;
     }
     if(!gobj->gclass->gmt.mt_authenticate) {
-        // Authentication not needed
         KW_DECREF(kw);
-        return json_pack("{s:i}",
-            "result", 0
+        return json_pack("{s:i, s:s}",
+            "result", 0,
+            "comment", "Without authenticate method"
         );
     }
 
