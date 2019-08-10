@@ -935,9 +935,15 @@ PUBLIC json_t *gobj_read_attr( // Return is yours! Must be decref.
     hgobj gobj,
     const char *name
 );
-PUBLIC json_t *gobj_read_user_data( // Return is yours! Must be decref.
+PUBLIC json_t *gobj_read_user_data(
     hgobj gobj,
     const char *name
+);
+PUBLIC json_t *gobj_kw_get_user_data(
+    hgobj gobj,
+    const char *path,
+    json_t *default_value,
+    kw_flag_t flag
 );
 
 PUBLIC const char *gobj_read_str_attr(hgobj gobj, const char *name);
@@ -969,6 +975,11 @@ PUBLIC int gobj_write_attr(
 PUBLIC int gobj_write_user_data(
     hgobj gobj,
     const char *name,
+    json_t *value // owned
+);
+PUBLIC int gobj_kw_set_user_data(
+    hgobj gobj,
+    const char *path,   // The last word after . is the key
     json_t *value // owned
 );
 

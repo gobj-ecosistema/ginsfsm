@@ -6602,8 +6602,7 @@ PUBLIC json_t *gobj_read_attr(
 }
 
 /***************************************************************************
- *  ATTR: read str
- *  Return is yours! Must be decref.  New api (May/2019), js style
+ *  ATTR: read
  ***************************************************************************/
 PUBLIC json_t *gobj_read_user_data(
     hgobj gobj,
@@ -6611,6 +6610,19 @@ PUBLIC json_t *gobj_read_user_data(
 )
 {
     return json_object_get(((GObj_t *)gobj)->jn_user_data, name);
+}
+
+/***************************************************************************
+ *  ATTR: read
+ ***************************************************************************/
+PUBLIC json_t *gobj_kw_get_user_data(
+    hgobj gobj,
+    const char *path,
+    json_t *default_value,
+    kw_flag_t flag
+)
+{
+    return kw_get_dict_value(((GObj_t *)gobj)->jn_user_data, path, default_value, flag);
 }
 
 /***************************************************************************
@@ -6993,7 +7005,6 @@ PUBLIC int gobj_write_attr(
 
 /***************************************************************************
  *  ATTR: write
- *  New api (May/2019), js style
  ***************************************************************************/
 PUBLIC int gobj_write_user_data(
     hgobj gobj,
@@ -7002,6 +7013,18 @@ PUBLIC int gobj_write_user_data(
 )
 {
     return json_object_set_new(((GObj_t *)gobj)->jn_user_data, name, value);
+}
+
+/***************************************************************************
+ *  ATTR: write
+ ***************************************************************************/
+PUBLIC int gobj_kw_set_user_data(
+    hgobj gobj,
+    const char *path,   // The last word after . is the key
+    json_t *value // owned
+)
+{
+    return kw_set_dict_value(((GObj_t *)gobj)->jn_user_data, path, value);
 }
 
 /***************************************************************************
