@@ -19,7 +19,7 @@ extern "C"{
 /*********************************************************************
  *      Constants
  *********************************************************************/
-typedef struct _ISTREAM {
+typedef struct _ISTREAM { // TODO tengo que sacarlo de ginsfsm y moverlo a ghelpers
     hgobj gobj;
     GBUFFER *gbuf;
     size_t data_size;
@@ -57,25 +57,25 @@ typedef ISTREAM * istream;
 /*********************************************************************
  *      Prototypes
  *********************************************************************/
-istream istream_create(
+PUBLIC istream istream_create(
     hgobj gobj,
     size_t data_size,
     size_t max_size,
     size_t max_disk_size,
     gbuf_encoding encoding
 );
-void istream_destroy(istream istream);
-int istream_read_until_num_bytes(istream istream, size_t num_bytes, const char *event);
-size_t istream_consume(istream istream, char *bf, size_t len);
-char *istream_cur_rd_pointer(istream istream);
-size_t istream_length(istream istream);
-GBUFFER *istream_get_gbuffer(istream istream);
-GBUFFER *istream_pop_gbuffer(istream istream);
-int istream_new_gbuffer(istream istream, size_t data_size, size_t max_size);
-char *istream_extract_matched_data(istream istream, size_t *len);
-int istream_reset_wr(istream istream);
-int istream_reset_rd(istream istream);
-void istream_clear(istream istream); // reset wr/rd
+PUBLIC void istream_destroy(istream istream);
+PUBLIC int istream_read_until_num_bytes(istream istream, size_t num_bytes, const char *event);
+PUBLIC size_t istream_consume(istream istream, char *bf, size_t len);
+PUBLIC char *istream_cur_rd_pointer(istream istream);
+PUBLIC size_t istream_length(istream istream);
+PUBLIC GBUFFER *istream_get_gbuffer(istream istream);
+PUBLIC GBUFFER *istream_pop_gbuffer(istream istream);
+PUBLIC int istream_new_gbuffer(istream istream, size_t data_size, size_t max_size);
+PUBLIC char *istream_extract_matched_data(istream istream, size_t *len);
+PUBLIC int istream_reset_wr(istream istream);
+PUBLIC int istream_reset_rd(istream istream);
+PUBLIC void istream_clear(istream istream); // reset wr/rd
 
 #ifdef __cplusplus
 }

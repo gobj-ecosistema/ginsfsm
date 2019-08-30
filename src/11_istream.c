@@ -23,7 +23,7 @@
 /***************************************************************************
  *
  ***************************************************************************/
-istream istream_create(
+PUBLIC istream istream_create(
     hgobj gobj,
     size_t data_size,
     size_t max_size,
@@ -76,7 +76,7 @@ istream istream_create(
 /***************************************************************************
  *
  ***************************************************************************/
-void istream_destroy(istream istream)
+PUBLIC void istream_destroy(istream istream)
 {
     ISTREAM *ist = istream;
 
@@ -93,7 +93,7 @@ void istream_destroy(istream istream)
 /***************************************************************************
  *  TODO
  ***************************************************************************/
-// int istream_read_until_regex(istream istream, const char *regex, const char *event)
+// PUBLIC int istream_read_until_regex(istream istream, const char *regex, const char *event)
 // {
 //     ISTREAM *ist = istream;
 //
@@ -106,7 +106,7 @@ void istream_destroy(istream istream)
 /***************************************************************************
  *  TODO
  ***************************************************************************/
-// int istream_read_until_delimiter(istream istream, const char *delimiter, const char *event)
+// PUBLIC int istream_read_until_delimiter(istream istream, const char *delimiter, const char *event)
 // {
 //     ISTREAM *ist = istream;
 //
@@ -120,7 +120,7 @@ void istream_destroy(istream istream)
 /***************************************************************************
  *
  ***************************************************************************/
-int istream_read_until_num_bytes(istream istream, size_t num_bytes, const char *event)
+PUBLIC int istream_read_until_num_bytes(istream istream, size_t num_bytes, const char *event)
 {
     ISTREAM *ist = istream;
 
@@ -134,7 +134,7 @@ int istream_read_until_num_bytes(istream istream, size_t num_bytes, const char *
 /***************************************************************************
  *  Return number of bytes consumed
  ***************************************************************************/
-size_t istream_consume(istream istream, char *bf, size_t len)
+PUBLIC size_t istream_consume(istream istream, char *bf, size_t len)
 {
     ISTREAM *ist = istream;
     size_t consumed = 0;
@@ -190,7 +190,7 @@ size_t istream_consume(istream istream, char *bf, size_t len)
 /***************************************************************************
  *  Current reading pointer
  ***************************************************************************/
-char *istream_cur_rd_pointer(istream istream)
+PUBLIC char *istream_cur_rd_pointer(istream istream)
 {
     ISTREAM *ist = istream;
     if(!ist) {
@@ -209,7 +209,7 @@ char *istream_cur_rd_pointer(istream istream)
 /***************************************************************************
  *  Current length of internal gbuffer
  ***************************************************************************/
-size_t istream_length(istream istream)
+PUBLIC size_t istream_length(istream istream)
 {
     ISTREAM *ist = istream;
     if(!ist) {
@@ -228,7 +228,7 @@ size_t istream_length(istream istream)
 /***************************************************************************
  *  Get current gbuffer
  ***************************************************************************/
-GBUFFER *istream_get_gbuffer(istream istream)
+PUBLIC GBUFFER *istream_get_gbuffer(istream istream)
 {
     ISTREAM *ist = istream;
     if(!ist) {
@@ -247,7 +247,7 @@ GBUFFER *istream_get_gbuffer(istream istream)
 /***************************************************************************
  *  Pop current gbuffer
  ***************************************************************************/
-GBUFFER *istream_pop_gbuffer(istream istream)
+PUBLIC GBUFFER *istream_pop_gbuffer(istream istream)
 {
     ISTREAM *ist = istream;
     if(!ist) {
@@ -268,7 +268,7 @@ GBUFFER *istream_pop_gbuffer(istream istream)
 /***************************************************************************
  *  Create new gbuffer
  ***************************************************************************/
-int istream_new_gbuffer(istream istream, size_t data_size, size_t max_size)
+PUBLIC int istream_new_gbuffer(istream istream, size_t data_size, size_t max_size)
 {
     ISTREAM *ist = istream;
 
@@ -294,7 +294,7 @@ int istream_new_gbuffer(istream istream, size_t data_size, size_t max_size)
 /***************************************************************************
  *  Get the matched data
  ***************************************************************************/
-char *istream_extract_matched_data(istream istream, size_t *len)
+PUBLIC char *istream_extract_matched_data(istream istream, size_t *len)
 {
     ISTREAM *ist = istream;
     char *p;
@@ -323,7 +323,7 @@ char *istream_extract_matched_data(istream istream, size_t *len)
 /***************************************************************************
  *  Reset WRITING pointer
  ***************************************************************************/
-int istream_reset_wr(istream istream)
+PUBLIC int istream_reset_wr(istream istream)
 {
     ISTREAM *ist = istream;
 
@@ -344,7 +344,7 @@ int istream_reset_wr(istream istream)
 /***************************************************************************
  *  Reset READING pointer
  ***************************************************************************/
-int istream_reset_rd(istream istream)
+PUBLIC int istream_reset_rd(istream istream)
 {
     ISTREAM *ist = istream;
 
@@ -365,7 +365,7 @@ int istream_reset_rd(istream istream)
 /***************************************************************************
  *  Reset READING and WRITING pointer
  ***************************************************************************/
-void istream_clear(istream istream)
+PUBLIC void istream_clear(istream istream)
 {
     istream_reset_rd(istream);
     istream_reset_wr(istream);
