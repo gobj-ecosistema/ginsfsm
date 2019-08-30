@@ -1,6 +1,9 @@
 /****************************************************************************
  *          ISTREAM.H
  *          Input stream
+ *
+ * TODO tengo que sacarlo de ginsfsm y moverlo a ghelpers
+ *
  *          Mixin: process-data & emit events
  *          Copyright (c) 2013 Niyamaka.
  *          All Rights Reserved.
@@ -19,7 +22,7 @@ extern "C"{
 /*********************************************************************
  *      Constants
  *********************************************************************/
-typedef struct _ISTREAM { // TODO tengo que sacarlo de ginsfsm y moverlo a ghelpers
+typedef struct _ISTREAM {
     hgobj gobj;
     GBUFFER *gbuf;
     size_t data_size;
