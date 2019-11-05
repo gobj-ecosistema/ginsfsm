@@ -265,8 +265,6 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
 /*********************************************************************
  *      Structures
  *********************************************************************/
-typedef void *hsdata;
-
 typedef struct {
     const char *action;     // "Allow" or "Deny"
     const char *principal;  // string representing a userid or a group id
@@ -340,6 +338,7 @@ typedef struct sdata_desc_s {
     int _suboid;    /* variable oid subindex */
 } sdata_desc_t;
 
+typedef void *hsdata;
 
 /*********************************************************************
  *      Prototypes

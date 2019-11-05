@@ -4541,9 +4541,9 @@ PRIVATE dl_list_t * _find_subscription(
 {
     BOOL (*_match)(json_t *, json_t *) = 0;
     if(strict) {
-        _match = kw_is_identical;
+        _match = kw_is_identical; // WARNING don't decref anything
     } else {
-        _match = kw_match_simple;
+        _match = kw_match_simple; // WARNING decref second parameter
     }
 
     dl_list_t *iter = rc_init_iter(NULL);
@@ -4584,6 +4584,9 @@ PRIVATE dl_list_t * _find_subscription(
         if(__config__) {
             json_t *kw_config = sdata_read_json(subs, "__config__");
             if(kw_config) {
+                if(!strict) { // HACK decref when calling _match (kw_match_simple)
+                    KW_INCREF(__config__);
+                }
                 if(!_match(kw_config, __config__)) {
                     match = FALSE;
                 }
@@ -4594,6 +4597,9 @@ PRIVATE dl_list_t * _find_subscription(
         if(__global__) {
             json_t *kw_global = sdata_read_json(subs, "__global__");
             if(kw_global) {
+                if(!strict) { // HACK decref when calling _match (kw_match_simple)
+                    KW_INCREF(__global__);
+                }
                 if(!_match(kw_global, __global__)) {
                     match = FALSE;
                 }
@@ -4604,6 +4610,9 @@ PRIVATE dl_list_t * _find_subscription(
         if(__local__) {
             json_t *kw_local = sdata_read_json(subs, "__local__");
             if(kw_local) {
+                if(!strict) { // HACK decref when calling _match (kw_match_simple)
+                    KW_INCREF(__local__);
+                }
                 if(!_match(kw_local, __local__)) {
                     match = FALSE;
                 }
@@ -4614,6 +4623,9 @@ PRIVATE dl_list_t * _find_subscription(
         if(__filter__) {
             json_t *jn_filter = sdata_read_json(subs, "__filter__");
             if(jn_filter) {
+                if(!strict) { // HACK decref when calling _match (kw_match_simple)
+                    KW_INCREF(__filter__);
+                }
                 if(!_match(jn_filter, __filter__)) {
                     match = FALSE;
                 }
