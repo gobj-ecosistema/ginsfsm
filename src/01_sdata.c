@@ -369,7 +369,7 @@ PRIVATE void clear_value(SData_t *sdata, const sdata_desc_t *it)
             dl_flush(ptr, it->free_fn);
         }
     } else {
-        SData_Value_t v;
+        SData_Value_t v = {0};
 
         if(ASN_IS_STRING(it->type)) {
             v.s = 0;
@@ -457,7 +457,7 @@ PRIVATE void set_default(SData_t *sdata, const sdata_desc_t *it, void *value)
         }
         dl_init(ptr);
     } else {
-        SData_Value_t v;
+        SData_Value_t v = {0};
 
         if(ASN_IS_STRING(it->type)) {
             v.s = value;

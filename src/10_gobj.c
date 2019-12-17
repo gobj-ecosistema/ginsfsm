@@ -195,7 +195,6 @@ typedef struct _GObj_t {
  ****************************************************************/
 PRIVATE volatile int  __shutdowning__ = 0;
 PRIVATE volatile BOOL __yuno_must_die__ = FALSE;
-PRIVATE volatile BOOL __yuno_must_raise__ = FALSE;
 PRIVATE int  __exit_code__ = 0;
 PRIVATE json_t * (*__global_command_parser_fn__)(
     hgobj gobj,
