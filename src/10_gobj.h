@@ -607,7 +607,9 @@ PUBLIC hgobj gobj_find_bottom_child_by_gclass(
 /*
  *  Returns a list (iter) with all matched childs.
  *  If dl_list is null a dynamic dl_list (iter) will be created and returned,
- *  that you must free with rc_free_iter(dl_list, TRUE, 0);
+ *      and you must free with rc_free_iter(dl_list, TRUE, 0);
+ *  If you pass the dl_list
+ *      you must free with the iter with rc_free_iter(dl_list, FALSE, 0);
  *
  *  Check ONLY first level of childs.
  */
@@ -620,7 +622,9 @@ PUBLIC dl_list_t *gobj_match_childs(
 /*
  *  Returns a list (iter) with all matched childs.
  *  If dl_list is null a dynamic dl_list (iter) will be created and returned,
- *  that you must free with rc_free_iter(dl_list, TRUE, 0);
+ *      and you must free with rc_free_iter(dl_list, TRUE, 0);
+ *  If you pass the dl_list
+ *      you must free with the iter with rc_free_iter(dl_list, FALSE, 0);
  *
  *  Check deep levels of childs
  */
@@ -633,7 +637,9 @@ PUBLIC dl_list_t *gobj_match_childs_tree(
 /*
  *  Returns a list (iter) with all matched childs.
  *  If dl_list is null a dynamic dl_list (iter) will be created and returned,
- *  that you must free with rc_free_iter(dl_list, TRUE, 0);
+ *      and you must free with rc_free_iter(dl_list, TRUE, 0);
+ *  If you pass the dl_list
+ *      you must free with the iter with rc_free_iter(dl_list, FALSE, 0);
  *
  *  Check ONLY first level of childs.
  */
@@ -642,7 +648,9 @@ PUBLIC dl_list_t *gobj_match_childs_by_inherited_gclass(hgobj gobj, const char *
 /*
  *  Returns a list (iter) with all matched childs.
  *  If dl_list is null a dynamic dl_list (iter) will be created and returned,
- *  that you must free with rc_free_iter(dl_list, TRUE, 0);
+ *      and you must free with rc_free_iter(dl_list, TRUE, 0);
+ *  If you pass the dl_list
+ *      you must free with the iter with rc_free_iter(dl_list, FALSE, 0);
  *
  *  Check deep levels of childs
  */
@@ -651,7 +659,9 @@ PUBLIC dl_list_t *gobj_match_childs_tree_by_strict_gclass(hgobj gobj, const char
 /*
  *  Returns a list (iter) with all matched childs with regular expression.
  *  If dl_list is null a dynamic dl_list (iter) will be created and returned,
- *  that you must free with rc_free_iter(dl_list, TRUE, 0);
+ *      and you must free with rc_free_iter(dl_list, TRUE, 0);
+ *  If you pass the dl_list
+ *      you must free with the iter with rc_free_iter(dl_list, FALSE, 0);
  *
  *  Check ONLY first level of childs.
  */
