@@ -94,8 +94,6 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     SDF_PSTATS          = 0x4000,   /* Field with persistent stats, implicitly SDF_STATS */
 } sdata_flag_t;
 
-#define SDF_IS_WRITABLE(flag) ((flag) & (SDF_WRITABLE))
-#define SDF_IS_REQUIRED(flag) ((flag) & (SDF_REQUIRED))
 
 #define SDATA_END()                             \
 {                                               \

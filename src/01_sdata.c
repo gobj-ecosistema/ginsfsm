@@ -1173,7 +1173,7 @@ PUBLIC BOOL sdata_check_required_attrs(
     }
 
     while(it->name) {
-        if(SDF_IS_REQUIRED(it->flag)) {
+        if(it->flag & SDF_REQUIRED) {
             void *ptr = item_pointer(hs, it);
             SData_Value_t value = sdata_read_by_type(hs, it, ptr);
             if(!attr_with_value(it, value)) {
