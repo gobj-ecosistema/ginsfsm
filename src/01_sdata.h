@@ -95,22 +95,22 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
 } sdata_flag_t;
 
 
-#define SDATA_END()                             \
-{                                               \
-    .type=0,                                    \
-    .name=0,                                    \
-    .alias=0,                                   \
-    .json_fn=0,                                 \
-    .flag=0,                                    \
-    .default_value=0,                           \
-    .description=0,                             \
-    .resource=0,                                \
-    .header=0,                                  \
-    .fillsp=0,                                  \
-    .schema=0,                                  \
-    .free_fn=0,                                 \
+#define SDATA_END()                                     \
+{                                                       \
+    .type=0,                                            \
+    .name=0,                                            \
+    .alias=0,                                           \
+    .json_fn=0,                                         \
+    .flag=0,                                            \
+    .default_value=0,                                   \
+    .description=0,                                     \
+    .resource=0,                                        \
+    .header=0,                                          \
+    .fillsp=0,                                          \
+    .schema=0,                                          \
+    .free_fn=0,                                         \
     .__acl__=0,                                         \
-    ._offset=0, ._ln=0, ._suboid=0              \
+    ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
 /*
