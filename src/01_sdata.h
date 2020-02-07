@@ -81,8 +81,8 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     SDF_RD              = 0x0002,   /* Field only readable by user */
     SDF_WR              = 0x0004,   /* Field writable (an readable) by user */
     SDF_REQUIRED        = 0x0008,   /* Required attribute. Must not be null */
-    SDF_PERSIST         = 0x0010,   /* data loaded/saved at startup/shutdow or manually */
-    SDF_VOLATIL         = 0x0020,   /* data loaded/saved at startup/shutdow or manually */
+    SDF_PERSIST         = 0x0010,   /* (implicit SDF_WR) Field must be loaded/saved HACK 7-Feb-2020 */
+    SDF_VOLATIL         = 0x0020,   /* (implicit SDF_RD) Field must not be loaded/saved HACK 7-Feb-2020 */
     SDF_RESOURCE        = 0x0040,   /* Mark as resource.  Use `schema` to specify the sdata schema */
     SDF_PKEY            = 0x0080,   /* field used as primary key */
     SDF_PURECHILD       = 0x0100,   /* Pure child, unique child (For n-1 relation) */

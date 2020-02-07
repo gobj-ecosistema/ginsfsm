@@ -6936,7 +6936,7 @@ PUBLIC const sdata_desc_t * gobj_read_iter_schema(hgobj gobj_, const char *name)
 PUBLIC BOOL gobj_is_readable_attr(hgobj gobj, const char *name)
 {
     const sdata_desc_t *it = gobj_attr_desc(gobj, name);
-    if(it && it->flag & (SDF_RD|SDF_WR)) {
+    if(it && it->flag & (SDF_RD|SDF_WR|SDF_PERSIST|SDF_STATS|SDF_VOLATIL)) {
         return TRUE;
     } else {
         return FALSE;
@@ -7254,7 +7254,7 @@ PUBLIC int gobj_write_pointer_attr(hgobj gobj, const char *name, void *value)
 PUBLIC BOOL gobj_is_writable_attr(hgobj gobj, const char *name)
 {
     const sdata_desc_t *it = gobj_attr_desc(gobj, name);
-    if(it && it->flag & SDF_WR) {
+    if(it && it->flag & (SDF_WR|SDF_PERSIST)) {
         return TRUE;
     } else {
         return FALSE;
@@ -8412,7 +8412,7 @@ PUBLIC json_t *gobj_list_childs(
             BOOL found = FALSE;
             if(gobj_has_bottom_attr(child, attr_name)) {
                 const sdata_desc_t *it = gobj_bottom_attr_desc(child, attr_name);
-                if(it->flag & (SDF_RD|SDF_WR|SDF_STATS)) {
+                if(it->flag & (SDF_RD|SDF_WR|SDF_STATS|SDF_PERSIST|SDF_VOLATIL)) {
                     if(ASN_IS_REAL_NUMBER(it->type)) {
                         found = TRUE;
                         json_object_set_new(
@@ -8508,7 +8508,11 @@ PUBLIC json_t *gclass_public_attrs(GCLASS *gclass)
         json_object_set_new(
             jn_dict,
             gclass->gclass_name,
-            sdatadesc2json(gclass->tattr_desc, SDF_WR|SDF_RD|SDF_STATS, 0)
+            sdatadesc2json(
+                gclass->tattr_desc,
+                SDF_WR|SDF_RD|SDF_STATS|SDF_PERSIST|SDF_VOLATIL,
+                0
+            )
         );
     } else {
         gclass_register_t *gclass_reg = dl_first(&dl_gclass);
@@ -8517,7 +8521,11 @@ PUBLIC json_t *gclass_public_attrs(GCLASS *gclass)
                 json_object_set_new(
                     jn_dict,
                     gclass_reg->gclass->gclass_name,
-                    sdatadesc2json(gclass_reg->gclass->tattr_desc, SDF_WR|SDF_RD|SDF_STATS, 0)
+                    sdatadesc2json(
+                        gclass_reg->gclass->tattr_desc,
+                        SDF_WR|SDF_RD|SDF_STATS|SDF_PERSIST|SDF_VOLATIL,
+                        0
+                    )
                 );
             }
             gclass_reg = dl_next(gclass_reg);
@@ -8673,7 +8681,7 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
 /***************************************************************************
  *
  *  Return list of objects with gobj's attribute description,
- *  restricted to attributes having SDF_RD|SDF_WR|SDF_STATS flag.
+ *  restricted to attributes having SDF_RD|SDF_WR|SDF_STATS|SDF_PERSIST|SDF_VOLATIL flag.
  *
  *  Esquema tabla webix:
 
@@ -8706,7 +8714,7 @@ PUBLIC json_t *attr2json(hgobj gobj_)
     const sdata_desc_t *sdesc = sdata_schema(gobj_hsdata(gobj));
     const sdata_desc_t *it = sdesc;
     while(it && it->name) {
-        if(it->flag & (SDF_RD|SDF_WR|SDF_STATS)) {
+        if(it->flag & (SDF_RD|SDF_WR|SDF_STATS|SDF_PERSIST|SDF_VOLATIL)) {
             char *type;
             if(ASN_IS_REAL_NUMBER(it->type)) {
                 type = "real";
