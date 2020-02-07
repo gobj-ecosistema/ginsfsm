@@ -88,7 +88,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     SDF_PURECHILD       = 0x0100,   /* Pure child, unique child (For n-1 relation) */
     SDF_PARENTID        = 0x0200,   /* Field with parent_id in a pure child record */
     SDF_WILD_CMD        = 0x0400,   /* Command with wild options (no checked) */
-    SDF_STATS           = 0x0800,   /* Field with stats (METADATA)*/
+    SDF_STATS           = 0x0800,   /* (implicit SDF_RD) Field with stats (METADATA)*/
     SDF_FKEY            = 0x1000,   /* Foreign key (no pure child) */
     SDF_RSTATS          = 0x2000,   /* Field with resettable stats, implicitly SDF_STATS */
     SDF_PSTATS          = 0x4000,   /* Field with persistent stats, implicitly SDF_STATS */
