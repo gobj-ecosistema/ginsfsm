@@ -929,7 +929,7 @@ PUBLIC int sdata_write_by_type(
 
         SDATA_METADATA_TYPE *p = item_metadata_pointer(sdata, it);
         SDATA_METADATA_TYPE m = *p;
-        if((it->flag & SDF_STATS)) {
+        if((it->flag & (SDF_STATS|SDF_RSTATS|SDF_PSTATS))) {
             m |= 0x8000;
         }
         if(m & 0x8000) {
@@ -1055,7 +1055,7 @@ PUBLIC uint32_t sdata_get_stats_metadata(hsdata hs, const char *name)
 
     SDATA_METADATA_TYPE *p = item_metadata_pointer(sdata, it);
     SDATA_METADATA_TYPE m = *p;
-    if((it->flag & SDF_STATS)) {
+    if((it->flag & (SDF_STATS|SDF_RSTATS|SDF_PSTATS))) {
         m |= 0x8000;
     }
     return m;
