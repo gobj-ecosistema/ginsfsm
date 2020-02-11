@@ -6936,7 +6936,7 @@ PUBLIC const sdata_desc_t * gobj_read_iter_schema(hgobj gobj_, const char *name)
 PUBLIC BOOL gobj_is_readable_attr(hgobj gobj, const char *name)
 {
     const sdata_desc_t *it = gobj_attr_desc(gobj, name);
-    if(it && it->flag & (SDF_RD|SDF_WR|SDF_PERSIST|SDF_STATS|SDF_VOLATIL|SDF_RSTATS|SDF_PSTATS)) {
+    if(it && it->flag & (ATTR_READABLE)) {
         return TRUE;
     } else {
         return FALSE;
@@ -7254,7 +7254,7 @@ PUBLIC int gobj_write_pointer_attr(hgobj gobj, const char *name, void *value)
 PUBLIC BOOL gobj_is_writable_attr(hgobj gobj, const char *name)
 {
     const sdata_desc_t *it = gobj_attr_desc(gobj, name);
-    if(it && it->flag & (SDF_WR|SDF_PERSIST)) {
+    if(it && it->flag & (ATTR_WRITABLE)) {
         return TRUE;
     } else {
         return FALSE;

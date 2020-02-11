@@ -27,7 +27,8 @@ extern "C"{
 /*********************************************************************
  *      Constants
  *********************************************************************/
-
+#define ATTR_WRITABLE (SDF_WR|SDF_PERSIST)
+#define ATTR_READABLE (SDF_RD|SDF_WR|SDF_PERSIST|SDF_STATS|SDF_VOLATIL|SDF_RSTATS|SDF_PSTATS)
 /*
  *  Macros to assign attr data to priv data.
  */
