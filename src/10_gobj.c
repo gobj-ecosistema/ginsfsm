@@ -7281,6 +7281,28 @@ PUBLIC json_t *gobj_get_writable_attrs(hgobj gobj) // Return is yours, decref!
 }
 
 /***************************************************************************
+ *  ATTR: write
+ *  Update writable attrs
+ ***************************************************************************/
+PUBLIC int gobj_update_writable_attrs(
+    hgobj gobj,
+    json_t *jn_attrs // owned
+)
+{
+    int ret = 0;
+    const char *key; json_t *jn_attr;
+    json_object_foreach(jn_attrs, key, jn_attr) {
+        if(gobj_is_writable_attr(gobj, key)) {
+            JSON_INCREF(jn_attr);
+            ret += gobj_write_attr(gobj, key, jn_attr);
+        }
+    }
+
+    JSON_DECREF(jn_attrs);
+    return ret;
+}
+
+/***************************************************************************
  *  Print yuneta gclass's methods in json
  ***************************************************************************/
 PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)

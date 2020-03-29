@@ -1006,6 +1006,10 @@ PUBLIC int gobj_write_json_attr(hgobj gobj, const char *name, json_t *value); //
 PUBLIC int gobj_write_pointer_attr(hgobj gobj, const char *name, void *value);
 PUBLIC BOOL gobj_is_writable_attr(hgobj gobj, const char *name);  // True is attr is SDF_WR or SDF_PERSIST (public writable)
 PUBLIC json_t *gobj_get_writable_attrs(hgobj gobj); // Return is yours, decref!
+PUBLIC int gobj_update_writable_attrs(
+    hgobj gobj,
+    json_t *jn_attrs // owned
+);
 
 
 /*--------------------------------------------*
