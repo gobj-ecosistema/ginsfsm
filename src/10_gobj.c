@@ -224,10 +224,10 @@ PRIVATE char __yuno_role_plus_name__[NAME_MAX];
 
 
 PRIVATE json_t *__jn_global_settings__ = 0;
-PRIVATE int (*__global_load_persistent_attrs__)(hgobj gobj) = 0;
-PRIVATE int (*__global_save_persistent_attrs__)(hgobj gobj) = 0;
-PRIVATE int (*__global_remove_persistent_attrs__)(hgobj gobj) = 0;
-PRIVATE json_t * (*__global_list_persistent_attrs__)(void) = 0;
+PRIVATE int (*__global_load_persistent_attrs_fn__)(hgobj gobj) = 0;
+PRIVATE int (*__global_save_persistent_attrs_fn__)(hgobj gobj) = 0;
+PRIVATE int (*__global_remove_persistent_attrs_fn__)(hgobj gobj) = 0;
+PRIVATE json_t * (*__global_list_persistent_attrs_fn__)(void) = 0;
 
 PRIVATE char __initialized__ = 0;
 PRIVATE int atexit_registered = 0; /* Register atexit just 1 time. */
@@ -407,12 +407,12 @@ PRIVATE int _set_gobj_trace_level(GObj_t * gobj, const char *level, BOOL set);
  ***************************************************************************/
 PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
-    int (*load_persistent_attrs)(hgobj gobj),
-    int (*save_persistent_attrs)(hgobj gobj),
-    int (*remove_persistent_attrs)(hgobj gobj),
-    json_t * (*list_persistent_attrs)(void),
-    json_function_t global_command_parser,
-    json_function_t global_stats_parser
+    int (*load_persistent_attrs_fn)(hgobj gobj),
+    int (*save_persistent_attrs_fn)(hgobj gobj),
+    int (*remove_persistent_attrs_fn)(hgobj gobj),
+    json_t * (*list_persistent_attrs_fn)(void),
+    json_function_t global_command_parser_fn,
+    json_function_t global_stats_parser_fn
 )
 {
     if(__initialized__) {
@@ -425,12 +425,12 @@ PUBLIC int gobj_start_up(
     __shutdowning__ = 0;
     __jn_global_settings__ =  kw_apply_json_config_variables(jn_global_settings, 0);
 
-    __global_load_persistent_attrs__ = load_persistent_attrs;
-    __global_save_persistent_attrs__ = save_persistent_attrs;
-    __global_remove_persistent_attrs__ = remove_persistent_attrs;
-    __global_list_persistent_attrs__ = list_persistent_attrs;
-    __global_command_parser_fn__ = global_command_parser;
-    __global_stats_parser_fn__ = global_stats_parser;
+    __global_load_persistent_attrs_fn__ = load_persistent_attrs_fn;
+    __global_save_persistent_attrs_fn__ = save_persistent_attrs_fn;
+    __global_remove_persistent_attrs_fn__ = remove_persistent_attrs_fn;
+    __global_list_persistent_attrs_fn__ = list_persistent_attrs_fn;
+    __global_command_parser_fn__ = global_command_parser_fn;
+    __global_stats_parser_fn__ = global_stats_parser_fn;
 
     dl_init(&dl_gclass);
     dl_init(&dl_service);
@@ -1703,8 +1703,8 @@ PRIVATE hgobj _gobj_create(
      *  of named-gobjs
      *--------------------------------------*/
     if(gobj->obflag & (obflag_unique_name)) {
-        if(__global_load_persistent_attrs__) {
-            __global_load_persistent_attrs__(gobj);
+        if(__global_load_persistent_attrs_fn__) {
+            __global_load_persistent_attrs_fn__(gobj);
         }
     }
 
@@ -6220,8 +6220,8 @@ PUBLIC int gobj_load_persistent_attrs(hgobj gobj_)
         );
         return -1;
     }
-    if(__global_load_persistent_attrs__) {
-        return __global_load_persistent_attrs__(gobj);
+    if(__global_load_persistent_attrs_fn__) {
+        return __global_load_persistent_attrs_fn__(gobj);
     }
     return -1;
 }
@@ -6243,8 +6243,8 @@ PUBLIC int gobj_save_persistent_attrs(hgobj gobj_)
         );
         return -1;
     }
-    if(__global_save_persistent_attrs__) {
-        return __global_save_persistent_attrs__(gobj);
+    if(__global_save_persistent_attrs_fn__) {
+        return __global_save_persistent_attrs_fn__(gobj);
     }
     return -1;
 }
@@ -6257,10 +6257,10 @@ PUBLIC int gobj_remove_persistent_attrs(hgobj gobj_, BOOL recursive)
 {
     GObj_t *gobj = gobj_;
 
-    if(!__global_remove_persistent_attrs__) {
+    if(!__global_remove_persistent_attrs_fn__) {
         return -1;
     }
-    __global_remove_persistent_attrs__(gobj);
+    __global_remove_persistent_attrs_fn__(gobj);
 
     if(recursive)  {
         GObj_t * child; rc_instance_t *i_child;
@@ -6280,10 +6280,10 @@ PUBLIC int gobj_remove_persistent_attrs(hgobj gobj_, BOOL recursive)
  ***************************************************************************/
 PUBLIC json_t * gobj_list_persistent_attrs(void)
 {
-    if(!__global_list_persistent_attrs__) {
+    if(!__global_list_persistent_attrs_fn__) {
         return 0;
     }
-    return __global_list_persistent_attrs__();
+    return __global_list_persistent_attrs_fn__();
 }
 
 /***************************************************************************

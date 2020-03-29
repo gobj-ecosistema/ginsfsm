@@ -342,12 +342,12 @@ typedef struct _GCLASS {
  *--------------------------------------------*/
 PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
-    int (*load_persistent_attrs)(hgobj gobj),
-    int (*save_persistent_attrs)(hgobj gobj),
-    int (*remove_persistent_attrs)(hgobj gobj),
-    json_t * (*list_persistent_attrs)(void),
-    json_function_t global_command_parser,
-    json_function_t global_stats_parser
+    int (*load_persistent_attrs_fn)(hgobj gobj),
+    int (*save_persistent_attrs_fn)(hgobj gobj),
+    int (*remove_persistent_attrs_fn)(hgobj gobj),
+    json_t * (*list_persistent_attrs_fn)(void),
+    json_function_t global_command_parser_fn,
+    json_function_t global_stats_parser_fn
 );
 PUBLIC void gobj_shutdown(void);
 PUBLIC BOOL gobj_is_shutdowning(void);
