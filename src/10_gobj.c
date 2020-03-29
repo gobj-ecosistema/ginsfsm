@@ -7262,6 +7262,25 @@ PUBLIC BOOL gobj_is_writable_attr(hgobj gobj, const char *name)
 }
 
 /***************************************************************************
+ *  ATTR: write
+ *  Return a json list of writable attribute names
+ ***************************************************************************/
+PUBLIC json_t *gobj_get_writable_attrs(hgobj gobj) // Return is yours, decref!
+{
+    json_t *jn_list = json_array();
+
+    const sdata_desc_t *it = gobj_tattr_desc(gobj);
+
+    while(it && it->name) {
+        if(it->flag & (SDF_PERSIST|SDF_WR)) {
+            json_array_append_new(jn_list, json_string(it->name));
+        }
+        it++;
+    }
+    return jn_list;
+}
+
+/***************************************************************************
  *  Print yuneta gclass's methods in json
  ***************************************************************************/
 PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
