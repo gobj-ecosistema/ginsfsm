@@ -1029,7 +1029,8 @@ PUBLIC int gobj_instances(hgobj gobj);
 PUBLIC const char * gobj_full_name(hgobj gobj);
 PUBLIC char *gobj_full_name2(hgobj gobj, char *bf, int bfsize); // Full name  with states of running/playing
 PUBLIC char *gobj_full_bottom_name(hgobj gobj, char *bf, int bfsize); // Full tree bottom names with states of running/playing
-PUBLIC const char * gobj_short_name(hgobj gobj);
+PUBLIC const char * gobj_short_name(hgobj gobj);    // (gclass^name)
+PUBLIC const char * gobj_escaped_short_name(hgobj gobj);    // (gclass^name)
 PUBLIC const char * gobj_snmp_name(hgobj gobj);
 PUBLIC BOOL gobj_is_volatil(hgobj gobj);
 

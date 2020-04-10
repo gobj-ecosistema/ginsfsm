@@ -180,6 +180,7 @@ typedef struct _GObj_t {
     hgobj bottom_gobj;
     const char *full_name;
     const char *short_name;
+    const char *escaped_short_name;
     const char *error_message;
     const char *poid;
     size_t oid;
@@ -2414,6 +2415,10 @@ PRIVATE void gobj_free(hgobj gobj_)
     if(gobj->short_name) {
         gbmem_free((void *)gobj->short_name);
         gobj->short_name = 0;
+    }
+    if(gobj->escaped_short_name) {
+        gbmem_free((void *)gobj->escaped_short_name);
+        gobj->escaped_short_name = 0;
     }
     if(gobj->error_message) {
         gbmem_free((void *)gobj->error_message);
@@ -7747,7 +7752,7 @@ PUBLIC char *gobj_full_bottom_name(hgobj gobj_, char *bf_, int bfsize)
 }
 
 /***************************************************************************
- *  Return short name
+ *  Return short name (gclass^name)
  ***************************************************************************/
 PUBLIC const char * gobj_short_name(hgobj gobj_)
 {
@@ -7767,6 +7772,30 @@ PUBLIC const char * gobj_short_name(hgobj gobj_)
     }
     return gobj->short_name;
 }
+
+/***************************************************************************
+ *  Return escaped short name (gclass-name)
+ ***************************************************************************/
+PUBLIC const char * gobj_escaped_short_name(hgobj gobj_)
+{
+    GObj_t *gobj = gobj_;
+
+    if(!gobj)
+        return "???";
+
+    if(!gobj->escaped_short_name) {
+        char temp[256];
+        snprintf(temp, sizeof(temp),
+            "%s-%s",
+            gobj_gclass_name(gobj),
+            gobj_name(gobj)
+        );
+        gobj->escaped_short_name = gbmem_strdup(temp);
+    }
+    return gobj->escaped_short_name;
+}
+
+
 
 /***************************************************************************
  *  Return snmp name
