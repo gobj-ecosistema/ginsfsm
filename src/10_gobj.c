@@ -6207,7 +6207,7 @@ PRIVATE int gobj_write_json_parameters(
         hs,
         new_kw,
         -1,
-        (gobj->gclass->gcflag & gcflag_ignore_unkwnow_attrs)?print_attr_not_found:0,
+        (gobj->gclass->gcflag & gcflag_ignore_unkwnow_attrs)?0:print_attr_not_found,
         gobj
     );
     json_decref(new_kw);
