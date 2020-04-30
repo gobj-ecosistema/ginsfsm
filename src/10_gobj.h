@@ -305,6 +305,7 @@ typedef struct {
 typedef enum {
     gcflag_manual_start             = 0x0001,   // gobj_start_tree() don't start gobjs of this gclass.
     gcflag_no_check_ouput_events    = 0x0002,   // When publishing don't check events in output_event_list.
+    gcflag_ignore_unkwnow_attrs     = 0x0004,   // When creating a gobj, ignore not existing attrs
 } gcflag_t;
 
 typedef struct _GCLASS {

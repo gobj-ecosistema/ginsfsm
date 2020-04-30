@@ -6203,7 +6203,13 @@ PRIVATE int gobj_write_json_parameters(
         }
     }
 
-    int ret = json2sdata(hs, new_kw, -1, print_attr_not_found, gobj);
+    int ret = json2sdata(
+        hs,
+        new_kw,
+        -1,
+        (gobj->gclass->gcflag & gcflag_ignore_unkwnow_attrs)?print_attr_not_found:0,
+        gobj
+    );
     json_decref(new_kw);
     return ret;
 }
