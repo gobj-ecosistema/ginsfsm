@@ -76,6 +76,9 @@ PUBLIC json_t *msg_iev_build_webix( // TODO DEPRECATED cambia todo (son muchas) 
     json_t *jn_data,    // owned
     json_t *kw_request // owned, used to extract ONLY __md_iev__.
 );
+//) __attribute__ ((deprecated)); cuando quieras levantar el warning
+
+
 PUBLIC json_t *msg_iev_build_webix2(
     hgobj gobj,
     json_int_t result,
