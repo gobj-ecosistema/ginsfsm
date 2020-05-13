@@ -6607,7 +6607,7 @@ PUBLIC json_t *gobj_read_attr(
         jn_value = sdata_read_json(hs, name);
         JSON_INCREF(jn_value);
     } else if(ASN_IS_POINTER(it->type)) {
-        jn_value = json_integer((json_int_t)sdata_read_pointer(hs, name));
+        jn_value = json_integer((json_int_t)(size_t)sdata_read_pointer(hs, name));
     } else {
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
@@ -7007,7 +7007,7 @@ PUBLIC int gobj_write_attr(
         ret = sdata_write_json(hs, name, value); // WARNING json is incref
         JSON_DECREF(value);
     } else if(ASN_IS_POINTER(it->type)) {
-        ret = sdata_write_pointer(hs, name, (void *)json_integer_value(value));
+        ret = sdata_write_pointer(hs, name, (void *)(size_t)json_integer_value(value));
     } else {
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
