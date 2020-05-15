@@ -569,6 +569,8 @@ PRIVATE json_t *sdatatype2simplejsontype(const sdata_desc_t *it)
 
     if(ASN_IS_STRING(type)) {
         return json_string("");
+    } else if(ASN_IS_BOOLEAN(type)) {
+        return json_false();
     } else if(ASN_IS_NATURAL_NUMBER(type)) {
         return json_integer(0);
     } else if(ASN_IS_REAL_NUMBER(type)) {
