@@ -190,8 +190,8 @@ typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent
 typedef int   (*mt_unlink_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref);
 typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char *id);
 typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_ids, json_t *jn_filter, json_t *jn_options);
-typedef int   (*mt_snap_nodes_fn)(hgobj gobj, const char *name);
-typedef int   (*mt_set_nodes_snap_fn)(hgobj gobj, const char *name);
+typedef int   (*mt_snap_nodes_fn)(hgobj gobj, const char *tag);
+typedef int   (*mt_set_nodes_snap_fn)(hgobj gobj, const char *tag);
 typedef json_t *(*mt_list_nodes_snaps_fn)(hgobj gobj);
 
 typedef void *(*local_method_fn)(hgobj gobj, void *data);
@@ -525,18 +525,65 @@ PUBLIC hsdata gobj_get_resource(
 /*--------------------------------------------*
  *  Node functions
  *--------------------------------------------*/
-PUBLIC json_t *gobj_create_node(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
-PUBLIC json_t *gobj_update_node(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
-PUBLIC int gobj_delete_node(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
-PUBLIC int gobj_link_nodes(hgobj gobj, const char *hook, json_t *parent, json_t *child);
-PUBLIC int gobj_link_nodes2(hgobj gobj, const char *parent_ref, const char *child_ref);
-PUBLIC int gobj_unlink_nodes(hgobj gobj, const char *hook, json_t *parent, json_t *child);
-PUBLIC int gobj_unlink_nodes2(hgobj gobj, const char *parent_ref, const char *child_ref);
-PUBLIC json_t *gobj_get_node(hgobj gobj, const char *topic_name, const char *id);
-PUBLIC json_t *gobj_list_nodes(hgobj gobj, const char *topic_name, json_t *jn_ids, json_t *jn_filter, json_t *jn_options);
-PUBLIC int gobj_snap_nodes_fn(hgobj gobj, const char *name);
-PUBLIC int gobj_set_nodes_snap_fn(hgobj gobj, const char *name);
-PUBLIC json_t *gobj_list_nodes_snaps_fn(hgobj gobj);
+/***************************************************************************
+    WARNING This function does NOT auto build links
+ ***************************************************************************/
+PUBLIC json_t *gobj_create_node( // Return is NOT YOURS
+    hgobj gobj,
+    const char *topic_name,
+    json_t *kw, // owned
+    const char *options // "permissive"
+);
+
+PUBLIC json_t *gobj_update_node( // Return is NOT YOURS
+    hgobj gobj,
+    const char *topic_name,
+    json_t *kw,    // owned
+    const char *options // "create" ["permissive"], "clean"
+);
+PUBLIC int gobj_delete_node(
+    hgobj gobj,
+    const char *topic_name,
+    json_t *kw,    // owned
+    const char *options // "force"
+);
+PUBLIC int gobj_link_nodes(
+    hgobj gobj,
+    const char *hook,
+    json_t *parent_node,    // not owned
+    json_t *child_node      // not owned
+);
+PUBLIC int gobj_link_nodes2(
+    hgobj gobj,
+    const char *parent_ref,     // parent_topic_name^parent_id^hook_name
+    const char *child_ref       // child_topic_name^child_id
+);
+PUBLIC int gobj_unlink_nodes(
+    hgobj gobj,
+    const char *hook,
+    json_t *parent_node,    // not owned
+    json_t *child_node      // not owned
+);
+PUBLIC int gobj_unlink_nodes2(
+    hgobj gobj,
+    const char *parent_ref,     // parent_topic_name^parent_id^hook_name
+    const char *child_ref       // child_topic_name^child_id
+);
+PUBLIC json_t *gobj_get_node( // Return is NOT YOURS
+    hgobj gobj,
+    const char *topic_name,
+    const char *id
+);
+PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
+    hgobj gobj,
+    const char *topic_name,
+    json_t *jn_ids,     // owned
+    json_t *jn_filter,  // owned
+    json_t *jn_options  // owned "collapsed"
+);
+PUBLIC int gobj_snap_nodes(hgobj gobj, const char *tag); // tag the current tree db
+PUBLIC int gobj_set_nodes_snap(hgobj gobj, const char *tag); // Activate tag (stop/start the gobj)
+PUBLIC json_t *gobj_list_nodes_snaps(hgobj gobj); // Return MUST be decref, list of snaps
 
 
 /*--------------------------------------------*

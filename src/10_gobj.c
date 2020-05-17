@@ -3098,7 +3098,7 @@ PUBLIC json_t *gobj_list_nodes(hgobj gobj_, const char *topic_name, json_t *jn_i
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_snap_nodes_fn(hgobj gobj_, const char *name)
+PUBLIC int gobj_snap_node(hgobj gobj_, const char *tag)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3121,13 +3121,13 @@ PUBLIC int gobj_snap_nodes_fn(hgobj gobj_, const char *name)
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_snap_nodes(gobj, name);
+    return gobj->gclass->gmt.mt_snap_nodes(gobj, tag);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_set_nodes_snap_fn(hgobj gobj_, const char *name)
+PUBLIC int gobj_set_nodes_snap(hgobj gobj_, const char *tag)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3150,7 +3150,7 @@ PUBLIC int gobj_set_nodes_snap_fn(hgobj gobj_, const char *name)
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_set_nodes_snap(gobj, name);
+    return gobj->gclass->gmt.mt_set_nodes_snap(gobj, tag);
 }
 
 /***************************************************************************
