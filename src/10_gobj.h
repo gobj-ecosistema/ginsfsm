@@ -181,6 +181,19 @@ typedef int   (*mt_add_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, hsd
 typedef int   (*mt_delete_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, hsdata hs_child);
 typedef hsdata (*mt_get_resource_fn)(hgobj gobj, const char *resource, json_int_t parent_id, json_int_t id);
 
+typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
+typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
+typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
+typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child);
+typedef int   (*mt_link_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref);
+typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child);
+typedef int   (*mt_unlink_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref);
+typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char *id);
+typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_ids, json_t *jn_filter, json_t *jn_options);
+typedef int   (*mt_snap_nodes_fn)(hgobj gobj, const char *name);
+typedef int   (*mt_set_nodes_snap_fn)(hgobj gobj, const char *name);
+typedef json_t *(*mt_list_nodes_snaps_fn)(hgobj gobj);
+
 typedef void *(*local_method_fn)(hgobj gobj, void *data);
 typedef json_t *(*mt_authenticate_fn)(hgobj gobj, const char *service, json_t *kw, hgobj src);
 typedef json_t *(*mt_list_childs_fn)(hgobj gobj, const char *child_gclass, const char **attributes);
@@ -253,18 +266,18 @@ typedef struct { // General methods (Yuneta framework methods)
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
     future_method_fn mt_future38;
     future_method_fn mt_future39;
-    future_method_fn mt_future40;
-    future_method_fn mt_future41;
-    future_method_fn mt_future42;
-    future_method_fn mt_future43;
-    future_method_fn mt_future44;
-    future_method_fn mt_future45;
-    future_method_fn mt_future46;
-    future_method_fn mt_future47;
-    future_method_fn mt_future48;
-    future_method_fn mt_future49;
-    future_method_fn mt_future50;
-    future_method_fn mt_future51;
+    mt_create_node_fn mt_create_node;
+    mt_update_node_fn mt_update_node;
+    mt_delete_node_fn mt_delete_node;
+    mt_link_nodes_fn mt_link_nodes;
+    mt_link_nodes2_fn mt_link_nodes2;
+    mt_unlink_nodes_fn mt_unlink_nodes;
+    mt_unlink_nodes2_fn mt_unlink_nodes2;
+    mt_get_node_fn mt_get_node;
+    mt_list_nodes_fn mt_list_nodes;
+    mt_snap_nodes_fn mt_snap_nodes;
+    mt_set_nodes_snap_fn mt_set_nodes_snap;
+    mt_list_nodes_snaps_fn mt_list_nodes_snaps;
     future_method_fn mt_future52;
     future_method_fn mt_future53;
     future_method_fn mt_future54;
@@ -507,6 +520,23 @@ PUBLIC hsdata gobj_get_resource(
     json_int_t parent_id,
     json_int_t id
 );
+
+
+/*--------------------------------------------*
+ *  Node functions
+ *--------------------------------------------*/
+PUBLIC json_t *gobj_create_node(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
+PUBLIC json_t *gobj_update_node(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
+PUBLIC int gobj_delete_node(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
+PUBLIC int gobj_link_nodes(hgobj gobj, const char *hook, json_t *parent, json_t *child);
+PUBLIC int gobj_link_nodes2(hgobj gobj, const char *parent_ref, const char *child_ref);
+PUBLIC int gobj_unlink_nodes(hgobj gobj, const char *hook, json_t *parent, json_t *child);
+PUBLIC int gobj_unlink_nodes2(hgobj gobj, const char *parent_ref, const char *child_ref);
+PUBLIC json_t *gobj_get_node(hgobj gobj, const char *topic_name, const char *id);
+PUBLIC json_t *gobj_list_nodes(hgobj gobj, const char *topic_name, json_t *jn_ids, json_t *jn_filter, json_t *jn_options);
+PUBLIC int gobj_snap_nodes_fn(hgobj gobj, const char *name);
+PUBLIC int gobj_set_nodes_snap_fn(hgobj gobj, const char *name);
+PUBLIC json_t *gobj_list_nodes_snaps_fn(hgobj gobj);
 
 
 /*--------------------------------------------*

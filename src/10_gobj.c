@@ -2827,6 +2827,364 @@ PUBLIC hsdata gobj_get_resource(
 
 
 
+                    /*------------------------------*
+                     *      Resource functions
+                     *------------------------------*/
+
+
+
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_create_node(hgobj gobj_, const char *topic_name, json_t *kw, const char *options)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_create_node) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_create_node not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_create_node(gobj, topic_name, kw, options);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_update_node(hgobj gobj_, const char *topic_name, json_t *kw, const char *options)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_update_node) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_update_node not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_update_node(gobj, topic_name, kw, options);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_delete_node(hgobj gobj_, const char *topic_name, json_t *kw, const char *options)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_delete_node) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_delete_node not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_delete_node(gobj, topic_name, kw, options);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_link_nodes(hgobj gobj_, const char *hook, json_t *parent, json_t *child)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_link_nodes) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_link_nodes not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_link_nodes(gobj, hook, parent, child);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_link_nodes2(hgobj gobj_, const char *parent_ref, const char *child_ref)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_link_nodes2) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_link_nodes2 not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_link_nodes2(gobj, parent_ref, child_ref);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_unlink_nodes(hgobj gobj_, const char *hook, json_t *parent, json_t *child)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_unlink_nodes) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_unlink_nodes not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_unlink_nodes(gobj, hook, parent, child);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_unlink_nodes2(hgobj gobj_, const char *parent_ref, const char *child_ref)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_unlink_nodes2) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_unlink_nodes not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_unlink_nodes2(gobj, parent_ref, child_ref);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_get_node(hgobj gobj_, const char *topic_name, const char *id)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_get_node) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_get_node not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_get_node(gobj, topic_name, id);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_list_nodes(hgobj gobj_, const char *topic_name, json_t *jn_ids, json_t *jn_filter, json_t *jn_options)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_list_nodes) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_list_nodes not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_list_nodes(gobj, topic_name, jn_ids, jn_filter, jn_options);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_snap_nodes_fn(hgobj gobj_, const char *name)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_snap_nodes) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_snap_nodes not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_snap_nodes(gobj, name);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_set_nodes_snap_fn(hgobj gobj_, const char *name)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_set_nodes_snap) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_set_nodes_snap not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_set_nodes_snap(gobj, name);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_list_nodes_snaps_fn(hgobj gobj_)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_list_nodes_snaps) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_list_nodes_snaps not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_list_nodes_snaps(gobj);
+}
+
+
+
+
                     /*---------------------------------*
                      *  SECTION: Operational functions
                      *---------------------------------*/
