@@ -9608,12 +9608,10 @@ PUBLIC int gobj_set_gobj_trace(hgobj gobj_, const char *level, BOOL set, json_t 
     }
     if(set) {
         if(gobj->gclass->gmt.mt_trace_on) {
-            KW_INCREF(kw);
             return gobj->gclass->gmt.mt_trace_on(gobj, level, kw);
         }
     } else {
         if(gobj->gclass->gmt.mt_trace_off) {
-            KW_INCREF(kw);
             return gobj->gclass->gmt.mt_trace_off(gobj, level, kw);
         }
     }
