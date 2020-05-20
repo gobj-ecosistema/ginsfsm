@@ -189,7 +189,7 @@ typedef int   (*mt_link_nodes2_fn)(hgobj gobj, const char *parent_ref, const cha
 typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child);
 typedef int   (*mt_unlink_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref);
 typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char *id);
-typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_ids, json_t *jn_filter, json_t *jn_options);
+typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options);
 typedef int   (*mt_snap_nodes_fn)(hgobj gobj, const char *tag);
 typedef int   (*mt_set_nodes_snap_fn)(hgobj gobj, const char *tag);
 typedef json_t *(*mt_list_nodes_snaps_fn)(hgobj gobj);
@@ -577,7 +577,6 @@ PUBLIC json_t *gobj_get_node( // Return is NOT YOURS
 PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
-    json_t *jn_ids,     // owned
     json_t *jn_filter,  // owned
     json_t *jn_options  // owned "collapsed"
 );

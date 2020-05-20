@@ -3069,7 +3069,12 @@ PUBLIC json_t *gobj_get_node(hgobj gobj_, const char *topic_name, const char *id
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_list_nodes(hgobj gobj_, const char *topic_name, json_t *jn_ids, json_t *jn_filter, json_t *jn_options)
+PUBLIC json_t *gobj_list_nodes(
+    hgobj gobj_,
+    const char *topic_name,
+    json_t *jn_filter,  // owned
+    json_t *jn_options  // owned "collapsed"
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3092,7 +3097,7 @@ PUBLIC json_t *gobj_list_nodes(hgobj gobj_, const char *topic_name, json_t *jn_i
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_list_nodes(gobj, topic_name, jn_ids, jn_filter, jn_options);
+    return gobj->gclass->gmt.mt_list_nodes(gobj, topic_name, jn_filter, jn_options);
 }
 
 /***************************************************************************
