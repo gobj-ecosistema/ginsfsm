@@ -41,6 +41,7 @@
 #include <string.h>
 #include <strings.h>
 #include "10_gobj.h"
+#include "12_msg_ievent.h"
 
 /****************************************************************
  *         Constants
@@ -8804,16 +8805,17 @@ PUBLIC json_t *gobj_command(hgobj gobj_, const char *command,  json_t *kw, hgobj
             return 0;
         }
     } else {
-        log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "Command table not available",
-            "command",      "%s", command?command:"",
-            NULL
+        return msg_iev_build_webix(
+            gobj,
+            -1,
+            json_local_sprintf(
+                "Command table not available in '%s' gobj",
+                gobj_short_name(gobj)
+            ),
+            0,
+            0,
+            kw
         );
-        KW_DECREF(kw);
-        return 0;
     }
 }
 
