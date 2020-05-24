@@ -3041,7 +3041,12 @@ PUBLIC int gobj_unlink_nodes2(hgobj gobj_, const char *parent_ref, const char *c
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_get_node(hgobj gobj_, const char *topic_name, const char *id)
+PUBLIC json_t *gobj_get_node(
+    hgobj gobj_,
+    const char *topic_name,
+    const char *id,
+    json_t *jn_options  // owned "collapsed"
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3064,7 +3069,7 @@ PUBLIC json_t *gobj_get_node(hgobj gobj_, const char *topic_name, const char *id
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_get_node(gobj, topic_name, id);
+    return gobj->gclass->gmt.mt_get_node(gobj, topic_name, id, jn_options);
 }
 
 /***************************************************************************
