@@ -3341,7 +3341,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_snap_node(hgobj gobj_, const char *tag)
+PUBLIC int gobj_shoot_snap(hgobj gobj_, const char *tag)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3399,7 +3399,7 @@ PUBLIC int gobj_activate_snap(hgobj gobj_, const char *tag)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_list_snaps_fn(hgobj gobj_)
+PUBLIC json_t *gobj_list_snaps(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
