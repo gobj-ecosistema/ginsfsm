@@ -3354,23 +3354,23 @@ PUBLIC int gobj_snap_node(hgobj gobj_, const char *tag)
         );
         return 0;
     }
-    if(!gobj->gclass->gmt.mt_snap_nodes) {
+    if(!gobj->gclass->gmt.mt_shoot_snap) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_snap_nodes not defined",
+            "msg",          "%s", "mt_shoot_snap not defined",
             NULL
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_snap_nodes(gobj, tag);
+    return gobj->gclass->gmt.mt_shoot_snap(gobj, tag);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_set_nodes_snap(hgobj gobj_, const char *tag)
+PUBLIC int gobj_activate_snap(hgobj gobj_, const char *tag)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3383,23 +3383,23 @@ PUBLIC int gobj_set_nodes_snap(hgobj gobj_, const char *tag)
         );
         return 0;
     }
-    if(!gobj->gclass->gmt.mt_set_nodes_snap) {
+    if(!gobj->gclass->gmt.mt_activate_snap) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_set_nodes_snap not defined",
+            "msg",          "%s", "mt_activate_snap not defined",
             NULL
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_set_nodes_snap(gobj, tag);
+    return gobj->gclass->gmt.mt_activate_snap(gobj, tag);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_list_nodes_snaps_fn(hgobj gobj_)
+PUBLIC json_t *gobj_list_snaps_fn(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3412,17 +3412,17 @@ PUBLIC json_t *gobj_list_nodes_snaps_fn(hgobj gobj_)
         );
         return 0;
     }
-    if(!gobj->gclass->gmt.mt_list_nodes_snaps) {
+    if(!gobj->gclass->gmt.mt_list_snaps) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_list_nodes_snaps not defined",
+            "msg",          "%s", "mt_list_snaps not defined",
             NULL
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_list_nodes_snaps(gobj);
+    return gobj->gclass->gmt.mt_list_snaps(gobj);
 }
 
 

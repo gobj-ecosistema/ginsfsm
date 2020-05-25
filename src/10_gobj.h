@@ -190,9 +190,9 @@ typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent
 typedef int   (*mt_unlink_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref);
 typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char *id, json_t *options);
 typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options);
-typedef int   (*mt_snap_nodes_fn)(hgobj gobj, const char *tag);
-typedef int   (*mt_set_nodes_snap_fn)(hgobj gobj, const char *tag);
-typedef json_t *(*mt_list_nodes_snaps_fn)(hgobj gobj);
+typedef int   (*mt_shoot_snap_fn)(hgobj gobj, const char *tag);
+typedef int   (*mt_activate_snap_fn)(hgobj gobj, const char *tag);
+typedef json_t *(*mt_list_snaps_fn)(hgobj gobj);
 
 typedef json_t *(*mt_treedbs_fn)(hgobj gobj);
 typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *treedb_name, const char *options);
@@ -283,9 +283,9 @@ typedef struct { // General methods (Yuneta framework methods)
     mt_unlink_nodes2_fn mt_unlink_nodes2;
     mt_get_node_fn mt_get_node;
     mt_list_nodes_fn mt_list_nodes;
-    mt_snap_nodes_fn mt_snap_nodes;
-    mt_set_nodes_snap_fn mt_set_nodes_snap;
-    mt_list_nodes_snaps_fn mt_list_nodes_snaps;
+    mt_shoot_snap_fn mt_shoot_snap;
+    mt_activate_snap_fn mt_activate_snap;
+    mt_list_snaps_fn mt_list_snaps;
     mt_treedbs_fn mt_treedbs;
     mt_treedb_topics_fn mt_treedb_topics;
     mt_topic_desc_fn mt_topic_desc;
@@ -631,9 +631,9 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     json_t *jn_options  // owned "collapsed"
 );
 
-PUBLIC int gobj_snap_nodes(hgobj gobj, const char *tag); // tag the current tree db
-PUBLIC int gobj_set_nodes_snap(hgobj gobj, const char *tag); // Activate tag (stop/start the gobj)
-PUBLIC json_t *gobj_list_nodes_snaps(hgobj gobj); // Return MUST be decref, list of snaps
+PUBLIC int gobj_shoot_snap(hgobj gobj, const char *tag); // tag the current tree db
+PUBLIC int gobj_activate_snap(hgobj gobj, const char *tag); // Activate tag (stop/start the gobj)
+PUBLIC json_t *gobj_list_snaps(hgobj gobj); // Return MUST be decref, list of snaps
 
 
 /*--------------------------------------------*
