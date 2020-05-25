@@ -2936,6 +2936,7 @@ PUBLIC json_t *gobj_topic_desc(
  ***************************************************************************/
 PUBLIC json_t *gobj_topic_links(
     hgobj gobj_,
+    const char *treedb_name,
     const char *topic_name
 )
 {
@@ -2960,7 +2961,7 @@ PUBLIC json_t *gobj_topic_links(
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_topic_links(gobj, topic_name);
+    return gobj->gclass->gmt.mt_topic_links(gobj, treedb_name, topic_name);
 }
 
 /***************************************************************************
@@ -2968,6 +2969,7 @@ PUBLIC json_t *gobj_topic_links(
  ***************************************************************************/
 PUBLIC json_t *gobj_topic_hooks(
     hgobj gobj_,
+    const char *treedb_name,
     const char *topic_name
 )
 {
@@ -2992,7 +2994,7 @@ PUBLIC json_t *gobj_topic_hooks(
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_topic_hooks(gobj, topic_name);
+    return gobj->gclass->gmt.mt_topic_hooks(gobj, treedb_name, topic_name);
 }
 
 /***************************************************************************

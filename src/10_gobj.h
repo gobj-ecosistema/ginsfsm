@@ -195,10 +195,10 @@ typedef int   (*mt_set_nodes_snap_fn)(hgobj gobj, const char *tag);
 typedef json_t *(*mt_list_nodes_snaps_fn)(hgobj gobj);
 
 typedef json_t *(*mt_treedbs_fn)(hgobj gobj);
-typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *topic_name, const char *options);
+typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *treedb_name, const char *options);
 typedef json_t *(*mt_topic_desc_fn)(hgobj gobj, const char *topic_name);
-typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *topic_name);
-typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *topic_name);
+typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *treedb_name, const char *topic_name);
+typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *treedb_name, const char *topic_name);
 typedef json_t *(*mt_node_parents_fn)(hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options);
 typedef json_t *(*mt_node_childs_fn)(hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options);
 
@@ -551,11 +551,13 @@ PUBLIC json_t *gobj_topic_desc(
 
 PUBLIC json_t *gobj_topic_links(
     hgobj gobj,
+    const char *treedb_name,
     const char *topic_name
 );
 
 PUBLIC json_t *gobj_topic_hooks(
     hgobj gobj,
+    const char *treedb_name,
     const char *topic_name
 );
 
