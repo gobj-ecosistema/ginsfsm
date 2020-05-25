@@ -194,6 +194,14 @@ typedef int   (*mt_snap_nodes_fn)(hgobj gobj, const char *tag);
 typedef int   (*mt_set_nodes_snap_fn)(hgobj gobj, const char *tag);
 typedef json_t *(*mt_list_nodes_snaps_fn)(hgobj gobj);
 
+typedef json_t *(*mt_treedbs_fn)(hgobj gobj);
+typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *topic_name, const char *options);
+typedef json_t *(*mt_topic_desc_fn)(hgobj gobj, const char *topic_name);
+typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *topic_name);
+typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *topic_name);
+typedef json_t *(*mt_node_parents_fn)(hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options);
+typedef json_t *(*mt_node_childs_fn)(hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options);
+
 typedef void *(*local_method_fn)(hgobj gobj, void *data);
 typedef json_t *(*mt_authenticate_fn)(hgobj gobj, const char *service, json_t *kw, hgobj src);
 typedef json_t *(*mt_list_childs_fn)(hgobj gobj, const char *child_gclass, const char **attributes);
@@ -278,13 +286,13 @@ typedef struct { // General methods (Yuneta framework methods)
     mt_snap_nodes_fn mt_snap_nodes;
     mt_set_nodes_snap_fn mt_set_nodes_snap;
     mt_list_nodes_snaps_fn mt_list_nodes_snaps;
-    future_method_fn mt_future52;
-    future_method_fn mt_future53;
-    future_method_fn mt_future54;
-    future_method_fn mt_future55;
-    future_method_fn mt_future56;
-    future_method_fn mt_future57;
-    future_method_fn mt_future58;
+    mt_treedbs_fn mt_treedbs;
+    mt_treedb_topics_fn mt_treedb_topics;
+    mt_topic_desc_fn mt_topic_desc;
+    mt_topic_links_fn mt_topic_links;
+    mt_topic_hooks_fn mt_topic_hooks;
+    mt_node_parents_fn mt_node_parents;
+    mt_node_childs_fn mt_node_childs;
     future_method_fn mt_future59;
     future_method_fn mt_future60;
     future_method_fn mt_future61;
@@ -495,7 +503,7 @@ PUBLIC void gobj_destroy_childs(hgobj gobj);
 PUBLIC GCLASS *gobj_subclass_gclass(GCLASS *base, const char *gclass_name);
 
 /*--------------------------------------------*
- *  Resource functions
+ *  Resource functions DEPRECATED
  *--------------------------------------------*/
 PUBLIC hsdata gobj_create_resource(
     hgobj gobj,
@@ -523,13 +531,35 @@ PUBLIC hsdata gobj_get_resource(
 );
 
 
-/*--------------------------------------------*
- *  Node functions
- *--------------------------------------------*/
-/***************************************************************************
-    WARNING This function does NOT auto build links
- ***************************************************************************/
-PUBLIC json_t *gobj_create_node( // Return is NOT YOURS
+/*--------------------------------------------------*
+ *  Node functions. Don't use resource, use this
+ *--------------------------------------------------*/
+PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
+    hgobj gobj
+);
+
+PUBLIC json_t *gobj_treedb_topics(
+    hgobj gobj,
+    const char *treedb_name,
+    const char *options // "dict" return list of dicts, otherwise return list of strings
+);
+
+PUBLIC json_t *gobj_topic_desc(
+    hgobj gobj,
+    const char *topic_name
+);
+
+PUBLIC json_t *gobj_topic_links(
+    hgobj gobj,
+    const char *topic_name
+);
+
+PUBLIC json_t *gobj_topic_hooks(
+    hgobj gobj,
+    const char *topic_name
+);
+
+PUBLIC json_t *gobj_create_node( // Return is NOT YOURS, WARNING This does NOT auto build links
     hgobj gobj,
     const char *topic_name,
     json_t *kw, // owned
@@ -582,6 +612,23 @@ PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     json_t *jn_filter,  // owned
     json_t *jn_options  // owned "collapsed"
 );
+
+PUBLIC json_t *gobj_node_parents( // Return MUST be decref
+    hgobj gobj,
+    const char *topic_name,
+    const char *id,
+    const char *link,
+    json_t *jn_options  // owned "collapsed"
+);
+
+PUBLIC json_t *gobj_node_childs( // Return MUST be decref
+    hgobj gobj,
+    const char *topic_name,
+    const char *id,
+    const char *hook,
+    json_t *jn_options  // owned "collapsed"
+);
+
 PUBLIC int gobj_snap_nodes(hgobj gobj, const char *tag); // tag the current tree db
 PUBLIC int gobj_set_nodes_snap(hgobj gobj, const char *tag); // Activate tag (stop/start the gobj)
 PUBLIC json_t *gobj_list_nodes_snaps(hgobj gobj); // Return MUST be decref, list of snaps

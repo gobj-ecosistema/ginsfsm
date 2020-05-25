@@ -2829,11 +2829,171 @@ PUBLIC hsdata gobj_get_resource(
 
 
                     /*------------------------------*
-                     *      Resource functions
+                     *      Node functions
                      *------------------------------*/
 
 
 
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
+    hgobj gobj_
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_treedbs) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_treedbs not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_treedbs(gobj);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_treedb_topics(
+    hgobj gobj_,
+    const char *treedb_name,
+    const char *options // "dict" return list of dicts, otherwise return list of strings
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_treedb_topics) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_treedb_topics not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_treedb_topics(gobj, treedb_name, options);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_topic_desc(
+    hgobj gobj_,
+    const char *topic_name
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_topic_desc) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_topic_desc not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_topic_desc(gobj, topic_name);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_topic_links(
+    hgobj gobj_,
+    const char *topic_name
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_topic_links) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_topic_links not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_topic_links(gobj, topic_name);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_topic_hooks(
+    hgobj gobj_,
+    const char *topic_name
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_topic_hooks) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_topic_hooks not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_topic_hooks(gobj, topic_name);
+}
 
 /***************************************************************************
  *
@@ -3104,6 +3264,76 @@ PUBLIC json_t *gobj_list_nodes(
         return 0;
     }
     return gobj->gclass->gmt.mt_list_nodes(gobj, topic_name, jn_filter, jn_options);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_node_parents( // Return MUST be decref
+    hgobj gobj_,
+    const char *topic_name,
+    const char *id,
+    const char *link,
+    json_t *jn_options  // owned "collapsed"
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_node_parents) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_node_parents not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_node_parents(gobj, topic_name, id, link, jn_options);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t *gobj_node_childs( // Return MUST be decref
+    hgobj gobj_,
+    const char *topic_name,
+    const char *id,
+    const char *hook,
+    json_t *jn_options  // owned "collapsed"
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_node_childs) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_node_childs not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_node_childs(gobj, topic_name, id, hook, jn_options);
 }
 
 /***************************************************************************
