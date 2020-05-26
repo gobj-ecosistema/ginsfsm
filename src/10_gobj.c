@@ -3069,7 +3069,7 @@ PUBLIC int gobj_delete_node(hgobj gobj_, const char *topic_name, json_t *kw, con
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_delete_node) {
         log_error(0,
@@ -3079,7 +3079,7 @@ PUBLIC int gobj_delete_node(hgobj gobj_, const char *topic_name, json_t *kw, con
             "msg",          "%s", "mt_delete_node not defined",
             NULL
         );
-        return 0;
+        return -1;
     }
     return gobj->gclass->gmt.mt_delete_node(gobj, topic_name, kw, options);
 }
@@ -3098,7 +3098,7 @@ PUBLIC int gobj_link_nodes(hgobj gobj_, const char *hook, json_t *parent, json_t
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_link_nodes) {
         log_error(0,
@@ -3108,7 +3108,7 @@ PUBLIC int gobj_link_nodes(hgobj gobj_, const char *hook, json_t *parent, json_t
             "msg",          "%s", "mt_link_nodes not defined",
             NULL
         );
-        return 0;
+        return -1;
     }
     return gobj->gclass->gmt.mt_link_nodes(gobj, hook, parent, child);
 }
@@ -3127,7 +3127,7 @@ PUBLIC int gobj_link_nodes2(hgobj gobj_, const char *parent_ref, const char *chi
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_link_nodes2) {
         log_error(0,
@@ -3137,7 +3137,7 @@ PUBLIC int gobj_link_nodes2(hgobj gobj_, const char *parent_ref, const char *chi
             "msg",          "%s", "mt_link_nodes2 not defined",
             NULL
         );
-        return 0;
+        return -1;
     }
     return gobj->gclass->gmt.mt_link_nodes2(gobj, parent_ref, child_ref);
 }
@@ -3156,7 +3156,7 @@ PUBLIC int gobj_unlink_nodes(hgobj gobj_, const char *hook, json_t *parent, json
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_unlink_nodes) {
         log_error(0,
@@ -3166,7 +3166,7 @@ PUBLIC int gobj_unlink_nodes(hgobj gobj_, const char *hook, json_t *parent, json
             "msg",          "%s", "mt_unlink_nodes not defined",
             NULL
         );
-        return 0;
+        return -1;
     }
     return gobj->gclass->gmt.mt_unlink_nodes(gobj, hook, parent, child);
 }
@@ -3185,7 +3185,7 @@ PUBLIC int gobj_unlink_nodes2(hgobj gobj_, const char *parent_ref, const char *c
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_unlink_nodes2) {
         log_error(0,
@@ -3195,7 +3195,7 @@ PUBLIC int gobj_unlink_nodes2(hgobj gobj_, const char *parent_ref, const char *c
             "msg",          "%s", "mt_unlink_nodes not defined",
             NULL
         );
-        return 0;
+        return -1;
     }
     return gobj->gclass->gmt.mt_unlink_nodes2(gobj, parent_ref, child_ref);
 }
@@ -3352,7 +3352,7 @@ PUBLIC int gobj_shoot_snap(hgobj gobj_, const char *tag)
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_shoot_snap) {
         log_error(0,
@@ -3362,7 +3362,7 @@ PUBLIC int gobj_shoot_snap(hgobj gobj_, const char *tag)
             "msg",          "%s", "mt_shoot_snap not defined",
             NULL
         );
-        return 0;
+        return -1;
     }
     return gobj->gclass->gmt.mt_shoot_snap(gobj, tag);
 }
@@ -3381,7 +3381,7 @@ PUBLIC int gobj_activate_snap(hgobj gobj_, const char *tag)
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_activate_snap) {
         log_error(0,
@@ -3391,7 +3391,7 @@ PUBLIC int gobj_activate_snap(hgobj gobj_, const char *tag)
             "msg",          "%s", "mt_activate_snap not defined",
             NULL
         );
-        return 0;
+        return -1;
     }
     return gobj->gclass->gmt.mt_activate_snap(gobj, tag);
 }
@@ -3399,7 +3399,7 @@ PUBLIC int gobj_activate_snap(hgobj gobj_, const char *tag)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_list_snaps(hgobj gobj_)
+PUBLIC json_t *gobj_list_snaps(hgobj gobj_, json_t *kw)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3410,6 +3410,7 @@ PUBLIC json_t *gobj_list_snaps(hgobj gobj_)
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_snaps) {
@@ -3420,9 +3421,10 @@ PUBLIC json_t *gobj_list_snaps(hgobj gobj_)
             "msg",          "%s", "mt_list_snaps not defined",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
-    return gobj->gclass->gmt.mt_list_snaps(gobj);
+    return gobj->gclass->gmt.mt_list_snaps(gobj, kw);
 }
 
 

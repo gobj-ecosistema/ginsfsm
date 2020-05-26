@@ -192,7 +192,7 @@ typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char
 typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options);
 typedef int   (*mt_shoot_snap_fn)(hgobj gobj, const char *tag);
 typedef int   (*mt_activate_snap_fn)(hgobj gobj, const char *tag);
-typedef json_t *(*mt_list_snaps_fn)(hgobj gobj);
+typedef json_t *(*mt_list_snaps_fn)(hgobj gobj, json_t *filter);
 
 typedef json_t *(*mt_treedbs_fn)(hgobj gobj);
 typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *treedb_name, const char *options);
@@ -633,7 +633,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 
 PUBLIC int gobj_shoot_snap(hgobj gobj, const char *tag); // tag the current tree db
 PUBLIC int gobj_activate_snap(hgobj gobj, const char *tag); // Activate tag (stop/start the gobj)
-PUBLIC json_t *gobj_list_snaps(hgobj gobj); // Return MUST be decref, list of snaps
+PUBLIC json_t *gobj_list_snaps(hgobj gobj, json_t *filter); // Return MUST be decref, list of snaps
 
 
 /*--------------------------------------------*
