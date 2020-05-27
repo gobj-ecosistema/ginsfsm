@@ -652,6 +652,7 @@ PUBLIC hgobj gobj_yuno_factory(
             );
             if(__yuno__) {
                 register_service("__yuno__", gobj);
+                gobj_write_uint32_attr(__yuno__, "watcher_pid", get_watcher_pid());
             }
             return __yuno__;
         }
