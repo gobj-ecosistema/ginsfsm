@@ -201,6 +201,7 @@ typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *treedb_name, const 
 typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *treedb_name, const char *topic_name);
 typedef json_t *(*mt_node_parents_fn)(hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options);
 typedef json_t *(*mt_node_childs_fn)(hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options);
+typedef json_t *(*mt_node_instances_fn)(hgobj gobj, const char *topic_name, const char *id, int max_instances);
 
 typedef void *(*local_method_fn)(hgobj gobj, void *data);
 typedef json_t *(*mt_authenticate_fn)(hgobj gobj, const char *service, json_t *kw, hgobj src);
@@ -293,7 +294,7 @@ typedef struct { // General methods (Yuneta framework methods)
     mt_topic_hooks_fn mt_topic_hooks;
     mt_node_parents_fn mt_node_parents;
     mt_node_childs_fn mt_node_childs;
-    future_method_fn mt_future59;
+    mt_node_instances_fn mt_node_instances;
     future_method_fn mt_future60;
     future_method_fn mt_future61;
     future_method_fn mt_future62;
@@ -629,6 +630,13 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     const char *id,
     const char *hook,
     json_t *jn_options  // owned "collapsed"
+);
+
+PUBLIC json_t *gobj_node_instances(
+    hgobj gobj,
+    const char *topic_name,
+    const char *id,
+    int max_instances // 0 all instances
 );
 
 PUBLIC int gobj_shoot_snap(hgobj gobj, const char *tag); // tag the current tree db

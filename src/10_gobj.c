@@ -3342,6 +3342,40 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 /***************************************************************************
  *
  ***************************************************************************/
+PUBLIC json_t *gobj_node_instances(
+    hgobj gobj_,
+    const char *topic_name,
+    const char *id,
+    int max_instances // 0 all instances
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_node_instances) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_node_instances not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_node_instances(gobj, topic_name, id, max_instances);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
 PUBLIC int gobj_shoot_snap(hgobj gobj_, const char *tag)
 {
     GObj_t *gobj = gobj_;
