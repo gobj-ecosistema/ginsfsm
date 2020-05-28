@@ -3346,7 +3346,7 @@ PUBLIC json_t *gobj_node_instances(
     hgobj gobj_,
     const char *topic_name,
     const char *id,
-    int max_instances // 0 all instances
+    json_t *match_cond
 )
 {
     GObj_t *gobj = gobj_;
@@ -3358,6 +3358,7 @@ PUBLIC json_t *gobj_node_instances(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        JSON_DECREF(match_cond);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_node_instances) {
@@ -3368,9 +3369,11 @@ PUBLIC json_t *gobj_node_instances(
             "msg",          "%s", "mt_node_instances not defined",
             NULL
         );
+
+        JSON_DECREF(match_cond);
         return 0;
     }
-    return gobj->gclass->gmt.mt_node_instances(gobj, topic_name, id, max_instances);
+    return gobj->gclass->gmt.mt_node_instances(gobj, topic_name, id, match_cond);
 }
 
 /***************************************************************************
