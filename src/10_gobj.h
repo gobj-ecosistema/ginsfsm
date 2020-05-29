@@ -199,9 +199,20 @@ typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *treedb_name, cons
 typedef json_t *(*mt_topic_desc_fn)(hgobj gobj, const char *topic_name);
 typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *treedb_name, const char *topic_name);
 typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *treedb_name, const char *topic_name);
-typedef json_t *(*mt_node_parents_fn)(hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options);
-typedef json_t *(*mt_node_childs_fn)(hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options);
-typedef json_t *(*mt_node_instances_fn)(hgobj gobj, const char *topic_name, const char *id, const char *pkey2, json_t *match_cond);
+typedef json_t *(*mt_node_parents_fn)(
+    hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options
+);
+typedef json_t *(*mt_node_childs_fn)(
+    hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options
+);
+typedef json_t *(*mt_node_instances_fn)(
+    hgobj gobj,
+    const char *topic_name,
+    const char *pkey2_field,
+    json_t *jn_filter,
+    json_t *jn_options
+);
+
 
 typedef void *(*local_method_fn)(hgobj gobj, void *data);
 typedef json_t *(*mt_authenticate_fn)(hgobj gobj, const char *service, json_t *kw, hgobj src);
@@ -635,9 +646,9 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 PUBLIC json_t *gobj_node_instances(
     hgobj gobj,
     const char *topic_name,
-    const char *id,
-    const char *pkey2,
-    json_t *match_cond
+    const char *pkey2_field,
+    json_t *jn_filter,  // owned
+    json_t *jn_options // owned, "collapsed"
 );
 
 PUBLIC int gobj_shoot_snap(hgobj gobj, const char *tag); // tag the current tree db

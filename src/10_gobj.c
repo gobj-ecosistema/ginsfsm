@@ -3345,9 +3345,9 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 PUBLIC json_t *gobj_node_instances(
     hgobj gobj_,
     const char *topic_name,
-    const char *id,
-    const char *pkey2,
-    json_t *match_cond
+    const char *pkey2_field,
+    json_t *jn_filter,  // owned
+    json_t *jn_options // owned, "collapsed"
 )
 {
     GObj_t *gobj = gobj_;
@@ -3359,7 +3359,8 @@ PUBLIC json_t *gobj_node_instances(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        JSON_DECREF(match_cond);
+        JSON_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_node_instances) {
@@ -3371,10 +3372,13 @@ PUBLIC json_t *gobj_node_instances(
             NULL
         );
 
-        JSON_DECREF(match_cond);
+        JSON_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_node_instances(gobj, topic_name, id, pkey2, match_cond);
+    return gobj->gclass->gmt.mt_node_instances(
+        gobj, topic_name, pkey2_field, jn_filter, jn_options
+    );
 }
 
 /***************************************************************************
