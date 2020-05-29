@@ -3346,6 +3346,7 @@ PUBLIC json_t *gobj_node_instances(
     hgobj gobj_,
     const char *topic_name,
     const char *id,
+    const char *pkey2,
     json_t *match_cond
 )
 {
@@ -3373,7 +3374,7 @@ PUBLIC json_t *gobj_node_instances(
         JSON_DECREF(match_cond);
         return 0;
     }
-    return gobj->gclass->gmt.mt_node_instances(gobj, topic_name, id, match_cond);
+    return gobj->gclass->gmt.mt_node_instances(gobj, topic_name, id, pkey2, match_cond);
 }
 
 /***************************************************************************
