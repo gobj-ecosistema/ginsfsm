@@ -3032,7 +3032,7 @@ PUBLIC json_t *gobj_create_node(hgobj gobj_, const char *topic_name, json_t *kw,
  ***************************************************************************/
 PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
     hgobj gobj_,
-    json_t *node
+    json_t *node // not owned
 )
 {
     GObj_t *gobj = gobj_;

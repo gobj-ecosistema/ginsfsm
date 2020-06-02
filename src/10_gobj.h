@@ -583,7 +583,7 @@ PUBLIC json_t *gobj_create_node( // Return is NOT YOURS, WARNING This does NOT a
 
 PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
     hgobj gobj,
-    json_t *node
+    json_t *node // not owned
 );
 
 PUBLIC json_t *gobj_update_node( // Return is NOT YOURS, High level: DOES auto build links
