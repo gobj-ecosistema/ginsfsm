@@ -3030,6 +3030,38 @@ PUBLIC json_t *gobj_create_node(hgobj gobj_, const char *topic_name, json_t *kw,
 /***************************************************************************
  *
  ***************************************************************************/
+PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
+    hgobj gobj_,
+    json_t *node
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_save_node) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_save_node not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_save_node(gobj, node);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
 PUBLIC json_t *gobj_update_node(hgobj gobj_, const char *topic_name, json_t *kw, const char *options)
 {
     GObj_t *gobj = gobj_;

@@ -182,6 +182,7 @@ typedef int   (*mt_delete_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, 
 typedef hsdata (*mt_get_resource_fn)(hgobj gobj, const char *resource, json_int_t parent_id, json_int_t id);
 
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
+typedef json_t *(*mt_save_node_fn)(hgobj gobj, json_t *node);
 typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
 typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
 typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child);
@@ -306,7 +307,7 @@ typedef struct { // General methods (Yuneta framework methods)
     mt_node_parents_fn mt_node_parents;
     mt_node_childs_fn mt_node_childs;
     mt_node_instances_fn mt_node_instances;
-    future_method_fn mt_future60;
+    mt_save_node_fn mt_save_node;
     future_method_fn mt_future61;
     future_method_fn mt_future62;
     future_method_fn mt_future63;
@@ -580,46 +581,58 @@ PUBLIC json_t *gobj_create_node( // Return is NOT YOURS, WARNING This does NOT a
     const char *options // "permissive"
 );
 
-PUBLIC json_t *gobj_update_node( // Return is NOT YOURS
+PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
+    hgobj gobj,
+    json_t *node
+);
+
+PUBLIC json_t *gobj_update_node( // Return is NOT YOURS, High level: DOES auto build links
     hgobj gobj,
     const char *topic_name,
     json_t *kw,    // owned
     const char *options // "create" ["permissive"], "clean"
 );
+
 PUBLIC int gobj_delete_node(
     hgobj gobj,
     const char *topic_name,
     json_t *kw,    // owned
     const char *options // "force"
 );
+
 PUBLIC int gobj_link_nodes(
     hgobj gobj,
     const char *hook,
     json_t *parent_node,    // not owned
     json_t *child_node      // not owned
 );
+
 PUBLIC int gobj_link_nodes2(
     hgobj gobj,
     const char *parent_ref,     // parent_topic_name^parent_id^hook_name
     const char *child_ref       // child_topic_name^child_id
 );
+
 PUBLIC int gobj_unlink_nodes(
     hgobj gobj,
     const char *hook,
     json_t *parent_node,    // not owned
     json_t *child_node      // not owned
 );
+
 PUBLIC int gobj_unlink_nodes2(
     hgobj gobj,
     const char *parent_ref,     // parent_topic_name^parent_id^hook_name
     const char *child_ref       // child_topic_name^child_id
 );
+
 PUBLIC json_t *gobj_get_node( // Return is NOT YOURS
     hgobj gobj,
     const char *topic_name,
     const char *id,
     json_t *jn_options  // owned "collapsed"
 );
+
 PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
