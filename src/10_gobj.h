@@ -182,7 +182,7 @@ typedef int   (*mt_delete_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, 
 typedef hsdata (*mt_get_resource_fn)(hgobj gobj, const char *resource, json_int_t parent_id, json_int_t id);
 
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
-typedef json_t *(*mt_save_node_fn)(hgobj gobj, json_t *node);
+typedef int (*mt_save_node_fn)(hgobj gobj, json_t *node);
 typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
 typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
 typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child);
