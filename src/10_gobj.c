@@ -1703,7 +1703,7 @@ PRIVATE hgobj _gobj_create(
 
     /*--------------------------------------*
      *  Load writable and persistent attrs
-     *  of named-gobjs
+     *  of named-gobjs and __root__
      *--------------------------------------*/
     if(gobj->obflag & (obflag_unique_name)) {
         if(__global_load_persistent_attrs_fn__) {
@@ -6910,7 +6910,7 @@ PUBLIC int gobj_load_persistent_attrs(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
 
-    if(!(gobj->obflag & obflag_unique_name)) {
+    if(!(gobj->obflag & (obflag_unique_name))) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
@@ -6933,7 +6933,7 @@ PUBLIC int gobj_save_persistent_attrs(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
 
-    if(!(gobj->obflag & obflag_unique_name)) {
+    if(!(gobj->obflag & (obflag_unique_name))) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
