@@ -2244,7 +2244,7 @@ PUBLIC void gobj_destroy(hgobj gobj_)
         return;
     }
     if(gobj->obflag & obflag_destroying) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -5923,7 +5923,7 @@ PUBLIC int gobj_publish_event(
         return 0;
     }
     if(publisher->obflag & obflag_destroyed) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -6210,7 +6210,7 @@ PUBLIC int gobj_send_event(
         return RETEVENT_NO_GOBJ;
     }
     if(dst->obflag & obflag_destroyed) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -8632,7 +8632,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
         return FALSE;
     }
     if(gobj->obflag & obflag_destroyed) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
