@@ -2152,6 +2152,18 @@ PRIVATE hgobj _create_tree(
             ev_on_setup_complete,
             0
         );
+        if(!last_child) {
+            log_error(0,
+                "gobj",         "%s", __FILE__,
+                "function",     "%s", __FUNCTION__,
+                "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+                "msg",          "%s", "_create_tree() FAILED",
+                "jn_child",     "%j", jn_child,
+                NULL
+            );
+            JSON_DECREF(jn_tree);
+            return 0;
+        }
     }
     if(json_array_size(jn_childs) == 1) {
         gobj_set_bottom_gobj(first_child, last_child);
