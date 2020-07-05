@@ -4858,7 +4858,7 @@ PRIVATE BOOL match_child(
 
     BOOL matched = TRUE;
     json_object_foreach(jn_filter, key, jn_value) {
-        hsdata hs = gobj_hsdata2(child, key, TRUE);
+        hsdata hs = gobj_hsdata2(child, key, FALSE);
         if(hs) {
             json_t *jn_var1 = item2json(hs, key, 0, 0);
             int cmp = cmp_two_simple_json(jn_var1, jn_value);
