@@ -255,7 +255,6 @@ PUBLIC json_t *msg_iev_answer(
         json_object_set_new(request_msg_area, "__msg_type__", json_string(""));
         json_object_set_new(kw_answer, "__md_iev__", request_msg_area);
         msg_set_msg_type(kw_answer, msg_type);
-
         if(!kw_has_key(request_msg_area, "__md_yuno__")) {
             json_t *jn_metadata = json_pack("{s:s, s:s, s:s, s:I, s:s}",
                 "realm_name", gobj_yuno_realm_name(),

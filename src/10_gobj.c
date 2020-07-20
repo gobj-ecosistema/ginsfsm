@@ -5439,7 +5439,7 @@ PRIVATE int _delete_subscription(hsdata subs, BOOL force)
             gobj_full_name(publisher)
         );
 
-        if(__trace_gobj_ev_kw__(subscriber) || __trace_gobj_ev_kw__(publisher)) {
+        if(1 || __trace_gobj_ev_kw__(subscriber) || __trace_gobj_ev_kw__(publisher)) {
             json_t *kw_config = sdata_read_json(subs, "__config__");
             json_t *kw_global = sdata_read_json(subs, "__global__");
             json_t *kw_local = sdata_read_json(subs, "__local__");
@@ -5662,7 +5662,7 @@ PUBLIC hsdata gobj_subscribe_event(
         );
         if(kw) {
             char *rpr = 0;
-            if(__trace_gobj_ev_kw__(subscriber) || __trace_gobj_ev_kw__(publisher)) {
+            if(1 || __trace_gobj_ev_kw__(subscriber) || __trace_gobj_ev_kw__(publisher)) {
                 rpr = json2str(kw);
                 if(rpr) {
                     trace_machine(rpr);
