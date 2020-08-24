@@ -9406,6 +9406,11 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
         "name",
         json_string(gobj->name)
     );
+    json_object_set_new(
+        jn_dict,
+        "fullname",
+        json_string(gobj_full_name(gobj))
+    );
 
     json_object_set_new(
         jn_dict,
