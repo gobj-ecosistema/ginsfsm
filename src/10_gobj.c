@@ -9434,6 +9434,11 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
     );
     json_object_set_new(
         jn_dict,
+        "__unique_",
+        gobj_is_unique(gobj)? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
         "__disabled__",
         gobj->disabled? json_true(): json_false()
     );
