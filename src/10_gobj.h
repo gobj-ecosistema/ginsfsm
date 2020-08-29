@@ -1329,8 +1329,11 @@ PUBLIC json_t *gclass2json(GCLASS *gclass); // Return a dict with gclass's descr
 PUBLIC json_t *gobj2json(hgobj gobj);       // Return a dict with gobj's description.
 PUBLIC json_t *attr2json(hgobj gobj);       // Return a list with gobj's public attributes.
 
-PUBLIC json_t *webix_gobj_tree(hgobj gobj);     // Return webix style tree with gobj's tree.
-PUBLIC json_t *view_gobj_tree(hgobj gobj);      // Return tree with gobj's tree.
+PUBLIC json_t *webix_gobj_tree(hgobj gobj); // Return webix style tree with gobj's tree.
+PUBLIC json_t *view_gobj_tree(hgobj gobj);  // Return tree with gobj's tree.
+
+PUBLIC json_t *gobj_gobjs_treedb_schema(const char *topic_name); // Return is NOT YOURS
+PUBLIC json_t *gobj_gobjs_treedb_data(hgobj gobj);          // Return must be decref
 
 PUBLIC int gobj_set_message_error(hgobj gobj, const char *msg);
 PUBLIC int gobj_set_message_errorf(hgobj gobj, const char *msg, ...);

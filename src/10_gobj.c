@@ -43,6 +43,8 @@
 #include "10_gobj.h"
 #include "12_msg_ievent.h"
 
+#include "treedb_schema_gobjs.c"
+
 /****************************************************************
  *         Constants
  ****************************************************************/
@@ -195,6 +197,7 @@ typedef struct _GObj_t {
 /****************************************************************
  *         Data
  ****************************************************************/
+PRIVATE json_t *jn_treedb_schema_gobjs = 0;
 PRIVATE volatile int  __shutdowning__ = 0;
 PRIVATE volatile BOOL __yuno_must_die__ = FALSE;
 PRIVATE int  __exit_code__ = 0;
@@ -440,6 +443,17 @@ PUBLIC int gobj_start_up(
 
     gobj_add_publication_transformation_filter_fn("webix", webix_trans_filter);
 
+
+    helper_quote2doublequote(treedb_schema_gobjs);
+
+    /*
+     *  Chequea schema fichador, exit si falla.
+     */
+    jn_treedb_schema_gobjs = legalstring2json(treedb_schema_gobjs, TRUE);
+    if(!jn_treedb_schema_gobjs) {
+        exit(-1);
+    }
+
     __initialized__ = TRUE;
     return 0;
 
@@ -497,7 +511,7 @@ PUBLIC void gobj_end(void)
     while((trans_reg=dl_first(&dl_trans_filter))) {
         free_trans_filter(trans_reg);
     }
-
+    JSON_DECREF(jn_treedb_schema_gobjs);
 }
 
 /***************************************************************************
@@ -9389,7 +9403,7 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
 }
 
 /***************************************************************************
- *  Return a webix dict with gobj's description.
+ *  Return a dict with gobj's description.
  ***************************************************************************/
 PUBLIC json_t *gobj2json(hgobj gobj_)
 {
@@ -9736,6 +9750,143 @@ PUBLIC json_t *view_gobj_tree(hgobj gobj)
     json_t *jn_tree = json_array();
     _add_gobj(jn_tree, gobj);
     return jn_tree;
+}
+
+/***************************************************************************
+ *  Return is NOT YOURS
+ ***************************************************************************/
+PUBLIC json_t *gobj_gobjs_treedb_schema(const char *topic_name)
+{
+    if(empty_string(topic_name)) {
+        return jn_treedb_schema_gobjs;
+    }
+    json_t *topics = kw_get_list(jn_treedb_schema_gobjs, "topics", 0, KW_REQUIRED);
+
+    int idx; json_t *topic;
+    json_array_foreach(topics, idx, topic) {
+        const char *topic_name_ = kw_get_str(topic, "topic_name", "", KW_REQUIRED);
+        if(strcmp(topic_name, topic_name_)==0) {
+            return topic;
+        }
+    }
+
+    return 0;
+}
+
+/***************************************************************************
+ *  To use in treedb style
+ ***************************************************************************/
+PRIVATE int _add_gobj2(json_t *jn_list, json_t *parent, GObj_t *gobj)
+{
+    json_t *jn_dict = json_object();
+    json_array_append_new(jn_list, jn_dict);
+
+    json_object_set_new( // Webix id
+        jn_dict,
+        "id",
+        json_string(gobj_snmp_name(gobj))
+    );
+    json_object_set_new(
+        jn_dict,
+        "name",
+        json_string(gobj->name)
+    );
+    json_object_set_new(
+        jn_dict,
+        "shortname",
+        json_string(gobj_short_name(gobj))
+    );
+    json_object_set_new(
+        jn_dict,
+        "fullname",
+        json_string(gobj_full_name(gobj))
+    );
+
+    json_object_set_new(
+        jn_dict,
+        "gclass_name",
+        json_string(gobj->gclass->gclass_name)
+    );
+    json_object_set_new(
+        jn_dict,
+        "running",
+        gobj->running? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "playing",
+        gobj->playing? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "service",
+        gobj_is_service(gobj)? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "unique",
+        gobj_is_unique(gobj)? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "disabled",
+        gobj->disabled? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "state",
+        json_string(gobj_current_state(gobj))
+    );
+    json_object_set_new(
+        jn_dict,
+        "gobj_trace_level",
+        json_integer(gobj_trace_level(gobj))
+    );
+    json_object_set_new(
+        jn_dict,
+        "gobj_no_trace_level",
+        json_integer(gobj_no_trace_level(gobj))
+    );
+    json_object_set_new(
+        jn_dict,
+        "attrs",
+        sdata2json(gobj_hsdata(gobj), -1, 0)
+    );
+    json_object_set_new(
+        jn_dict,
+        "parent_id",
+        parent? json_string(kw_get_str(parent, "id", "", KW_REQUIRED)):json_string("")
+    );
+    json_t *jn_childs = json_array();
+    json_object_set_new(
+        jn_dict,
+        "childs",
+        jn_childs
+    );
+
+    if(gobj_child_size(gobj)>0) {
+
+        GObj_t * child; rc_instance_t *i_child;
+        i_child = gobj_first_child(gobj, (hgobj *)&child);
+
+        while(i_child) {
+            _add_gobj2(jn_list, jn_dict, child);
+            i_child = gobj_next_child(i_child, (hgobj *)&child);
+        }
+    }
+    return 0;
+}
+PUBLIC json_t *gobj_gobjs_treedb_data(hgobj gobj)
+{
+    json_t *jn_list = json_array();
+
+    if(!gobj) {
+        gobj = __yuno__;
+    }
+
+    _add_gobj2(jn_list, 0, gobj);
+
+    return jn_list;
 }
 
 /***************************************************************************
