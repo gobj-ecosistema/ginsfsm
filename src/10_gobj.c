@@ -9850,18 +9850,17 @@ PRIVATE int _add_gobj2(json_t *jn_list, json_t *parent, GObj_t *gobj)
     json_object_set_new(
         jn_dict,
         "attrs",
-        sdata2json(gobj_hsdata(gobj), -1, 0)
+        json_object()
     );
     json_object_set_new(
         jn_dict,
         "parent_id",
         parent? json_string(kw_get_str(parent, "id", "", KW_REQUIRED)):json_string("")
     );
-    json_t *jn_childs = json_array();
-    json_object_set_new(
+    json_object_set_new( // Emulate treedb
         jn_dict,
         "childs",
-        jn_childs
+        json_array()
     );
 
     if(gobj_child_size(gobj)>0) {
