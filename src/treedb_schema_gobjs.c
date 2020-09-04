@@ -113,8 +113,17 @@ static char treedb_schema_gobjs[]= "\
                         'required'                                  \n\
                     ]                                               \n\
                 },                                                  \n\
-                'info_trace_level': {                               \n\
-                    'header': 'info_trace_level',                   \n\
+                'info_global_trace': {                              \n\
+                    'header': 'info_global_trace',                  \n\
+                    'fillspace': 20,                                \n\
+                    'type': 'object',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'info_gclass_trace': {                              \n\
+                    'header': 'info_gclass_trace',                  \n\
                     'fillspace': 20,                                \n\
                     'type': 'object',                               \n\
                     'flag': [                                       \n\

@@ -1394,6 +1394,16 @@ PUBLIC json_t * gobj_repr_gclass_trace_levels(const char *gclass_name);
 PUBLIC json_t *gobj_trace_level_list(GCLASS *gclass, BOOL not_internals);
 
 /*
+ *  Return list of trace levels
+ *  Remember decref return
+ */
+PUBLIC json_t *gobj_trace_level_list2(
+    GCLASS *gclass,
+    BOOL with_global_levels,
+    BOOL with_gclass_levels
+);
+
+/*
  *  Set trace levels and no-set trace levels, in gclass and gobj
  *      - if gobj is null then the trace level is global.
  *      - if level is empty, all levels are set/reset.

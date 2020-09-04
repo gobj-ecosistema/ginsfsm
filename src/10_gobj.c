@@ -9477,8 +9477,14 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
 
     json_object_set_new(
         jn_dict,
-        "info_trace_level",
-        gobj_trace_level_list(gclass, FALSE)
+        "info_global_trace",
+        gobj_trace_level_list2(gclass, TRUE, FALSE)
+    );
+
+    json_object_set_new(
+        jn_dict,
+        "info_gclass_trace",
+        gobj_trace_level_list2(gclass, FALSE, TRUE)
     );
 
     json_object_set_new(
@@ -10203,6 +10209,44 @@ PUBLIC json_t *gobj_trace_level_list(GCLASS *gclass, BOOL not_internals)
                 gclass->s_user_trace_level[i].name,
                 json_string(gclass->s_user_trace_level[i].description)
             );
+        }
+    }
+    return jn_dict;
+}
+
+/****************************************************************************
+ *  Return list of trace levels
+ *  Remember decref return
+ ****************************************************************************/
+PUBLIC json_t *gobj_trace_level_list2(
+    GCLASS *gclass,
+    BOOL with_global_levels,
+    BOOL with_gclass_levels
+)
+{
+    json_t *jn_dict = json_object();
+    if(with_global_levels) {
+        for(int i=0; i<16; i++) {
+            if(!s_global_trace_level[i].name)
+                break;
+            json_object_set_new(
+                jn_dict,
+                s_global_trace_level[i].name,
+                json_string(s_global_trace_level[i].description)
+            );
+        }
+    }
+    if(with_gclass_levels) {
+        if(gclass->s_user_trace_level) {
+            for(int i=0; i<16; i++) {
+                if(!gclass->s_user_trace_level[i].name)
+                    break;
+                json_object_set_new(
+                    jn_dict,
+                    gclass->s_user_trace_level[i].name,
+                    json_string(gclass->s_user_trace_level[i].description)
+                );
+            }
         }
     }
     return jn_dict;
