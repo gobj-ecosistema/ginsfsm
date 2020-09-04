@@ -9658,13 +9658,18 @@ PUBLIC json_t *attr2json(hgobj gobj_)
                 continue;
             }
 
-            json_t *attr_dict = json_pack("{s:I, s:s, s:s, s:s, s:b}",
+            GBUFFER *gbuf = get_sdata_flag_desc(it->flag);
+            char *flag = gbuf?gbuf_cur_rd_pointer(gbuf):"";
+            json_t *attr_dict = json_pack("{s:I, s:s, s:s, s:s, s:s, s:b}",
                 "id", (json_int_t)id++,
                 "name", it->name,
                 "type", type,
+                "flag", flag,
                 "description", it->description?it->description:"",
                 "stats", (it->flag & (SDF_STATS|SDF_RSTATS|SDF_PSTATS))?1:0
             );
+            GBUF_DECREF(gbuf);
+
             if(ASN_IS_REAL_NUMBER(it->type)) {
                 json_object_set_new(
                     attr_dict,
@@ -9711,90 +9716,99 @@ PUBLIC json_t *attr2json(hgobj gobj_)
     }
 
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:s}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:s}",
             "id", (json_int_t)id++,
             "name", "__state__",
             "type", "string",
+            "flag", "",
             "description", "SMachine'state of gobj",
             "stats", 0,
             "value", gobj_current_state(gobj)
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:s}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:s}",
             "id", (json_int_t)id++,
             "name", "__bottom__",
             "type", "string",
+            "flag", "",
             "description", "Bottom gobj",
             "stats", 0,
             "value", gobj->bottom_gobj? gobj_short_name(gobj->bottom_gobj):""
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:s}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:s}",
             "id", (json_int_t)id++,
             "name", "__shortname__",
             "type", "string",
+            "flag", "",
             "description", "Full name",
             "stats", 0,
             "value", gobj_short_name(gobj)
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:s}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:s}",
             "id", (json_int_t)id++,
             "name", "__fullname__",
             "type", "string",
+            "flag", "",
             "description", "Full name",
             "stats", 0,
             "value", gobj_full_name(gobj)
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:I}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:I}",
             "id", (json_int_t)id++,
             "name", "__running__",
             "type", "boolean",
+            "flag", "",
             "description", "Is running the gobj?",
             "stats", 0,
             "value", (json_int_t)(size_t)gobj_is_running(gobj)
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:I}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:I}",
             "id", (json_int_t)id++,
             "name", "__playing__",
             "type", "boolean",
+            "flag", "",
             "description", "Is playing the gobj?",
             "stats", 0,
             "value", (json_int_t)(size_t)gobj_is_playing(gobj)
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:I}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:I}",
             "id", (json_int_t)id++,
             "name", "__service__",
             "type", "boolean",
+            "flag", "",
             "description", "Is a service the gobj?",
             "stats", 0,
             "value", (json_int_t)(size_t)gobj_is_service(gobj)
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:I}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:I}",
             "id", (json_int_t)id++,
             "name", "__disabled__",
             "type", "boolean",
+            "flag", "",
             "description", "Is disabled the gobj?",
             "stats", 0,
             "value", (json_int_t)(size_t)gobj_is_disabled(gobj)
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:o}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:o}",
             "id", (json_int_t)id++,
             "name", "__trace_level__",
             "type", "array",
+            "flag", "",
             "description", "Current trace level",
             "stats", 0,
             "value",  bit2level(
@@ -9806,10 +9820,11 @@ PUBLIC json_t *attr2json(hgobj gobj_)
     );
 
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:o}",
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:o}",
             "id", (json_int_t)id++,
             "name", "__no_trace_level__",
             "type", "array",
+            "flag", "",
             "description", "Current no trace level",
             "stats", 0,
             "value",  bit2level(
