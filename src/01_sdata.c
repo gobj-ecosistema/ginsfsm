@@ -1224,7 +1224,86 @@ PUBLIC const char **sdata_keys( // WARNING remember free with gbmem_free()
 }
 
 /***************************************************************************
- *  Return a json object describing the hsdata
+ *  Return a json object describing the hsdata for commands
+ ***************************************************************************/
+PUBLIC json_t *sdatacmd2json(
+    const sdata_desc_t *items
+)
+{
+    json_t *jn_items = json_array();
+    const sdata_desc_t *it = items;
+    if(!it) {
+        return jn_items;
+    }
+    while(it->name) {
+        json_t *jn_it = cmddesc2json(it);
+        if(jn_it) {
+            json_array_append_new(jn_items, jn_it);
+        }
+        it++;
+    }
+    return jn_items;
+}
+
+/***************************************************************************
+ *  Return a json object describing the hsdata for commands
+ ***************************************************************************/
+PUBLIC json_t *cmddesc2json(const sdata_desc_t *it)
+{
+    int type = it->type;
+
+    if(!ASN_IS_SCHEMA(type)) {
+        return 0; // Only schemas please
+    }
+
+    json_t *jn_it = json_object();
+
+    json_object_set_new(jn_it, "id", json_string(it->name));
+
+    if(it->alias) {
+        json_t *jn_alias = json_array();
+        json_object_set_new(jn_it, "alias", jn_alias);
+        const char **alias = it->alias;
+        while(*alias) {
+            json_array_append_new(jn_alias, json_string(*alias));
+            alias++;
+        }
+    }
+
+    json_object_set_new(jn_it, "description", json_string(it->description));
+
+    GBUFFER *gbuf = gbuf_create(256, 16*1024, 0, 0);
+    gbuf_printf(gbuf, "%s ", it->name);
+    const sdata_desc_t *pparam = it->schema;
+    while(pparam && pparam->name) {
+        if((pparam->flag & SDF_REQUIRED)) {
+            gbuf_printf(gbuf, " <%s>", pparam->name);
+        } else {
+            gbuf_printf(gbuf, " [%s='%s']", pparam->name, pparam->default_value?pparam->default_value:"?");
+        }
+        pparam++;
+    }
+    json_t *jn_usage = json_string(gbuf_cur_rd_pointer(gbuf));
+    json_object_set_new(jn_it, "usage", jn_usage);
+    GBUF_DECREF(gbuf);
+
+    json_t *jn_parameters = json_array();
+    json_object_set_new(jn_it, "parameters", jn_parameters);
+
+    pparam = it->schema;
+    while(pparam && pparam->name) {
+        json_t *jn_param = json_object();
+        json_object_set_new(jn_param, "id", json_string(pparam->name));
+        json_object_update_missing_new(jn_param, itdesc2json(pparam));
+        json_array_append_new(jn_parameters, jn_param);
+        pparam++;
+    }
+
+    return jn_it;
+}
+
+/***************************************************************************
+ *  Return a json object describing the hsdata for attrs
  ***************************************************************************/
 PUBLIC json_t *sdatadesc2json(
     const sdata_desc_t *items,
@@ -1232,6 +1311,7 @@ PUBLIC json_t *sdatadesc2json(
     sdata_flag_t exclude_flag
 )
 {
+    json_t *jn_items = json_object();
     const sdata_desc_t *it = items;
     if(!it) {
         log_error(LOG_OPT_TRACE_STACK,
@@ -1241,9 +1321,8 @@ PUBLIC json_t *sdatadesc2json(
             "msg",          "%s", "sdata items is NULL",
             NULL
         );
-        return 0;
+        return jn_items;
     }
-    json_t *jn_items = json_object();
     while(it->name) {
         if(exclude_flag && (it->flag & exclude_flag)) {
             it++;
@@ -1252,6 +1331,37 @@ PUBLIC json_t *sdatadesc2json(
         if(include_flag == -1 || (it->flag & include_flag)) {
             json_t *jn_it = itdesc2json(it);
             json_object_set_new(jn_items, it->name, jn_it);
+        }
+        it++;
+    }
+    return jn_items;
+}
+
+/***************************************************************************
+ *  Return a json array describing the hsdata for attrs
+ ***************************************************************************/
+PUBLIC json_t *sdatadesc2json2(
+    const sdata_desc_t *items,
+    sdata_flag_t include_flag,
+    sdata_flag_t exclude_flag
+)
+{
+    json_t *jn_items = json_array();
+
+    const sdata_desc_t *it = items;
+    if(!it) {
+        return jn_items;
+    }
+    while(it->name) {
+        if(exclude_flag && (it->flag & exclude_flag)) {
+            it++;
+            continue;
+        }
+        if(include_flag == -1 || (it->flag & include_flag)) {
+            json_t *jn_it = json_object();
+            json_array_append_new(jn_items, jn_it);
+            json_object_set_new(jn_it, "id", json_string(it->name));
+            json_object_update_missing_new(jn_it, itdesc2json(it));
         }
         it++;
     }
@@ -1315,6 +1425,8 @@ PUBLIC json_t *itdesc2json(const sdata_desc_t *it)
         if(l) {
             char *pflag = gbuf_get(gbuf, l);
             json_object_set_new(jn_it, "flag", json_string(pflag));
+        } else {
+            json_object_set_new(jn_it, "flag", json_string(""));
         }
         gbuf_decref(gbuf);
     }

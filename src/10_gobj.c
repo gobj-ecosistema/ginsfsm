@@ -397,6 +397,12 @@ PRIVATE json_t *extract_json_config_variables_mine(
 );
 PRIVATE int _set_gobj_trace_level(GObj_t * gobj, const char *level, BOOL set);
 
+PRIVATE json_t *bit2level(
+    const trace_level_t *internal_trace_level,
+    const trace_level_t *user_trace_level,
+    uint32_t bit
+);
+
 
 
 
@@ -1513,8 +1519,8 @@ PRIVATE hgobj _gobj_create(
      *      Check forbidden chars
      *      in gobj's name
      *--------------------------------*/
-    if(!empty_string(name_)){
-// TODO no lo puedo poner, el '.' es usado cuando le pongo el nombre el peername a un gobj
+    if(!empty_string(name_)) {
+// WARNING no lo puedo poner, el '.' es usado cuando le pongo el nombre el peername a un gobj
 //         if(strchr(name_, '.')) {
 //             log_error(LOG_OPT_TRACE_STACK,
 //                 "gobj",         "%s", __FILE__,
@@ -8075,9 +8081,95 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_update_resource"));
     if(gmt->mt_delete_resource)
         json_array_append_new(jn_methods, json_string("mt_delete_resource"));
-    if(gmt->mt_list_resource)
-        json_array_append_new(jn_methods, json_string("mt_list_resource"));
-    // TODO faltan metodos nuevos
+    if(gmt->mt_add_child_resource_link)
+        json_array_append_new(jn_methods, json_string("mt_add_child_resource_link"));
+    if(gmt->mt_delete_child_resource_link)
+        json_array_append_new(jn_methods, json_string("mt_delete_child_resource_link"));
+    if(gmt->mt_get_resource)
+        json_array_append_new(jn_methods, json_string("mt_get_resource"));
+    if(gmt->mt_future24)
+        json_array_append_new(jn_methods, json_string("mt_future24"));
+    if(gmt->mt_authenticate)
+        json_array_append_new(jn_methods, json_string("mt_authenticate"));
+    if(gmt->mt_list_childs)
+        json_array_append_new(jn_methods, json_string("mt_list_childs"));
+    if(gmt->mt_stats_updated)
+        json_array_append_new(jn_methods, json_string(")"));
+    if(gmt->mt_disable)
+        json_array_append_new(jn_methods, json_string("mt_disable"));
+    if(gmt->mt_enable)
+        json_array_append_new(jn_methods, json_string("mt_enable"));
+    if(gmt->mt_trace_on)
+        json_array_append_new(jn_methods, json_string("mt_trace_on"));
+    if(gmt->mt_trace_off)
+        json_array_append_new(jn_methods, json_string("mt_trace_off"));
+    if(gmt->mt_gobj_created)
+        json_array_append_new(jn_methods, json_string("mt_gobj_created"));
+    if(gmt->mt_future33)
+        json_array_append_new(jn_methods, json_string("mt_future33"));
+    if(gmt->mt_future34)
+        json_array_append_new(jn_methods, json_string("mt_future34"));
+    if(gmt->mt_publish_event)
+        json_array_append_new(jn_methods, json_string("mt_publish_event"));
+    if(gmt->mt_publication_pre_filter)
+        json_array_append_new(jn_methods, json_string("mt_publish_event"));
+    if(gmt->mt_publication_filter)
+        json_array_append_new(jn_methods, json_string("mt_publication_filter"));
+    if(gmt->mt_future38)
+        json_array_append_new(jn_methods, json_string("mt_future38"));
+    if(gmt->mt_future39)
+        json_array_append_new(jn_methods, json_string("mt_future39"));
+    if(gmt->mt_create_node)
+        json_array_append_new(jn_methods, json_string("mt_create_node"));
+    if(gmt->mt_update_node)
+        json_array_append_new(jn_methods, json_string("mt_update_node"));
+    if(gmt->mt_delete_node)
+        json_array_append_new(jn_methods, json_string("mt_delete_node"));
+    if(gmt->mt_link_nodes)
+        json_array_append_new(jn_methods, json_string("mt_link_nodes"));
+    if(gmt->mt_link_nodes2)
+        json_array_append_new(jn_methods, json_string("mt_link_nodes2"));
+    if(gmt->mt_unlink_nodes)
+        json_array_append_new(jn_methods, json_string("mt_unlink_nodes"));
+    if(gmt->mt_unlink_nodes2)
+        json_array_append_new(jn_methods, json_string("mt_unlink_nodes2"));
+    if(gmt->mt_get_node)
+        json_array_append_new(jn_methods, json_string("mt_get_node"));
+    if(gmt->mt_list_nodes)
+        json_array_append_new(jn_methods, json_string("mt_list_nodes"));
+    if(gmt->mt_shoot_snap)
+        json_array_append_new(jn_methods, json_string("mt_shoot_snap"));
+    if(gmt->mt_activate_snap)
+        json_array_append_new(jn_methods, json_string("mt_activate_snap"));
+    if(gmt->mt_list_snaps)
+        json_array_append_new(jn_methods, json_string("mt_list_snaps"));
+    if(gmt->mt_treedbs)
+        json_array_append_new(jn_methods, json_string("mt_treedbs"));
+    if(gmt->mt_treedb_topics)
+        json_array_append_new(jn_methods, json_string("mt_treedb_topics"));
+    if(gmt->mt_topic_desc)
+        json_array_append_new(jn_methods, json_string("mt_topic_desc"));
+    if(gmt->mt_topic_links)
+        json_array_append_new(jn_methods, json_string("mt_topic_links"));
+    if(gmt->mt_topic_hooks)
+        json_array_append_new(jn_methods, json_string("mt_topic_hooks"));
+    if(gmt->mt_node_parents)
+        json_array_append_new(jn_methods, json_string("mt_node_parents"));
+    if(gmt->mt_node_childs)
+        json_array_append_new(jn_methods, json_string("mt_node_childs"));
+    if(gmt->mt_node_instances)
+        json_array_append_new(jn_methods, json_string("mt_node_instances"));
+    if(gmt->mt_save_node)
+        json_array_append_new(jn_methods, json_string("mt_save_node"));
+    if(gmt->mt_future61)
+        json_array_append_new(jn_methods, json_string("mt_future61"));
+    if(gmt->mt_future62)
+        json_array_append_new(jn_methods, json_string("mt_future62"));
+    if(gmt->mt_future63)
+        json_array_append_new(jn_methods, json_string("mt_future63"));
+    if(gmt->mt_future64)
+        json_array_append_new(jn_methods, json_string("mt_future64"));
+
     return jn_methods;
 }
 
@@ -8181,7 +8273,7 @@ PRIVATE json_t *states2json(FSM *fsm)
         while(st->event) {
             json_t *jn_ac = json_array();
             json_array_append_new(jn_ac, json_string(st->event));
-            json_array_append_new(jn_ac, json_integer((json_int_t)(size_t)st->action));
+            json_array_append_new(jn_ac, json_string("ac_action"));
             if(st->next_state) {
                 json_array_append_new(jn_ac, json_string(st->next_state));
             } else {
@@ -8212,17 +8304,17 @@ PRIVATE json_t *fsm2json(FSM *fsm)
 
     json_object_set_new(
         jn_fsm,
-        "__input_events__",
+        "input_events",
         events2json(fsm->input_events)
     );
     json_object_set_new(
         jn_fsm,
-        "__output_events__",
+        "output_events",
         events2json(fsm->output_events)
     );
     json_object_set_new(
         jn_fsm,
-        "__states__",
+        "states",
         states2json(fsm)
     );
 
@@ -9338,65 +9430,86 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
     }
     json_object_set_new(
         jn_dict,
-        "name",
+        "id",
         json_string(gclass->gclass_name)
     );
 
-    if(gclass->base) {
-        json_object_set_new(
-            jn_dict,
-            "__base__",
-            gclass2json(gclass->base)
-        );
-    }
     json_object_set_new(
         jn_dict,
-        "__attrs__",
-        sdatadesc2json(gclass->tattr_desc, -1, 0)
+        "base",
+        gclass->base?gclass2json(gclass->base):json_string("")
     );
     json_object_set_new(
         jn_dict,
-        "__yuneta_methods__",
+        "priv_size",
+        json_integer(gclass->priv_size)
+    );
+    json_object_set_new(
+        jn_dict,
+        "attrs",
+        sdatadesc2json2(gclass->tattr_desc, -1, 0)
+    );
+    json_object_set_new(
+        jn_dict,
+        "commands",
+        sdatacmd2json(gclass->command_table)
+    );
+    json_object_set_new(
+        jn_dict,
+        "global_methods",
         yunetamethods2json(&gclass->gmt)
     );
     json_object_set_new(
         jn_dict,
-        "__local_methods__",
+        "local_methods",
         localmethods2json(gclass->lmt)
     );
     json_object_set_new(
         jn_dict,
-        "__fsm__",
+        "FSM",
         fsm2json(gclass->fsm)
     );
     json_object_set_new(
         jn_dict,
-        "__priv_size__",
-        json_integer(gclass->priv_size)
+        "ACL", // Access Control List
+        json_array() // TODO
     );
-
-    //TODO print __acl__
 
     json_object_set_new(
         jn_dict,
-        "__trace_level__",
+        "info_trace_level",
         gobj_trace_level_list(gclass, FALSE)
     );
 
     json_object_set_new(
         jn_dict,
-        "__instances__",
+        "gclass_trace_level",
+        bit2level(
+            s_global_trace_level,
+            gclass->s_user_trace_level,
+            gclass->__gclass_trace_level__
+        )
+    );
+
+    json_object_set_new(
+        jn_dict,
+        "gclass_no_trace_level",
+        bit2level(
+            s_global_trace_level,
+            gclass->s_user_trace_level,
+            gclass->__gclass_no_trace_level__
+        )
+    );
+
+    json_object_set_new(
+        jn_dict,
+        "instances",
         json_integer(gclass->__instances__)
     );
     json_object_set_new(
         jn_dict,
-        "__gclass_trace_level__",
-        json_integer(gclass->__gclass_trace_level__)
-    );
-    json_object_set_new(
-        jn_dict,
-        "__gclass_no_trace_level__",
-        json_integer(gclass->__gclass_no_trace_level__)
+        "gobjs",
+        json_array()
     );
 
     return jn_dict;
@@ -9501,6 +9614,7 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
             "name", "__bottom__",
             "name", "__fullname__",
             "name", "__trace_level__",
+            "name", "__no_trace_evel__",
             "name", "__running__",
             "name", "__playing__",
             "name", "__disabled__"
@@ -9616,13 +9730,32 @@ PUBLIC json_t *attr2json(hgobj gobj_)
         )
     );
     json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:I}",
+        json_pack("{s:I, s:s, s:s, s:s, s:b, s:o}",
             "id", (json_int_t)id++,
             "name", "__trace_level__",
-            "type", "integer",
+            "type", "array",
             "description", "Current trace level",
             "stats", 0,
-            "value", (json_int_t)(size_t)gobj_trace_level(gobj)
+            "value",  bit2level(
+                s_global_trace_level,
+                gobj->gclass->s_user_trace_level,
+                gobj_trace_level(gobj)
+            )
+        )
+    );
+
+    json_array_append_new(jn_data,
+        json_pack("{s:I, s:s, s:s, s:s, s:b, s:o}",
+            "id", (json_int_t)id++,
+            "name", "__no_trace_level__",
+            "type", "array",
+            "description", "Current no trace level",
+            "stats", 0,
+            "value",  bit2level(
+                s_global_trace_level,
+                gobj->gclass->s_user_trace_level,
+                gobj_no_trace_level(gobj)
+            )
         )
     );
     json_array_append_new(jn_data,
@@ -10066,7 +10199,8 @@ PUBLIC json_t *gobj_trace_level_list(GCLASS *gclass, BOOL not_internals)
 PRIVATE uint32_t level2bit(
     const trace_level_t *internal_trace_level,
     const trace_level_t *user_trace_level,
-    const char *level)
+    const char *level
+)
 {
     for(int i=0; i<16; i++) {
         if(!internal_trace_level[i].name) {

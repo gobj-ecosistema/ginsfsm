@@ -359,7 +359,7 @@ PRIVATE void add_command_help(GBUFFER *gbuf, const sdata_desc_t *pcmds, BOOL ext
     BOOL add_point = FALSE;
     const sdata_desc_t *pparam = pcmds->schema;
     while(pparam && pparam->name) {
-        if((pparam->flag & SDF_REQUIRED) && !(pparam->flag & SDF_PERSIST)) {
+        if((pparam->flag & SDF_REQUIRED) && !(pparam->flag & SDF_PERSIST)) { // TODO PERSITS? why?
             gbuf_printf(gbuf, " <%s>", pparam->name);
         } else {
             gbuf_printf(gbuf, " [%s='%s']", pparam->name, pparam->default_value?pparam->default_value:"?");

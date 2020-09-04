@@ -42,8 +42,25 @@ static char treedb_schema_gobjs[]= "\
                         'required'                                  \n\
                     ]                                               \n\
                 },                                                  \n\
+                'base': {                                           \n\
+                    'header': 'base',                               \n\
+                    'fillspace': 10,                                \n\
+                    'type': 'string',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'priv_size': {                                      \n\
+                    'header': 'priv_size',                          \n\
+                    'fillspace': 6,                                 \n\
+                    'type': 'integer',                              \n\
+                    'flag': [                                       \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
                 'attrs': {                                          \n\
-                    'header': 'attrs',                              \n\
+                    'header': 'attributes',                         \n\
                     'fillspace': 20,                                \n\
                     'type': 'object',                               \n\
                     'flag': [                                       \n\
@@ -56,19 +73,12 @@ static char treedb_schema_gobjs[]= "\
                     'fillspace': 20,                                \n\
                     'type': 'object',                               \n\
                     'flag': [                                       \n\
-                        'persistent'                                \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
                     ]                                               \n\
                 },                                                  \n\
-                'trace_levels': {                                   \n\
-                    'header': 'trace_levels',                       \n\
-                    'fillspace': 20,                                \n\
-                    'type': 'object',                               \n\
-                    'flag': [                                       \n\
-                        'persistent'                                \n\
-                    ]                                               \n\
-                },                                                  \n\
-                'input_events': {                                   \n\
-                    'header': 'input_events',                       \n\
+                'global_methods': {                                 \n\
+                    'header': 'global_methods',                     \n\
                     'fillspace': 20,                                \n\
                     'type': 'object',                               \n\
                     'flag': [                                       \n\
@@ -76,8 +86,8 @@ static char treedb_schema_gobjs[]= "\
                         'required'                                  \n\
                     ]                                               \n\
                 },                                                  \n\
-                'output_events': {                                  \n\
-                    'header': 'output_events',                      \n\
+                'local_methods': {                                  \n\
+                    'header': 'local_methods',                      \n\
                     'fillspace': 20,                                \n\
                     'type': 'object',                               \n\
                     'flag': [                                       \n\
@@ -85,12 +95,54 @@ static char treedb_schema_gobjs[]= "\
                         'required'                                  \n\
                     ]                                               \n\
                 },                                                  \n\
-                'states': {                                         \n\
-                    'header': 'states',                             \n\
+                'FSM': {                                            \n\
+                    'header': 'FSM',                                \n\
                     'fillspace': 20,                                \n\
                     'type': 'object',                               \n\
                     'flag': [                                       \n\
                         'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'ACL': {                                            \n\
+                    'header': 'ACL',                                \n\
+                    'fillspace': 20,                                \n\
+                    'type': 'list',                                 \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'info_trace_level': {                               \n\
+                    'header': 'info_trace_level',                   \n\
+                    'fillspace': 20,                                \n\
+                    'type': 'object',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'gclass_trace_level': {                             \n\
+                    'header': 'gclass_trace_level',                 \n\
+                    'fillspace': 6,                                 \n\
+                    'type': 'integer',                              \n\
+                    'flag': [                                       \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'gclass_no_trace_level': {                          \n\
+                    'header': 'gclass_no_trace_level',              \n\
+                    'fillspace': 6,                                 \n\
+                    'type': 'integer',                              \n\
+                    'flag': [                                       \n\
+                        'persistent'                                \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'instances': {                                      \n\
+                    'header': 'instances',                          \n\
+                    'fillspace': 6,                                 \n\
+                    'type': 'integer',                              \n\
+                    'flag': [                                       \n\
                         'required'                                  \n\
                     ]                                               \n\
                 },                                                  \n\

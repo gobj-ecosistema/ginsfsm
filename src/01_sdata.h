@@ -429,9 +429,25 @@ PUBLIC const char **sdata_keys( // WARNING remember free with gbmem_free()
 );
 
 /*
- *  Return a json object describing the hsdata
+ *  Return a json object describing the hsdata for commands
+ */
+PUBLIC json_t *sdatacmd2json(
+    const sdata_desc_t *items
+);
+PUBLIC json_t *cmddesc2json(const sdata_desc_t *it);
+
+/*
+ *  Return a json OBJECT describing the hsdata for attrs
  */
 PUBLIC json_t *sdatadesc2json(
+    const sdata_desc_t *items,
+    sdata_flag_t include_flag,
+    sdata_flag_t exclude_flag
+);
+/*
+ *  Return a json ARRAY describing the hsdata for attrs
+ */
+PUBLIC json_t *sdatadesc2json2(
     const sdata_desc_t *items,
     sdata_flag_t include_flag,
     sdata_flag_t exclude_flag
