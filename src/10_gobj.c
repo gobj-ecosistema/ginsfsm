@@ -9535,6 +9535,11 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
     );
     json_object_set_new(
         jn_dict,
+        "shortname",
+        json_string(gobj_short_name(gobj))
+    );
+    json_object_set_new(
+        jn_dict,
         "fullname",
         json_string(gobj_full_name(gobj))
     );
@@ -9722,40 +9727,21 @@ PUBLIC json_t *attr2json(hgobj gobj_)
     json_array_append_new(jn_data,
         json_pack("{s:I, s:s, s:s, s:s, s:b, s:s}",
             "id", (json_int_t)id++,
+            "name", "__shortname__",
+            "type", "string",
+            "description", "Full name",
+            "stats", 0,
+            "value", gobj_short_name(gobj)
+        )
+    );
+    json_array_append_new(jn_data,
+        json_pack("{s:I, s:s, s:s, s:s, s:b, s:s}",
+            "id", (json_int_t)id++,
             "name", "__fullname__",
             "type", "string",
             "description", "Full name",
             "stats", 0,
             "value", gobj_full_name(gobj)
-        )
-    );
-    json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:o}",
-            "id", (json_int_t)id++,
-            "name", "__trace_level__",
-            "type", "array",
-            "description", "Current trace level",
-            "stats", 0,
-            "value",  bit2level(
-                s_global_trace_level,
-                gobj->gclass->s_user_trace_level,
-                gobj_trace_level(gobj)
-            )
-        )
-    );
-
-    json_array_append_new(jn_data,
-        json_pack("{s:I, s:s, s:s, s:s, s:b, s:o}",
-            "id", (json_int_t)id++,
-            "name", "__no_trace_level__",
-            "type", "array",
-            "description", "Current no trace level",
-            "stats", 0,
-            "value",  bit2level(
-                s_global_trace_level,
-                gobj->gclass->s_user_trace_level,
-                gobj_no_trace_level(gobj)
-            )
         )
     );
     json_array_append_new(jn_data,
@@ -9796,6 +9782,35 @@ PUBLIC json_t *attr2json(hgobj gobj_)
             "description", "Is disabled the gobj?",
             "stats", 0,
             "value", (json_int_t)(size_t)gobj_is_disabled(gobj)
+        )
+    );
+    json_array_append_new(jn_data,
+        json_pack("{s:I, s:s, s:s, s:s, s:b, s:o}",
+            "id", (json_int_t)id++,
+            "name", "__trace_level__",
+            "type", "array",
+            "description", "Current trace level",
+            "stats", 0,
+            "value",  bit2level(
+                s_global_trace_level,
+                gobj->gclass->s_user_trace_level,
+                gobj_trace_level(gobj)
+            )
+        )
+    );
+
+    json_array_append_new(jn_data,
+        json_pack("{s:I, s:s, s:s, s:s, s:b, s:o}",
+            "id", (json_int_t)id++,
+            "name", "__no_trace_level__",
+            "type", "array",
+            "description", "Current no trace level",
+            "stats", 0,
+            "value",  bit2level(
+                s_global_trace_level,
+                gobj->gclass->s_user_trace_level,
+                gobj_no_trace_level(gobj)
+            )
         )
     );
 
