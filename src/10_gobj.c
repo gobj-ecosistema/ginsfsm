@@ -1641,9 +1641,9 @@ PRIVATE hgobj _gobj_create(
     /*--------------------------------*
      *      Check smachine
      *--------------------------------*/
-    if(!gclass->fms_checked) {
+    if(!gclass->fsm_checked) {
         smachine_check(gclass);
-        gclass->fms_checked = TRUE;
+        gclass->fsm_checked = TRUE;
     }
 
     /*--------------------------------*

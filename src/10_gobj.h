@@ -366,7 +366,7 @@ typedef struct _GCLASS {
     uint32_t __instances__;      // instances of this gclass
     uint32_t __gclass_trace_level__;
     uint32_t __gclass_no_trace_level__;
-    BOOL fms_checked;
+    BOOL fsm_checked;
 } GCLASS;
 
 
