@@ -9441,6 +9441,11 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
     );
     json_object_set_new(
         jn_dict,
+        "gcflag",
+        json_integer(gclass->gcflag)
+    );
+    json_object_set_new(
+        jn_dict,
         "priv_size",
         json_integer(gclass->priv_size)
     );
