@@ -193,7 +193,6 @@ typedef struct _GObj_t {
 } GObj_t;
 
 
-
 /****************************************************************
  *         Data
  ****************************************************************/
@@ -245,6 +244,15 @@ PRIVATE dl_list_t dl_service = {0};
 PRIVATE dl_list_t dl_trans_filter = {0};
 
 PRIVATE kw_match_fn __publish_event_match__ = kw_match_simple;
+/*
+ *  gcflag's strings
+ */
+PRIVATE const trace_level_t s_gcflag[] = {
+{"manual_start",            "gobj_start_tree() don't start gobjs of this /gclass"},
+{"no_check_ouput_events",   "When publishing don't check events in output_event_list"},
+{"ignore_unkwnow_attrs",    "When creating a gobj, ignore not existing attrs"},
+{0, 0},
+};
 /*
  *  Global trace levels
  */
@@ -401,6 +409,11 @@ PRIVATE json_t *bit2level(
     const trace_level_t *internal_trace_level,
     const trace_level_t *user_trace_level,
     uint32_t bit
+);
+PRIVATE uint32_t level2bit(
+    const trace_level_t *internal_trace_level,
+    const trace_level_t *user_trace_level,
+    const char *level
 );
 
 
@@ -9437,12 +9450,12 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
     json_object_set_new(
         jn_dict,
         "base",
-        gclass->base?gclass2json(gclass->base):json_string("")
+        json_string(gclass->base?gclass->base->gclass_name:"")
     );
     json_object_set_new(
         jn_dict,
         "gcflag",
-        json_integer(gclass->gcflag)
+        gcflag2json(gclass)
     );
     json_object_set_new(
         jn_dict,
@@ -9524,6 +9537,27 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
     );
 
     return jn_dict;
+}
+
+/***************************************************************************
+ *  Return a list with gcflag's strings.
+ ***************************************************************************/
+PUBLIC json_t *gcflag2json(GCLASS *gclass)
+{
+    json_t *jn_list = json_array();
+    for(int i=0; i<sizeof(gclass->gcflag); i++) {
+        if(!s_gcflag[i].name) {
+            break;
+        }
+        uint32_t bitmask = 1 << i;
+        if(gclass->gcflag & bitmask) {
+            json_array_append_new(
+                jn_list,
+                json_string(s_gcflag[i].name)
+            );
+        }
+    }
+    return jn_list;
 }
 
 /***************************************************************************
@@ -10273,6 +10307,45 @@ PUBLIC json_t *gobj_trace_level_list2(
 }
 
 /****************************************************************************
+ *  Convert bit to string level
+ ****************************************************************************/
+PRIVATE json_t *bit2level(
+    const trace_level_t *internal_trace_level,
+    const trace_level_t *user_trace_level,
+    uint32_t bit)
+{
+    json_t *jn_list = json_array();
+    for(int i=0; i<16; i++) {
+        if(!internal_trace_level[i].name) {
+            break;
+        }
+        uint32_t bitmask = 1 << i;
+        bitmask <<= 16;
+        if(bit & bitmask) {
+            json_array_append_new(
+                jn_list,
+                json_string(internal_trace_level[i].name)
+            );
+        }
+    }
+    if(user_trace_level) {
+        for(int i=0; i<16; i++) {
+            if(!user_trace_level[i].name) {
+                break;
+            }
+            uint32_t bitmask = 1 << i;
+            if(bit & bitmask) {
+                json_array_append_new(
+                    jn_list,
+                    json_string(user_trace_level[i].name)
+                );
+            }
+        }
+    }
+    return jn_list;
+}
+
+/****************************************************************************
  *  Convert string level to bit
  ****************************************************************************/
 PRIVATE uint32_t level2bit(
@@ -10630,45 +10703,6 @@ PUBLIC uint32_t gobj_no_trace_level(hgobj gobj_)
     uint32_t bitmask = gobj->__gobj_no_trace_level__ | gobj->gclass->__gclass_no_trace_level__;
 
     return bitmask;
-}
-
-/****************************************************************************
- *  Convert bit to string level
- ****************************************************************************/
-PRIVATE json_t *bit2level(
-    const trace_level_t *internal_trace_level,
-    const trace_level_t *user_trace_level,
-    uint32_t bit)
-{
-    json_t *jn_list = json_array();
-    for(int i=0; i<16; i++) {
-        if(!internal_trace_level[i].name) {
-            break;
-        }
-        uint32_t bitmask = 1 << i;
-        bitmask <<= 16;
-        if(bit & bitmask) {
-            json_array_append_new(
-                jn_list,
-                json_string(internal_trace_level[i].name)
-            );
-        }
-    }
-    if(user_trace_level) {
-        for(int i=0; i<16; i++) {
-            if(!user_trace_level[i].name) {
-                break;
-            }
-            uint32_t bitmask = 1 << i;
-            if(bit & bitmask) {
-                json_array_append_new(
-                    jn_list,
-                    json_string(user_trace_level[i].name)
-                );
-            }
-        }
-    }
-    return jn_list;
 }
 
 /***************************************************************************

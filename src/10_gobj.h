@@ -336,8 +336,8 @@ typedef struct {
     const char *description;
 } trace_level_t;
 
-typedef enum {
-    gcflag_manual_start             = 0x0001,   // gobj_start_tree() don't start gobjs of this gclass.
+typedef enum { // WARNING strings in s_gcflag
+    gcflag_manual_start             = 0x0001,   // gobj_start_tree() don't start gobjs of this /gclass.
     gcflag_no_check_ouput_events    = 0x0002,   // When publishing don't check events in output_event_list.
     gcflag_ignore_unkwnow_attrs     = 0x0004,   // When creating a gobj, ignore not existing attrs
     gcflag_required_start_to_play   = 0x0008,   // Don't to play if no start done.
@@ -907,8 +907,6 @@ typedef enum {
 } subs_flag_t;
 
 
-
-
 /*
  *  Return schema of subcriptions hsdata
  */
@@ -1326,6 +1324,7 @@ PUBLIC int gobj_audit_commands( // Only one can audit. New calls will overwrite 
 
 PUBLIC json_t *gclass_public_attrs(GCLASS *gclass);// Return a dict with gclass's public attrs (all if null).
 PUBLIC json_t *gclass2json(GCLASS *gclass); // Return a dict with gclass's description.
+PUBLIC json_t *gcflag2json(GCLASS *gclass); // Return a list with gcflag's strings.
 PUBLIC json_t *gobj2json(hgobj gobj);       // Return a dict with gobj's description.
 PUBLIC json_t *attr2json(hgobj gobj);       // Return a list with gobj's public attributes.
 
