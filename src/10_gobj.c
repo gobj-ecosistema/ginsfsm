@@ -9530,11 +9530,6 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
         "instances",
         json_integer(gclass->__instances__)
     );
-    json_object_set_new(
-        jn_dict,
-        "gobjs",
-        json_array()
-    );
 
     return jn_dict;
 }

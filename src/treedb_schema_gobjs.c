@@ -305,6 +305,68 @@ static char treedb_schema_gobjs[]= "\
                     }                                               \n\
                 }                                                   \n\
             }                                                       \n\
+        },                                                          \n\
+        {                                                           \n\
+            'topic_name': 'attrs' ,                                 \n\
+            'pkey': 'id',                                           \n\
+            'system_flag': 'sf_string_key',                         \n\
+            'topic_version': '1',                                   \n\
+            'cols': {                                               \n\
+                'id': {                                             \n\
+                    'header': 'id',                                 \n\
+                    'fillspace': 15,                                \n\
+                    'type': 'string',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'type': {                                           \n\
+                    'header': 'type',                               \n\
+                    'fillspace': 8,                                 \n\
+                    'type': 'string',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'value': {                                          \n\
+                    'header': 'value',                              \n\
+                    'fillspace': 15,                                \n\
+                    'type': 'string',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'flag': {                                           \n\
+                    'header': 'flag',                               \n\
+                    'fillspace': 15,                                \n\
+                    'type': 'string',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'stats': {                                          \n\
+                    'header': 'stats',                              \n\
+                    'fillspace': 5,                                 \n\
+                    'type': 'string',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                },                                                  \n\
+                'description': {                                    \n\
+                    'header': 'description',                        \n\
+                    'fillspace': 30,                                \n\
+                    'type': 'string',                               \n\
+                    'flag': [                                       \n\
+                        'persistent',                               \n\
+                        'required'                                  \n\
+                    ]                                               \n\
+                }                                                   \n\
+            }                                                       \n\
         }                                                           \n\
     ]                                                               \n\
 }                                                                   \n\
