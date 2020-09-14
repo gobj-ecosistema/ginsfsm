@@ -32,7 +32,7 @@ PUBLIC void end_ginsfsm_library(void);
 /*********************************************************************
  *      Version
  *********************************************************************/
-#define __ginsfsm_version__  "4.2.10"
+#define __ginsfsm_version__  "4.2.11"
 
 
 #ifdef __cplusplus
