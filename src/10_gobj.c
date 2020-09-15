@@ -9591,47 +9591,47 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
     );
     json_object_set_new(
         jn_dict,
-        "__running__",
-        gobj->running? json_true(): json_false()
-    );
-    json_object_set_new(
-        jn_dict,
-        "__playing__",
-        gobj->playing? json_true(): json_false()
-    );
-    json_object_set_new(
-        jn_dict,
-        "__service__",
-        gobj_is_service(gobj)? json_true(): json_false()
-    );
-    json_object_set_new(
-        jn_dict,
-        "__unique_",
-        gobj_is_unique(gobj)? json_true(): json_false()
-    );
-    json_object_set_new(
-        jn_dict,
-        "__disabled__",
-        gobj->disabled? json_true(): json_false()
-    );
-    json_object_set_new(
-        jn_dict,
-        "__attrs__",
+        "attrs",
         sdata2json(gobj_hsdata(gobj), -1, 0)
     );
     json_object_set_new(
         jn_dict,
-        "__machine_state__",
+        "state",
         json_string(gobj_current_state(gobj))
     );
     json_object_set_new(
         jn_dict,
-        "__gobj_trace_level__",
+        "running",
+        gobj->running? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "playing",
+        gobj->playing? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "service",
+        gobj_is_service(gobj)? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "unique",
+        gobj_is_unique(gobj)? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "disabled",
+        gobj->disabled? json_true(): json_false()
+    );
+    json_object_set_new(
+        jn_dict,
+        "gobj_trace_level",
         json_integer(gobj_trace_level(gobj))
     );
     json_object_set_new(
         jn_dict,
-        "__gobj_no_trace_level__",
+        "gobj_no_trace_level",
         json_integer(gobj_no_trace_level(gobj))
     );
 
@@ -9650,6 +9650,7 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
             id: integer (index)
             name: string,
             type: string ("real" | "boolean" | "integer" | "string" | "json"),
+            flag: string ("SDF_RD",...),
             description: string,
             stats: boolean,
             value: any
@@ -9657,12 +9658,15 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
         {   Metadata:
             "name", "__state__",
             "name", "__bottom__",
+            "name", "__shortname__",
             "name", "__fullname__",
-            "name", "__trace_level__",
-            "name", "__no_trace_evel__",
             "name", "__running__",
             "name", "__playing__",
-            "name", "__disabled__"
+            "name", "__service__",
+            "name", "__unique__",
+            "name", "__disabled__",
+            "name", "__gobj_trace_level__",
+            "name", "__gobj_no_trace_level__"
         }
     ]
  ***************************************************************************/
@@ -9829,6 +9833,17 @@ PUBLIC json_t *attr2json(hgobj gobj_)
     json_array_append_new(jn_data,
         json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:I}",
             "id", (json_int_t)id++,
+            "name", "__unique__",
+            "type", "boolean",
+            "flag", "",
+            "description", "Is unique the gobj?",
+            "stats", 0,
+            "value", (json_int_t)(size_t)gobj_is_unique(gobj)
+        )
+    );
+    json_array_append_new(jn_data,
+        json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:I}",
+            "id", (json_int_t)id++,
             "name", "__disabled__",
             "type", "boolean",
             "flag", "",
@@ -9840,7 +9855,7 @@ PUBLIC json_t *attr2json(hgobj gobj_)
     json_array_append_new(jn_data,
         json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:o}",
             "id", (json_int_t)id++,
-            "name", "__trace_level__",
+            "name", "__gobj_trace_level__",
             "type", "array",
             "flag", "",
             "description", "Current trace level",
@@ -9856,7 +9871,7 @@ PUBLIC json_t *attr2json(hgobj gobj_)
     json_array_append_new(jn_data,
         json_pack("{s:I, s:s, s:s, s:s, s:s, s:b, s:o}",
             "id", (json_int_t)id++,
-            "name", "__no_trace_level__",
+            "name", "__gobj_no_trace_level__",
             "type", "array",
             "flag", "",
             "description", "Current no trace level",
