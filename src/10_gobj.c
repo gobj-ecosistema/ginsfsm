@@ -291,6 +291,8 @@ PRIVATE const char *event_flag_names[] = {
     0
 };
 
+PRIVATE json_t *__2key__ = 0;
+
 /****************************************************************
  *         Prototypes
  ****************************************************************/
@@ -466,12 +468,14 @@ PUBLIC int gobj_start_up(
     helper_quote2doublequote(treedb_schema_gobjs);
 
     /*
-     *  Chequea schema fichador, exit si falla.
+     *  Chequea schema treedb, exit si falla.
      */
     jn_treedb_schema_gobjs = legalstring2json(treedb_schema_gobjs, TRUE);
     if(!jn_treedb_schema_gobjs) {
         exit(-1);
     }
+
+    __2key__ = json_object();
 
     __initialized__ = TRUE;
     return 0;
@@ -531,6 +535,7 @@ PUBLIC void gobj_end(void)
         free_trans_filter(trans_reg);
     }
     JSON_DECREF(jn_treedb_schema_gobjs);
+    JSON_DECREF(__2key__);
 }
 
 /***************************************************************************
@@ -11280,6 +11285,16 @@ PUBLIC int gobj_print_childs(dl_list_t *dl_childs, int verbose_level)
     return 0;
 }
 
+
+
+
+                    /*---------------------------------*
+                     *  SECTION: Stats
+                     *---------------------------------*/
+
+
+
+
 /***************************************************************************
  *
  ***************************************************************************/
@@ -11346,3 +11361,98 @@ PUBLIC json_t *gobj_jn_stats(hgobj gobj)
 {
     return ((GObj_t *)gobj)->jn_stats;
 }
+
+
+
+
+                    /*---------------------------------*
+                     *  SECTION: 2key
+                     *---------------------------------*/
+
+
+
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_2key_register(const char *key1, const char *key2, json_t *value)
+{
+    if(empty_string(key1)) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "key1 empty",
+            NULL
+        );
+        return -1;
+    }
+    if(empty_string(key2)) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "key2 empty",
+            "key",          "%s", key1,
+            NULL
+        );
+        return -1;
+    }
+
+    json_t *jn_key1 = kw_get_dict(__2key__, key1, json_object(), KW_CREATE);
+    if(!jn_key1) {
+        // Error already logged
+        return -1;
+    }
+    json_t *jn_key2 = kw_get_dict(jn_key1, key2, kw_incref(value), KW_CREATE);
+    if(jn_key2) {
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
+/***************************************************************************
+ *  retorna {k1:{k2:type,},}, sin `value`s!, y en type: "",[],{}
+ ***************************************************************************/
+PUBLIC json_t *gobj_2key_get_schema(void)
+{
+    json_t *jn_schema = json_object();
+
+    const char *key1; json_t *jn_key1;
+    json_object_foreach(__2key__, key1, jn_key1) {
+        json_t *jn_l2 = json_object();
+        json_object_set_new(jn_schema, key1, jn_l2);
+
+        const char *key2; json_t *jn_value;
+        json_object_foreach(jn_key1, key2, jn_value) {
+            if(json_is_string(jn_value)) {
+                json_object_set_new(jn_l2, key2, json_string(""));
+            } else if(json_is_integer(jn_value)) {
+                json_object_set_new(jn_l2, key2, json_integer(0));
+            } else if(json_is_object(jn_value)) {
+                json_object_set_new(jn_l2, key2, json_object());
+            } else if(json_is_array(jn_value)) {
+                json_object_set_new(jn_l2, key2, json_array());
+            } else if(json_is_boolean(jn_value)) {
+                json_object_set_new(jn_l2, key2, json_true());
+            } else if(json_is_real(jn_value)) {
+                json_object_set_new(jn_l2, key2, json_real(0.0));
+            } else if(json_is_null(jn_value)) {
+                json_object_set_new(jn_l2, key2, json_null());
+            } else {
+                json_object_set_new(jn_l2, key2, json_string("MERDE"));
+            }
+        }
+    }
+    return jn_schema;
+}
+
+/***************************************************************************
+ *  WARNING the json return is NOT YOURS!
+ ***************************************************************************/
+PUBLIC json_t *gobj_2key_get_value(const char *key1, const char *key2)
+{
+    return kw_get_subdict_value(__2key__, key1, key2, 0, KW_REQUIRED);
+}
+

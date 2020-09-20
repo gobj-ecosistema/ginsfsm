@@ -1454,6 +1454,28 @@ PUBLIC json_int_t gobj_decr_stat(hgobj gobj, const char *path, json_int_t value)
 PUBLIC json_int_t gobj_get_stat(hgobj gobj, const char *path);
 PUBLIC json_t *gobj_jn_stats(hgobj gobj);  // WARNING the json return is NOT YOURS!
 
+/*
+ *  2key: in-memory double-key para registrar json con acceso global
+ *  Eschema 2key: {k1:{k2:value,},}
+ *
+ *  Registro:
+ *      gobj_2key_register(k1, k2, value); // value incref, ref must be >= 2 else someone not unregister
+ *
+ *  Se puede recuperar `value` con:
+ *      json_t *gobj_get_2key_value(k1, k2);
+ *      Ex:
+ *      // retorna `value` of {k1:{k2:value} (priv->tranger)
+ *      gobj_2key_get_value("tranger", "fichador");
+ *
+ *  Se puede recuperar schema con:
+ *      json_t *gobj_get_2key_schema();
+ *      Ex:
+ *      // retorna {k1:{k2:type,},}, sin `value`s!, en type: "",[],{}
+ *      gobj_get_2key_schema();
+ */
+PUBLIC int gobj_2key_register(const char *key1, const char *key2, json_t *value);
+PUBLIC json_t *gobj_2key_get_schema(void);  // return is yours
+PUBLIC json_t *gobj_2key_get_value(const char *key1, const char *key2); // WARNING return is NOT YOURS!
 
 
 #ifdef __cplusplus
