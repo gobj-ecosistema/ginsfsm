@@ -2069,7 +2069,9 @@ PRIVATE hgobj _create_tree(
     const char *gclass_name = kw_get_str(jn_tree, "gclass", "", KW_REQUIRED);
     const char *name = kw_get_str(jn_tree, "name", "", 0);
     BOOL default_service = kw_get_bool(jn_tree, "default_service", 0, 0);
-    BOOL as_service = kw_get_bool(jn_tree, "as_service", 0, 0);
+    BOOL as_service = kw_get_bool(jn_tree, "as_service", 0, 0) ||
+        kw_get_bool(jn_tree, "service", 0, 0);
+    BOOL unique = kw_get_bool(jn_tree, "unique", 0, 0);
     BOOL autoplay = kw_get_bool(jn_tree, "autoplay", 0, 0);
     BOOL autostart = kw_get_bool(jn_tree, "autostart", 0, 0);
     BOOL disabled = kw_get_bool(jn_tree, "disabled", 0, 0);
@@ -2142,6 +2144,9 @@ PRIVATE hgobj _create_tree(
     }
     if(as_service) {
         obflag |= obflag_service;
+    }
+    if(unique) {
+        obflag |= obflag_unique_name;
     }
     if(autoplay) {
         obflag |= obflag_autoplay;
