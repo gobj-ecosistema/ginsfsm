@@ -3055,9 +3055,14 @@ PUBLIC json_t *gobj_topic_hooks(
 }
 
 /***************************************************************************
- *
+ *  Return is NOT YOURS, WARNING This does NOT auto build links
  ***************************************************************************/
-PUBLIC json_t *gobj_create_node(hgobj gobj_, const char *topic_name, json_t *kw, const char *options)
+PUBLIC json_t *gobj_create_node(
+    hgobj gobj_,
+    const char *topic_name,
+    json_t *kw,
+    const char *options
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3116,9 +3121,14 @@ PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be
 }
 
 /***************************************************************************
- *
+ *  Return is NOT YOURS, High level: DOES auto build links
  ***************************************************************************/
-PUBLIC json_t *gobj_update_node(hgobj gobj_, const char *topic_name, json_t *kw, const char *options)
+PUBLIC json_t *gobj_update_node(
+    hgobj gobj_,
+    const char *topic_name,
+    json_t *kw,
+    const char *options
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
