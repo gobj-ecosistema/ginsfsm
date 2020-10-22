@@ -11429,6 +11429,40 @@ PUBLIC int gobj_2key_register(const char *key1, const char *key2, json_t *value)
 }
 
 /***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_2key_deregister(const char *key1, const char *key2)
+{
+    if(empty_string(key1)) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "key1 empty",
+            NULL
+        );
+        return -1;
+    }
+    if(empty_string(key2)) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "key2 empty",
+            "key",          "%s", key1,
+            NULL
+        );
+        return -1;
+    }
+
+    json_t *jn_key1 = kw_get_dict(__2key__, key1, 0, 0);
+    if(!jn_key1) {
+        return -1;
+    }
+    return kw_delete(jn_key1, key2);
+}
+
+/***************************************************************************
  *  retorna {k1:{k2:type,},}, sin `value`s!, y en type: "",[],{}
  ***************************************************************************/
 PUBLIC json_t *gobj_2key_get_schema(void)

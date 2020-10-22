@@ -1474,6 +1474,7 @@ PUBLIC json_t *gobj_jn_stats(hgobj gobj);  // WARNING the json return is NOT YOU
  *      gobj_get_2key_schema();
  */
 PUBLIC int gobj_2key_register(const char *key1, const char *key2, json_t *value);
+PUBLIC int gobj_2key_deregister(const char *key1, const char *key2);
 PUBLIC json_t *gobj_2key_get_schema(void);  // return is yours
 PUBLIC json_t *gobj_2key_get_value(const char *key1, const char *key2); // WARNING return is NOT YOURS!
 
