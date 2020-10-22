@@ -1065,7 +1065,7 @@ PRIVATE int register_service(const char *name, hgobj gobj)
             "gobj",         "%s", "__yuno__",
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "service ALREADY REGISTERED. Will be UPDATED.",
+            "msg",          "%s", "service ALREADY REGISTERED. Will be UPDATED",
             "service",      "%s", name?name:"",
             "gobj_service", "%s", gobj_full_name(gobj),
             NULL
@@ -1120,7 +1120,7 @@ PRIVATE int register_transformation_filter(const char *name, json_t * (trans_fil
             "gobj",         "%s", "__yuno__",
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "trans filter ALREADY REGISTERED. Will be UPDATED.",
+            "msg",          "%s", "trans filter ALREADY REGISTERED. Will be UPDATED",
             "name",         "%s", name?name:"",
             NULL
         );
@@ -2581,7 +2581,7 @@ PRIVATE int register_unique_gobj(GObj_t * gobj)
             "gobj",         "%s", "__yuno__",
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj ALREADY REGISTERED. Will be UPDATED.",
+            "msg",          "%s", "gobj ALREADY REGISTERED. Will be UPDATED",
             "gclass",       "%s", gobj_gclass_name(gobj),
             "name",         "%s", gobj_name(gobj),
             NULL
