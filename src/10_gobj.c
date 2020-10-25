@@ -8128,7 +8128,7 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
     if(gmt->mt_list_childs)
         json_array_append_new(jn_methods, json_string("mt_list_childs"));
     if(gmt->mt_stats_updated)
-        json_array_append_new(jn_methods, json_string(")"));
+        json_array_append_new(jn_methods, json_string("mt_stats_updated"));
     if(gmt->mt_disable)
         json_array_append_new(jn_methods, json_string("mt_disable"));
     if(gmt->mt_enable)
