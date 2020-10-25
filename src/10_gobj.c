@@ -15,7 +15,7 @@
  *
  *  Ideas sobre seguridad:
  *      1.- listas de acceso (ACL) definidas a nivel de clase (gclass).
- *      2.- permisos en metodos de objecto (local method)
+ *      2.- permisos en metodos de objecto (internal method)
  *      3.- permisos en eventos de entrada y salida.
  *
  *  El método 2 lo usarán los clientes "http".
@@ -3579,9 +3579,9 @@ PUBLIC json_t *gobj_list_snaps(hgobj gobj_, json_t *kw)
 
 
 /***************************************************************************
- *  Execute local method
+ *  Execute internal method
  ***************************************************************************/
-PUBLIC void * gobj_exec_local_method(hgobj gobj_, const char *lmethod, void *data)
+PUBLIC void * gobj_exec_internal_method(hgobj gobj_, const char *lmethod, void *data)
 {
     GObj_t * gobj = gobj_;
     register const LMETHOD *lmt;
@@ -3600,7 +3600,7 @@ PUBLIC void * gobj_exec_local_method(hgobj gobj_, const char *lmethod, void *dat
         "gobj",         "%s", __FILE__,
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-        "msg",          "%s", "local method NOT EXIST",
+        "msg",          "%s", "internal method NOT EXIST",
         "full-name",    "%s", gobj_full_name(gobj),
         "lmethod",      "%s", lmethod,
         NULL
@@ -8208,9 +8208,9 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
 }
 
 /***************************************************************************
- *  Print local gclass's methods in json
+ *  Print internal gclass's methods in json
  ***************************************************************************/
-PRIVATE json_t *localmethods2json(const LMETHOD *lmt)
+PRIVATE json_t *internalmethods2json(const LMETHOD *lmt)
 {
     json_t *jn_methods = json_array();
 
@@ -9500,8 +9500,8 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
     );
     json_object_set_new(
         jn_dict,
-        "local_methods",
-        localmethods2json(gclass->lmt)
+        "internal_methods",
+        internalmethods2json(gclass->lmt)
     );
     json_object_set_new(
         jn_dict,

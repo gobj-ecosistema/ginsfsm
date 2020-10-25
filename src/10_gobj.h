@@ -215,7 +215,7 @@ typedef json_t *(*mt_node_instances_fn)(
 );
 
 
-typedef void *(*local_method_fn)(hgobj gobj, void *data);
+typedef void *(*internal_method_fn)(hgobj gobj, void *data);
 typedef json_t *(*mt_authenticate_fn)(hgobj gobj, const char *service, json_t *kw, hgobj src);
 typedef json_t *(*mt_list_childs_fn)(hgobj gobj, const char *child_gclass, const char **attributes);
 typedef int (*mt_stats_updated_fn)(
@@ -314,9 +314,9 @@ typedef struct { // GClass methods (Yuneta framework methods)
     future_method_fn mt_future64;
 } GMETHODS;
 
-typedef struct { // Local methods (object methods)
+typedef struct { // Internal methods
     const char *lname;
-    const local_method_fn lm;
+    const internal_method_fn lm;
     const char *permission;
 } LMETHOD;
 
@@ -672,7 +672,7 @@ PUBLIC json_t *gobj_list_snaps(hgobj gobj, json_t *filter); // Return MUST be de
 /*--------------------------------------------*
  *  Operational functions
  *--------------------------------------------*/
-PUBLIC void *gobj_exec_local_method(hgobj gobj, const char *lmethod, void *data);
+PUBLIC void *gobj_exec_internal_method(hgobj gobj, const char *lmethod, void *data);
 
 PUBLIC int gobj_start(hgobj gobj);
 PUBLIC int gobj_start_childs(hgobj gobj);   // only direct childs
