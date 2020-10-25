@@ -247,7 +247,7 @@ typedef int (*future_method_fn)(hgobj gobj, void *data, int c, char x);
  *  mt_stats or mt_command return 0 if there is a asynchronous response.
  *  For examples these will ocurr when the command is redirect to a event.
  */
-typedef struct { // General methods (Yuneta framework methods)
+typedef struct { // GClass methods (Yuneta framework methods)
     mt_create_fn mt_create;
     mt_create2_fn mt_create2;
     mt_destroy_fn mt_destroy;

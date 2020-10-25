@@ -8259,7 +8259,7 @@ PRIVATE json_t *events2json(const EVENT *events)
 
     while(events->event) {
         json_t *jn_ev = json_object();
-        json_object_set_new(jn_ev, "event", json_string(events->event));
+        json_object_set_new(jn_ev, "id", json_string(events->event));
 
         GBUFFER *gbuf = get_event_flag_names_desc(events->flag);
         if(gbuf) {
@@ -9495,7 +9495,7 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
     );
     json_object_set_new(
         jn_dict,
-        "global_methods",
+        "gclass_methods",
         yunetamethods2json(&gclass->gmt)
     );
     json_object_set_new(
