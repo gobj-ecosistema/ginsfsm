@@ -5824,6 +5824,7 @@ PUBLIC int gobj_unsubscribe_event(
             "subscriber",   "%s", gobj_full_name(subscriber),
             NULL
         );
+        log_debug_json(0, kw, "gobj_unsubscribe_event() NO SUBCRIPTION FOUND");
     }
     rc_free_iter(dl_subs, TRUE, sdata_destroy);
 
