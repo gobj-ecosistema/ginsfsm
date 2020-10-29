@@ -1031,7 +1031,7 @@ PUBLIC hgobj gobj_service_factory(
 PRIVATE int register_service(const char *name, hgobj gobj)
 {
     if(!gobj) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -1061,7 +1061,7 @@ PRIVATE int register_service(const char *name, hgobj gobj)
         srv_reg = dl_next(srv_reg);
     }
     if(srv_reg) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", "__yuno__",
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -2577,11 +2577,11 @@ PRIVATE int register_unique_gobj(GObj_t * gobj)
         __jn_unique_named_dict__ = json_object();
     }
     if(json_object_get(__jn_unique_named_dict__, unique_name)) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", "__yuno__",
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj ALREADY REGISTERED. Will be UPDATED",
+            "msg",          "%s", "gobj unique ALREADY REGISTERED. Will be UPDATED",
             "gclass",       "%s", gobj_gclass_name(gobj),
             "name",         "%s", gobj_name(gobj),
             NULL
@@ -4808,7 +4808,7 @@ PUBLIC int gobj_walk_gobj_childs_tree(
     void *user_data3)
 {
     if(!gobj) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
