@@ -3761,7 +3761,7 @@ PUBLIC int gobj_stop(hgobj gobj_)
     GObj_t * gobj = gobj_;
 
     if(!gobj) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
