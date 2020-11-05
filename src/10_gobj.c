@@ -746,7 +746,7 @@ PUBLIC int gobj_register_gclass(GCLASS *gclass)
         return -1;
     }
     gclass_reg->gclass = gclass;
-    dl_add(&dl_gclass, gclass_reg);
+    dl_insert(&dl_gclass, gclass_reg);
 
     return 0;
 }
