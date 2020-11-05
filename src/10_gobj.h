@@ -578,7 +578,7 @@ PUBLIC json_t *gobj_create_node( // Return is NOT YOURS, WARNING This does NOT a
     hgobj gobj,
     const char *topic_name,
     json_t *kw, // owned
-    const char *options // "permissive" "verbose"
+    const char *options // "permissive"
 );
 
 PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
