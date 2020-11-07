@@ -449,7 +449,7 @@ PUBLIC int gobj_start_up(
         atexit_registered = 1;
     }
     __shutdowning__ = 0;
-    __jn_global_settings__ =  kw_apply_json_config_variables(jn_global_settings, 0);
+    __jn_global_settings__ =  kw_duplicate(jn_global_settings);
 
     __global_load_persistent_attrs_fn__ = load_persistent_attrs_fn;
     __global_save_persistent_attrs_fn__ = save_persistent_attrs_fn;
@@ -982,8 +982,24 @@ PUBLIC hgobj gobj_service_factory(
         gobj_name,
         __jn_global_settings__
     );
+    json_t *__json_config_variables__ = kw_get_dict(
+        jn_global,
+        "__json_config_variables__",
+        json_object(),
+        KW_CREATE
+    );
+    json_object_update_new(
+        __json_config_variables__,
+        json_pack("{s:s, s:s, s:s, s:s, s:s}",
+            "__realm_name__", __realm_name__,
+            "__yuno_role__", __yuno_role__,
+            "__yuno_name__", __yuno_name__,
+            "__yuno_alias__", __yuno_alias__,
+            "__yuno_role_plus_name__", __yuno_role_plus_name__
+        )
+    );
 
-    if(__trace_gobj_create_delete2__(0)) {
+    if(__trace_gobj_create_delete2__(__yuno__)) {
         trace_machine("⛿> %s:%s => service global",
             gclass_name,
             gobj_name
@@ -1001,7 +1017,7 @@ PUBLIC hgobj gobj_service_factory(
     );
     json_decref(jn_global);
 
-    if(__trace_gobj_create_delete2__(0)) {
+    if(__trace_gobj_create_delete2__(__yuno__)) {
         trace_machine("⛿⛿> %s:%s => service final",
             gclass_name,
             gobj_name
