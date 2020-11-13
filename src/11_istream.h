@@ -22,19 +22,7 @@ extern "C"{
 /*********************************************************************
  *      Constants
  *********************************************************************/
-typedef struct _ISTREAM { // TODO ocultar, revisión total
-    hgobj gobj;
-    GBUFFER *gbuf;
-    size_t data_size;
-    size_t max_size;
-    const char *event_name;
-    const char *delimiter;
-    size_t delimiter_size;
-    size_t num_bytes;
-    char completed;
-} ISTREAM;
-
-typedef ISTREAM * istream;
+typedef void *istream;
 
 #define ISTREAM_CREATE(var, gobj, data_size, max_size, max_disk_size, encoding)         \
     if(var) {                                                                           \
@@ -87,6 +75,7 @@ PUBLIC char *istream_extract_matched_data(istream istream, size_t *len);
 PUBLIC int istream_reset_wr(istream istream);
 PUBLIC int istream_reset_rd(istream istream);
 PUBLIC void istream_clear(istream istream); // reset wr/rd
+PUBLIC BOOL istream_is_completed(istream istream);
 
 #ifdef __cplusplus
 }

@@ -14,6 +14,17 @@
 /***************************************************************************
  *              Structures
  ***************************************************************************/
+typedef struct _ISTREAM {
+    hgobj gobj;
+    GBUFFER *gbuf;
+    size_t data_size;
+    size_t max_size;
+    const char *event_name;
+    const char *delimiter;
+    size_t delimiter_size;
+    size_t num_bytes;
+    char completed;
+} ISTREAM;
 
 /***************************************************************************
  *              Prototypes
@@ -88,19 +99,6 @@ PUBLIC void istream_destroy(istream istream)
     GBUF_DECREF(ist->gbuf);
     gbmem_free(ist);
 }
-
-/***************************************************************************
- *  TODO
- ***************************************************************************/
-// PUBLIC int istream_read_until_regex(istream istream, const char *regex, const char *event)
-// {
-//     ISTREAM *ist = istream;
-//
-//     ist->regex = regex;
-//     ist->event_regex = event;
-//     ist->completed = FALSE;
-//     return 0;
-// }
 
 /***************************************************************************
  *
@@ -364,7 +362,7 @@ PUBLIC char *istream_extract_matched_data(istream istream, size_t *len)
     char *p;
     size_t ln;
 
-    if(!istream->completed) {
+    if(!ist->completed) {
         return 0;
     }
     if(!ist->gbuf) {
@@ -380,7 +378,7 @@ PUBLIC char *istream_extract_matched_data(istream istream, size_t *len)
     p = gbuf_get(ist->gbuf, ln);
     if(len)
         *len = ln;
-    istream->completed = FALSE;
+    ist->completed = FALSE;
     return p;
 }
 
@@ -433,4 +431,13 @@ PUBLIC void istream_clear(istream istream)
 {
     istream_reset_rd(istream);
     istream_reset_wr(istream);
+}
+
+/***************************************************************************
+ *  Reset READING and WRITING pointer
+ ***************************************************************************/
+PUBLIC BOOL istream_is_completed(istream istream)
+{
+    ISTREAM *ist = istream;
+    return ist->completed;
 }
