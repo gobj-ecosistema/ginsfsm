@@ -22,16 +22,14 @@ extern "C"{
 /*********************************************************************
  *      Constants
  *********************************************************************/
-typedef struct _ISTREAM {
+typedef struct _ISTREAM { // TODO ocultar, revisión total
     hgobj gobj;
     GBUFFER *gbuf;
     size_t data_size;
     size_t max_size;
-    const char *event_regex;
-    const char *regex;
-    const char *event_delimiter;
+    const char *event_name;
     const char *delimiter;
-    const char *event_num_bytes;
+    size_t delimiter_size;
     size_t num_bytes;
     char completed;
 } ISTREAM;
@@ -68,7 +66,17 @@ PUBLIC istream istream_create(
     gbuf_encoding encoding
 );
 PUBLIC void istream_destroy(istream istream);
-PUBLIC int istream_read_until_num_bytes(istream istream, size_t num_bytes, const char *event);
+PUBLIC int istream_read_until_num_bytes(
+    istream istream,
+    size_t num_bytes,
+    const char *event
+);
+PUBLIC int istream_read_until_delimiter(
+    istream istream,
+    const char *delimiter,
+    int delimiter_size,
+    const char *event
+);
 PUBLIC size_t istream_consume(istream istream, char *bf, size_t len);
 PUBLIC char *istream_cur_rd_pointer(istream istream);
 PUBLIC size_t istream_length(istream istream);

@@ -83,10 +83,9 @@ PUBLIC void istream_destroy(istream istream)
     /*-----------------------*
      *  Libera la memoria
      *-----------------------*/
-    if(ist->gbuf) {
-        gbuf_decref(ist->gbuf);
-        ist->gbuf = 0;
-    }
+    GBMEM_FREE(ist->delimiter);
+    GBMEM_FREE(ist->event_name);
+    GBUF_DECREF(ist->gbuf);
     gbmem_free(ist);
 }
 
@@ -104,18 +103,52 @@ PUBLIC void istream_destroy(istream istream)
 // }
 
 /***************************************************************************
- *  TODO
+ *
  ***************************************************************************/
-// PUBLIC int istream_read_until_delimiter(istream istream, const char *delimiter, const char *event)
-// {
-//     ISTREAM *ist = istream;
-//
-//     ist->delimiter = delimiter;
-//     ist->event_delimiter = event;
-//     ist->completed = FALSE;
-//
-//     return 0;
-// }
+PUBLIC int istream_read_until_delimiter(
+    istream istream,
+    const char *delimiter,
+    int delimiter_size,
+    const char *event
+)
+{
+    ISTREAM *ist = istream;
+
+    if(delimiter_size <= 0) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(ist->gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "delimiter_size is <= 0",
+            NULL
+        );
+        return -1;
+    }
+    ist->delimiter_size = delimiter_size;
+
+    GBMEM_FREE(ist->delimiter);
+
+    ist->delimiter = gbmem_malloc(delimiter_size);
+    if(!ist->delimiter) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(ist->gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_MEMORY_ERROR,
+            "msg",          "%s", "No memory",
+            NULL
+        );
+        return -1;
+    }
+    memcpy((void *)ist->delimiter, delimiter, delimiter_size);
+
+    GBMEM_FREE(ist->event_name);
+    ist->event_name = gbmem_strdup(event);
+    ist->completed = FALSE;
+
+    ist->num_bytes = 0;
+
+    return 0;
+}
 
 /***************************************************************************
  *
@@ -125,8 +158,11 @@ PUBLIC int istream_read_until_num_bytes(istream istream, size_t num_bytes, const
     ISTREAM *ist = istream;
 
     ist->num_bytes = num_bytes;
-    ist->event_num_bytes = event;
+    GBMEM_FREE(ist->event_name);
+    ist->event_name = gbmem_strdup(event);
     ist->completed = FALSE;
+
+    ist->delimiter = 0;
 
     return 0;
 }
@@ -148,7 +184,8 @@ PUBLIC size_t istream_consume(istream istream, char *bf, size_t len)
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
             "msg",          "%s", "gbuf NULL",
-            NULL);
+            NULL
+        );
         return 0;
     }
     if(ist->num_bytes) {
@@ -163,13 +200,40 @@ PUBLIC size_t istream_consume(istream istream, char *bf, size_t len)
             consumed = needed;
         }
         ist->completed = TRUE;
-        if(!empty_string(ist->event_num_bytes)) {
+
+    } else if(ist->delimiter) {
+        for(int i=0; i<len; i++) {
+            uint8_t c = bf[i];
+            if(gbuf_append(ist->gbuf, &c, 1)!=1) {
+                log_error(0,
+                    "gobj",         "%s", __FILE__,
+                    "function",     "%s", __FUNCTION__,
+                    "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+                    "msg",          "%s", "gbuf FULL",
+                    NULL
+                );
+                return consumed;
+            }
+            consumed++;
+            if(gbuf_leftbytes(ist->gbuf) >= ist->delimiter_size) {
+                char *p = gbuf_cur_wr_pointer(ist->gbuf);
+                p -= ist->delimiter_size;
+                if(memcmp(ist->delimiter, p, ist->delimiter_size) == 0) {
+                    ist->completed = TRUE;
+                    break;
+                }
+            }
+        }
+    }
+
+    if(ist->completed) {
+        if(!empty_string(ist->event_name)) {
             json_t *kw = json_pack("{s:I}",
                 "gbuffer", (json_int_t)(size_t)ist->gbuf
             );
             /*
-             *  gbuf is for client, create a new gbuf
-             */
+            *  gbuf is for client, create a new gbuf
+            */
             ist->gbuf = gbuf_create(ist->data_size, ist->max_size, 0,0);
             if(!ist->gbuf) {
                 log_error(0,
@@ -177,14 +241,14 @@ PUBLIC size_t istream_consume(istream istream, char *bf, size_t len)
                     "function",     "%s", __FUNCTION__,
                     "msgset",       "%s", MSGSET_MEMORY_ERROR,
                     "msg",          "%s", "gbuf_create() return NULL",
-                    NULL);
+                    NULL
+                );
             }
-            gobj_send_event(ist->gobj, ist->event_num_bytes, kw, ist->gobj);
+            gobj_send_event(ist->gobj, ist->event_name, kw, ist->gobj);
         }
-        return consumed;
     }
 
-    return 0;
+    return consumed;
 }
 
 /***************************************************************************
