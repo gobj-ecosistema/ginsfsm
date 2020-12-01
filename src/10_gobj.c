@@ -3142,7 +3142,7 @@ PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be
 PUBLIC json_t *gobj_update_node(
     hgobj gobj_,
     const char *topic_name,
-    json_t *kw,
+    json_t *kw, // owned
     const char *options
 )
 {
@@ -3155,6 +3155,7 @@ PUBLIC json_t *gobj_update_node(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_update_node) {
@@ -3173,7 +3174,12 @@ PUBLIC json_t *gobj_update_node(
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_delete_node(hgobj gobj_, const char *topic_name, json_t *kw, const char *options)
+PUBLIC int gobj_delete_node(
+    hgobj gobj_,
+    const char *topic_name,
+    json_t *kw, // owned
+    const char *options
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3184,6 +3190,7 @@ PUBLIC int gobj_delete_node(hgobj gobj_, const char *topic_name, json_t *kw, con
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_delete_node) {
