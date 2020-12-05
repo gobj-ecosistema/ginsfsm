@@ -141,6 +141,7 @@ SDATA (ASN_JSON,        "__config__",       0,                  0,              
 SDATA (ASN_JSON,        "__global__",       0,                  0,              "global event kw"),
 SDATA (ASN_JSON,        "__local__",        0,                  0,              "local event kw"),
 SDATA (ASN_JSON,        "__filter__",       0,                  0,              "filter event kw"),
+SDATA (ASN_OCTET_STR,   "__service__",      0,                  0,              "subscription service"),
 SDATA_END()
 };
 
@@ -5243,6 +5244,7 @@ PRIVATE hsdata _create_subscription(
         json_t *__global__ = kw_get_dict(kw, "__global__", 0, 0);
         json_t *__local__ = kw_get_dict(kw, "__local__", 0, 0);
         json_t *__filter__ = kw_get_dict_value(kw, "__filter__", 0, 0);
+        const char *__service__ = kw_get_str(kw, "__service__", 0, 0);
 
         if(__global__) { // HACK __global__ the first. __config__ can write in this area.
             json_t *kw_clone = kw_duplicate(__global__);
@@ -5301,6 +5303,9 @@ PRIVATE hsdata _create_subscription(
             json_t *kw_clone = kw_duplicate(__filter__);
             sdata_write_json(subs, "__filter__", kw_clone); // Incref
             kw_decref(kw_clone); // Incref above
+        }
+        if(__service__) {
+            sdata_write_str(subs, "__service__", __service__);
         }
     }
 
