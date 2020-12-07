@@ -213,7 +213,7 @@ PRIVATE json_t * expand_command(
 /***************************************************************************
  *  Parameters of command are described as sdata_desc_t
  ***************************************************************************/
-PRIVATE json_t *parameter2json(hgobj gobj, int type, const char *name, char *s, int *result)
+PRIVATE json_t *parameter2json(hgobj gobj, int type, const char *name, const char *s, int *result)
 {
     if(ASN_IS_STRING(type)) {
         if(!s) {
@@ -492,34 +492,29 @@ PRIVATE json_t *build_cmd_kw(
 
         json_t *jn_param = kw_get_dict_value(kw, ip->name, 0, 0);
         if(jn_param) {
-            json_object_set(kw_cmd, ip->name, jn_param);
+            const char *param = json_string_value(jn_param);
+            jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
+            if(*result < 0) {
+                JSON_DECREF(kw_cmd);
+                return jn_param;
+            }
+            json_object_set_new(kw_cmd, ip->name, jn_param);
             ip++;
             continue;
         }
 
-        if(!ip->default_value) {
+        if(ip->default_value) {
+            char *param = (char *)ip->default_value;
+            jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
+            if(*result < 0) {
+                JSON_DECREF(kw_cmd);
+                return jn_param;
+            }
+            json_object_set_new(kw_cmd, ip->name, jn_param);
+
             ip++;
             continue;
         }
-
-        char *param = (char *)ip->default_value;
-        jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
-        if(*result < 0) {
-            JSON_DECREF(kw_cmd);
-            return jn_param;
-        }
-        if(!jn_param) {
-            JSON_DECREF(kw_cmd);
-            *result = -1;
-            jn_param = json_local_sprintf(
-                "%s: internal error, command '%s', parameter '%s'",
-                gobj_short_name(gobj),
-                command,
-                ip->name
-            );
-            return jn_param;
-        }
-        json_object_set_new(kw_cmd, ip->name, jn_param);
 
         ip++;
     }
