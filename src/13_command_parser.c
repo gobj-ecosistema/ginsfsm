@@ -168,7 +168,7 @@ PRIVATE BOOL command_in_gobj(
  *  If cmd_desc is 0 then there is a error
  *  and the return json is a json string message with the error.
  ***************************************************************************/
-PRIVATE json_t * expand_command(
+PRIVATE json_t *expand_command(
     hgobj gobj,
     const char *command,
     json_t *kw,     // NOT owned
@@ -587,7 +587,9 @@ PRIVATE json_t *build_cmd_kw(
             pxxx
         );
     }
-    json_object_update(kw_cmd, kw); // HACK lo quité y dejó de funcionar el GUI
+
+    json_object_update_missing(kw_cmd, kw); // HACK lo quité y dejó de funcionar el GUI
+
     return kw_cmd;
 }
 
