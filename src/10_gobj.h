@@ -44,51 +44,6 @@ extern "C"{
 #define SET_PRIV(__name__, __func__) \
     priv->__name__ = __func__(gobj, #__name__);
 
-/*
- *  Special principal. Also you can speficy strings of id's or group id's.
- */
-
-/*
- * The special principal id named 'Everyone'.
- * This principal id is granted to all requests.
- * Its actual value is the string 'system.Everyone'.
- */
-#define Everyone "Everyone"
-
-
-/*
- * The special principal id named 'Authenticated'.
- * This principal id is granted to all requests which contain
- * any other non-Everyone principal id (according to the authentication policy).
- * Its actual value is the string 'system.Authenticated'.
- */
-#define Authenticated "Authenticated"
-
-/*
- * An object that can be used as the permission member of an ACE
- * which matches all permissions unconditionally.
- * For example, an ACE that uses ALL_PERMISSIONS might be composed
- * like so: ('Deny', 'system.Everyone', ALL_PERMISSIONS).
- */
-#define ALL_PERMISSIONS "ALL_PERMISSIONS"
-
-/*
- * A convenience shorthand ACE that defines
- * ('Deny', 'system.Everyone', ALL_PERMISSIONS).
- * This is often used as the last ACE in an ACL in systems
- * that use an "inheriting" security policy,
- * representing the concept "don't inherit any other ACEs".
- */
-#define DENY_ALL {Deny, "system.Everyone", ALL_PERMISSIONS}
-
-/*
- * A special permission which indicates that the view should always be
- * executable by entirely anonymous users, regardless of the default permission,
- * bypassing any authorization policy that may be in effect.
- * Its actual value is the string '__no_permission_required__'.
- */
-#define NO_PERMISSION_REQUIRED "__no_permission_required__"
-
 
 /*********************************************************************
  *      Structures
