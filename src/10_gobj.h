@@ -136,37 +136,38 @@ typedef int   (*mt_add_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, hsd
 typedef int   (*mt_delete_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, hsdata hs_child);
 typedef hsdata (*mt_get_resource_fn)(hgobj gobj, const char *resource, json_int_t parent_id, json_int_t id);
 
-typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
-typedef int (*mt_save_node_fn)(hgobj gobj, json_t *node);
-typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
-typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, const char *options);
-typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child);
-typedef int   (*mt_link_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref);
-typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child);
-typedef int   (*mt_unlink_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref);
-typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char *id, json_t *options);
-typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options);
-typedef int   (*mt_shoot_snap_fn)(hgobj gobj, const char *tag);
-typedef int   (*mt_activate_snap_fn)(hgobj gobj, const char *tag);
-typedef json_t *(*mt_list_snaps_fn)(hgobj gobj, json_t *filter);
+typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
+typedef int (*mt_save_node_fn)(hgobj gobj, json_t *node, hgobj src);
+typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
+typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
+typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, json_t *kw, hgobj src);
+typedef int   (*mt_link_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref, json_t *kw, hgobj src);
+typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, json_t *kw, hgobj src);
+typedef int   (*mt_unlink_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref, json_t *kw, hgobj src);
+typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char *id, json_t *options, hgobj src);
+typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options, hgobj src);
+typedef int   (*mt_shoot_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hgobj src);
+typedef int   (*mt_activate_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hgobj src);
+typedef json_t *(*mt_list_snaps_fn)(hgobj gobj, json_t *filter, hgobj src);
 
-typedef json_t *(*mt_treedbs_fn)(hgobj gobj);
-typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *treedb_name, const char *options);
+typedef json_t *(*mt_treedbs_fn)(hgobj gobj, json_t *kw, hgobj src);
+typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *treedb_name, json_t *kw, hgobj src);
 typedef json_t *(*mt_topic_desc_fn)(hgobj gobj, const char *topic_name);
-typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *treedb_name, const char *topic_name);
-typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *treedb_name, const char *topic_name);
+typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *treedb_name, const char *topic_name, json_t *kw, hgobj src);
+typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *treedb_name, const char *topic_name, json_t *kw, hgobj src);
 typedef json_t *(*mt_node_parents_fn)(
-    hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options
+    hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options, hgobj src
 );
 typedef json_t *(*mt_node_childs_fn)(
-    hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options
+    hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options, hgobj src
 );
 typedef json_t *(*mt_node_instances_fn)(
     hgobj gobj,
     const char *topic_name,
     const char *pkey2_field,
     json_t *jn_filter,
-    json_t *jn_options
+    json_t *jn_options,
+    hgobj src
 );
 
 
@@ -504,16 +505,19 @@ PUBLIC hsdata gobj_get_resource(
 
 
 /*--------------------------------------------------*
- *  Node functions. Don't use resource, use this
+ *  Node functions. Don't use resource, use this.
  *--------------------------------------------------*/
 PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
-    hgobj gobj
+    hgobj gobj,
+    json_t *kw,
+    hgobj src
 );
 
 PUBLIC json_t *gobj_treedb_topics(
     hgobj gobj,
     const char *treedb_name,
-    const char *options // "dict" return list of dicts, otherwise return list of strings
+    json_t *kw, // "dict" return list of dicts, otherwise return list of strings
+    hgobj src
 );
 
 PUBLIC json_t *gobj_topic_desc(
@@ -524,79 +528,97 @@ PUBLIC json_t *gobj_topic_desc(
 PUBLIC json_t *gobj_topic_links(
     hgobj gobj,
     const char *treedb_name,
-    const char *topic_name
+    const char *topic_name,
+    json_t *kw,
+    hgobj src
 );
 
 PUBLIC json_t *gobj_topic_hooks(
     hgobj gobj,
     const char *treedb_name,
-    const char *topic_name
+    const char *topic_name,
+    json_t *kw,
+    hgobj src
 );
 
 PUBLIC json_t *gobj_create_node( // Return is NOT YOURS, WARNING This does NOT auto build links
     hgobj gobj,
     const char *topic_name,
-    json_t *kw, // owned
-    const char *options // "permissive"
+    json_t *kw,
+    json_t *jn_options, // bool "permissive"
+    hgobj src
 );
 
 PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
     hgobj gobj,
-    json_t *node // not owned
+    json_t *node, // NOT owned
+    hgobj src
 );
 
 PUBLIC json_t *gobj_update_node( // Return is NOT YOURS, High level: DOES auto build links
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,    // owned
-    const char *options // "create" ["permissive"], "clean"
+    json_t *kw,
+    json_t *jn_options, // "create" ["permissive"], "clean"
+    hgobj src
 );
 
 PUBLIC int gobj_delete_node(
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,    // owned
-    const char *options // "force"
+    json_t *kw,
+    json_t *jn_options, // "force"
+    hgobj src
 );
 
 PUBLIC int gobj_link_nodes(
     hgobj gobj,
     const char *hook,
-    json_t *parent_node,    // not owned
-    json_t *child_node      // not owned
+    json_t *parent_node,    // NOT owned
+    json_t *child_node,     // NOT owned
+    json_t *kw,
+    hgobj src
 );
 
 PUBLIC int gobj_link_nodes2(
     hgobj gobj,
     const char *parent_ref,     // parent_topic_name^parent_id^hook_name
-    const char *child_ref       // child_topic_name^child_id
+    const char *child_ref,       // child_topic_name^child_id
+    json_t *kw,
+    hgobj src
 );
 
 PUBLIC int gobj_unlink_nodes(
     hgobj gobj,
     const char *hook,
-    json_t *parent_node,    // not owned
-    json_t *child_node      // not owned
+    json_t *parent_node,    // NOT owned
+    json_t *child_node,     // NOT owned
+    json_t *kw,
+    hgobj src
 );
 
 PUBLIC int gobj_unlink_nodes2(
     hgobj gobj,
     const char *parent_ref,     // parent_topic_name^parent_id^hook_name
-    const char *child_ref       // child_topic_name^child_id
+    const char *child_ref,      // child_topic_name^child_id
+    json_t *kw,
+    hgobj src
 );
 
 PUBLIC json_t *gobj_get_node( // Return is NOT YOURS
     hgobj gobj,
     const char *topic_name,
     const char *id,
-    json_t *jn_options  // owned "collapsed"
+    json_t *jn_options, // "collapsed"
+    hgobj src
 );
 
 PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
-    json_t *jn_filter,  // owned
-    json_t *jn_options  // owned "collapsed"
+    json_t *jn_filter,
+    json_t *jn_options, // "collapsed"
+    hgobj src
 );
 
 PUBLIC json_t *gobj_node_parents( // Return MUST be decref
@@ -604,7 +626,8 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *link,
-    json_t *jn_options  // owned "collapsed"
+    json_t *jn_options,  // "collapsed"
+    hgobj src
 );
 
 PUBLIC json_t *gobj_node_childs( // Return MUST be decref
@@ -612,20 +635,36 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *hook,
-    json_t *jn_options  // owned "collapsed"
+    json_t *jn_options,  // "collapsed"
+    hgobj src
 );
 
 PUBLIC json_t *gobj_node_instances(
     hgobj gobj,
     const char *topic_name,
     const char *pkey2_field,
-    json_t *jn_filter,  // owned
-    json_t *jn_options // owned, "collapsed"
+    json_t *jn_filter,
+    json_t *jn_options, // "collapsed"
+    hgobj src
 );
 
-PUBLIC int gobj_shoot_snap(hgobj gobj, const char *tag); // tag the current tree db
-PUBLIC int gobj_activate_snap(hgobj gobj, const char *tag); // Activate tag (stop/start the gobj)
-PUBLIC json_t *gobj_list_snaps(hgobj gobj, json_t *filter); // Return MUST be decref, list of snaps
+PUBLIC int gobj_shoot_snap(  // tag the current tree db
+    hgobj gobj,
+    const char *tag,
+    json_t *kw,
+    hgobj src
+);
+PUBLIC int gobj_activate_snap( // Activate tag (stop/start the gobj)
+    hgobj gobj,
+    const char *tag,
+    json_t *kw,
+    hgobj src
+);
+PUBLIC json_t *gobj_list_snaps( // Return MUST be decref, list of snaps
+    hgobj gobj,
+    json_t *filter,
+    hgobj src
+);
 
 
 /*--------------------------------------------*
@@ -1467,25 +1506,25 @@ PUBLIC int gobj_set_gobj_no_permission(hgobj gobj, const char *level, BOOL set);
 /*
  *  Use this functions to see if you must permission in your gclasses
  */
-PUBLIC uint64_t gobj_permission_level(hgobj gobj);
-PUBLIC uint64_t gobj_no_permission_level(hgobj gobj);
+PUBLIC uint64_t gobj_permission_level(hgobj gobj, json_t *kw, hgobj src);
+PUBLIC uint64_t gobj_no_permission_level(hgobj gobj, json_t *kw, hgobj src);
 
 /*
  *  Get permissions set in tree of gclass or gobj
  */
-PUBLIC json_t *gobj_get_gclass_permission_level_list(GCLASS *gclass);
-PUBLIC json_t *gobj_get_gclass_no_permission_level_list(GCLASS *gclass);
-PUBLIC json_t *gobj_get_gobj_permission_level_tree(hgobj gobj);
-PUBLIC json_t *gobj_get_gobj_no_permission_level_tree(hgobj gobj);
+// PUBLIC json_t *gobj_get_gclass_permission_level_list(GCLASS *gclass);
+// PUBLIC json_t *gobj_get_gclass_no_permission_level_list(GCLASS *gclass);
+// PUBLIC json_t *gobj_get_gobj_permission_level_tree(hgobj gobj);
+// PUBLIC json_t *gobj_get_gobj_no_permission_level_tree(hgobj gobj);
 
 /*
  *  Get permissions set in gclass and gobj (return list of strings)
  */
-PUBLIC json_t *gobj_get_global_permission_level(void);
-PUBLIC json_t *gobj_get_gclass_permission_level(GCLASS *gclass);
-PUBLIC json_t *gobj_get_gclass_no_permission_level(GCLASS *gclass);
-PUBLIC json_t *gobj_get_gobj_permission_level(hgobj gobj);
-PUBLIC json_t *gobj_get_gobj_no_permission_level(hgobj gobj);
+// PUBLIC json_t *gobj_get_global_permission_level(void);
+// PUBLIC json_t *gobj_get_gclass_permission_level(GCLASS *gclass);
+// PUBLIC json_t *gobj_get_gclass_no_permission_level(GCLASS *gclass);
+// PUBLIC json_t *gobj_get_gobj_permission_level(hgobj gobj);
+// PUBLIC json_t *gobj_get_gobj_no_permission_level(hgobj gobj);
 
 /*--------------------------------------------*
  *  Print/debug functions

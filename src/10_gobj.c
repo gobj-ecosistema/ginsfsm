@@ -2936,7 +2936,9 @@ PUBLIC hsdata gobj_get_resource(
  *
  ***************************************************************************/
 PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
-    hgobj gobj_
+    hgobj gobj_,
+    json_t *kw,
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -2948,6 +2950,7 @@ PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_treedbs) {
@@ -2958,9 +2961,10 @@ PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
             "msg",          "%s", "mt_treedbs not defined",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
-    return gobj->gclass->gmt.mt_treedbs(gobj);
+    return gobj->gclass->gmt.mt_treedbs(gobj, kw, src);
 }
 
 /***************************************************************************
@@ -2969,7 +2973,8 @@ PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
 PUBLIC json_t *gobj_treedb_topics(
     hgobj gobj_,
     const char *treedb_name,
-    const char *options // "dict" return list of dicts, otherwise return list of strings
+    json_t *kw, // "dict" return list of dicts, otherwise return list of strings
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -2981,6 +2986,7 @@ PUBLIC json_t *gobj_treedb_topics(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_treedb_topics) {
@@ -2991,9 +2997,10 @@ PUBLIC json_t *gobj_treedb_topics(
             "msg",          "%s", "mt_treedb_topics not defined",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
-    return gobj->gclass->gmt.mt_treedb_topics(gobj, treedb_name, options);
+    return gobj->gclass->gmt.mt_treedb_topics(gobj, treedb_name, kw, src);
 }
 
 /***************************************************************************
@@ -3034,7 +3041,9 @@ PUBLIC json_t *gobj_topic_desc(
 PUBLIC json_t *gobj_topic_links(
     hgobj gobj_,
     const char *treedb_name,
-    const char *topic_name
+    const char *topic_name,
+    json_t *kw,
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3046,6 +3055,7 @@ PUBLIC json_t *gobj_topic_links(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_topic_links) {
@@ -3056,9 +3066,10 @@ PUBLIC json_t *gobj_topic_links(
             "msg",          "%s", "mt_topic_links not defined",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
-    return gobj->gclass->gmt.mt_topic_links(gobj, treedb_name, topic_name);
+    return gobj->gclass->gmt.mt_topic_links(gobj, treedb_name, topic_name, kw, src);
 }
 
 /***************************************************************************
@@ -3067,7 +3078,9 @@ PUBLIC json_t *gobj_topic_links(
 PUBLIC json_t *gobj_topic_hooks(
     hgobj gobj_,
     const char *treedb_name,
-    const char *topic_name
+    const char *topic_name,
+    json_t *kw,
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3079,6 +3092,7 @@ PUBLIC json_t *gobj_topic_hooks(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_topic_hooks) {
@@ -3089,9 +3103,10 @@ PUBLIC json_t *gobj_topic_hooks(
             "msg",          "%s", "mt_topic_hooks not defined",
             NULL
         );
+        KW_DECREF(kw);
         return 0;
     }
-    return gobj->gclass->gmt.mt_topic_hooks(gobj, treedb_name, topic_name);
+    return gobj->gclass->gmt.mt_topic_hooks(gobj, treedb_name, topic_name, kw, src);
 }
 
 /***************************************************************************
@@ -3101,7 +3116,8 @@ PUBLIC json_t *gobj_create_node(
     hgobj gobj_,
     const char *topic_name,
     json_t *kw,
-    const char *options
+    json_t *jn_options, // bool "permissive"
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3113,6 +3129,8 @@ PUBLIC json_t *gobj_create_node(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_create_node) {
@@ -3123,9 +3141,11 @@ PUBLIC json_t *gobj_create_node(
             "msg",          "%s", "mt_create_node not defined",
             NULL
         );
+        KW_DECREF(kw);
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_create_node(gobj, topic_name, kw, options);
+    return gobj->gclass->gmt.mt_create_node(gobj, topic_name, kw, jn_options, src);
 }
 
 /***************************************************************************
@@ -3133,7 +3153,8 @@ PUBLIC json_t *gobj_create_node(
  ***************************************************************************/
 PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
     hgobj gobj_,
-    json_t *node // not owned
+    json_t *node, // not owned
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3157,7 +3178,7 @@ PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be
         );
         return 0;
     }
-    return gobj->gclass->gmt.mt_save_node(gobj, node);
+    return gobj->gclass->gmt.mt_save_node(gobj, node, src);
 }
 
 /***************************************************************************
@@ -3166,8 +3187,9 @@ PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be
 PUBLIC json_t *gobj_update_node(
     hgobj gobj_,
     const char *topic_name,
-    json_t *kw, // owned
-    const char *options
+    json_t *kw,
+    json_t *jn_options, // "create" ["permissive"], "clean"
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3180,6 +3202,7 @@ PUBLIC json_t *gobj_update_node(
             NULL
         );
         KW_DECREF(kw);
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_update_node) {
@@ -3190,9 +3213,11 @@ PUBLIC json_t *gobj_update_node(
             "msg",          "%s", "mt_update_node not defined",
             NULL
         );
+        KW_DECREF(kw);
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_update_node(gobj, topic_name, kw, options);
+    return gobj->gclass->gmt.mt_update_node(gobj, topic_name, kw, jn_options, src);
 }
 
 /***************************************************************************
@@ -3201,8 +3226,49 @@ PUBLIC json_t *gobj_update_node(
 PUBLIC int gobj_delete_node(
     hgobj gobj_,
     const char *topic_name,
-    json_t *kw, // owned
-    const char *options
+    json_t *kw,
+    json_t *jn_options, // "force"
+    hgobj src
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        KW_DECREF(kw);
+        JSON_DECREF(jn_options);
+        return -1;
+    }
+    if(!gobj->gclass->gmt.mt_delete_node) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_delete_node not defined",
+            NULL
+        );
+        KW_DECREF(kw);
+        JSON_DECREF(jn_options);
+        return -1;
+    }
+    return gobj->gclass->gmt.mt_delete_node(gobj, topic_name, kw, jn_options, src);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_link_nodes(
+    hgobj gobj_,
+    const char *hook,
+    json_t *parent_node,    // NOT owned
+    json_t *child_node,     // NOT owned
+    json_t *kw,
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3217,35 +3283,6 @@ PUBLIC int gobj_delete_node(
         KW_DECREF(kw);
         return -1;
     }
-    if(!gobj->gclass->gmt.mt_delete_node) {
-        log_error(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_delete_node not defined",
-            NULL
-        );
-        return -1;
-    }
-    return gobj->gclass->gmt.mt_delete_node(gobj, topic_name, kw, options);
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC int gobj_link_nodes(hgobj gobj_, const char *hook, json_t *parent, json_t *child)
-{
-    GObj_t *gobj = gobj_;
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        return -1;
-    }
     if(!gobj->gclass->gmt.mt_link_nodes) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
@@ -3254,15 +3291,22 @@ PUBLIC int gobj_link_nodes(hgobj gobj_, const char *hook, json_t *parent, json_t
             "msg",          "%s", "mt_link_nodes not defined",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
-    return gobj->gclass->gmt.mt_link_nodes(gobj, hook, parent, child);
+    return gobj->gclass->gmt.mt_link_nodes(gobj, hook, parent_node, child_node, kw, src);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_link_nodes2(hgobj gobj_, const char *parent_ref, const char *child_ref)
+PUBLIC int gobj_link_nodes2(
+    hgobj gobj_,
+    const char *parent_ref,     // parent_topic_name^parent_id^hook_name
+    const char *child_ref,       // child_topic_name^child_id
+    json_t *kw,
+    hgobj src
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3273,6 +3317,7 @@ PUBLIC int gobj_link_nodes2(hgobj gobj_, const char *parent_ref, const char *chi
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_link_nodes2) {
@@ -3283,15 +3328,23 @@ PUBLIC int gobj_link_nodes2(hgobj gobj_, const char *parent_ref, const char *chi
             "msg",          "%s", "mt_link_nodes2 not defined",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
-    return gobj->gclass->gmt.mt_link_nodes2(gobj, parent_ref, child_ref);
+    return gobj->gclass->gmt.mt_link_nodes2(gobj, parent_ref, child_ref, kw, src);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_unlink_nodes(hgobj gobj_, const char *hook, json_t *parent, json_t *child)
+PUBLIC int gobj_unlink_nodes(
+    hgobj gobj_,
+    const char *hook,
+    json_t *parent_node,    // NOT owned
+    json_t *child_node,     // NOT owned
+    json_t *kw,
+    hgobj src
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3302,6 +3355,7 @@ PUBLIC int gobj_unlink_nodes(hgobj gobj_, const char *hook, json_t *parent, json
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_unlink_nodes) {
@@ -3312,15 +3366,22 @@ PUBLIC int gobj_unlink_nodes(hgobj gobj_, const char *hook, json_t *parent, json
             "msg",          "%s", "mt_unlink_nodes not defined",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
-    return gobj->gclass->gmt.mt_unlink_nodes(gobj, hook, parent, child);
+    return gobj->gclass->gmt.mt_unlink_nodes(gobj, hook, parent_node, child_node, kw, src);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_unlink_nodes2(hgobj gobj_, const char *parent_ref, const char *child_ref)
+PUBLIC int gobj_unlink_nodes2(
+    hgobj gobj_,
+    const char *parent_ref,     // parent_topic_name^parent_id^hook_name
+    const char *child_ref,      // child_topic_name^child_id
+    json_t *kw,
+    hgobj src
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3331,6 +3392,7 @@ PUBLIC int gobj_unlink_nodes2(hgobj gobj_, const char *parent_ref, const char *c
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_unlink_nodes2) {
@@ -3341,9 +3403,10 @@ PUBLIC int gobj_unlink_nodes2(hgobj gobj_, const char *parent_ref, const char *c
             "msg",          "%s", "mt_unlink_nodes not defined",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
-    return gobj->gclass->gmt.mt_unlink_nodes2(gobj, parent_ref, child_ref);
+    return gobj->gclass->gmt.mt_unlink_nodes2(gobj, parent_ref, child_ref, kw, src);
 }
 
 /***************************************************************************
@@ -3353,7 +3416,8 @@ PUBLIC json_t *gobj_get_node(
     hgobj gobj_,
     const char *topic_name,
     const char *id,
-    json_t *jn_options  // owned "collapsed"
+    json_t *jn_options, // "collapsed"
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3365,6 +3429,7 @@ PUBLIC json_t *gobj_get_node(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_get_node) {
@@ -3375,9 +3440,10 @@ PUBLIC json_t *gobj_get_node(
             "msg",          "%s", "mt_get_node not defined",
             NULL
         );
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_get_node(gobj, topic_name, id, jn_options);
+    return gobj->gclass->gmt.mt_get_node(gobj, topic_name, id, jn_options, src);
 }
 
 /***************************************************************************
@@ -3386,8 +3452,9 @@ PUBLIC json_t *gobj_get_node(
 PUBLIC json_t *gobj_list_nodes(
     hgobj gobj_,
     const char *topic_name,
-    json_t *jn_filter,  // owned
-    json_t *jn_options  // owned "collapsed"
+    json_t *jn_filter,
+    json_t *jn_options, // "collapsed"
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3399,6 +3466,8 @@ PUBLIC json_t *gobj_list_nodes(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        JSON_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_nodes) {
@@ -3409,9 +3478,11 @@ PUBLIC json_t *gobj_list_nodes(
             "msg",          "%s", "mt_list_nodes not defined",
             NULL
         );
+        JSON_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_list_nodes(gobj, topic_name, jn_filter, jn_options);
+    return gobj->gclass->gmt.mt_list_nodes(gobj, topic_name, jn_filter, jn_options, src);
 }
 
 /***************************************************************************
@@ -3422,7 +3493,8 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *link,
-    json_t *jn_options  // owned "collapsed"
+    json_t *jn_options,  // "collapsed"
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3434,6 +3506,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_node_parents) {
@@ -3444,9 +3517,10 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
             "msg",          "%s", "mt_node_parents not defined",
             NULL
         );
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_node_parents(gobj, topic_name, id, link, jn_options);
+    return gobj->gclass->gmt.mt_node_parents(gobj, topic_name, id, link, jn_options, src);
 }
 
 /***************************************************************************
@@ -3457,7 +3531,8 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *hook,
-    json_t *jn_options  // owned "collapsed"
+    json_t *jn_options,  // "collapsed"
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3469,6 +3544,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_node_childs) {
@@ -3479,9 +3555,10 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
             "msg",          "%s", "mt_node_childs not defined",
             NULL
         );
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_node_childs(gobj, topic_name, id, hook, jn_options);
+    return gobj->gclass->gmt.mt_node_childs(gobj, topic_name, id, hook, jn_options, src);
 }
 
 /***************************************************************************
@@ -3491,8 +3568,9 @@ PUBLIC json_t *gobj_node_instances(
     hgobj gobj_,
     const char *topic_name,
     const char *pkey2_field,
-    json_t *jn_filter,  // owned
-    json_t *jn_options // owned, "collapsed"
+    json_t *jn_filter,
+    json_t *jn_options, // "collapsed"
+    hgobj src
 )
 {
     GObj_t *gobj = gobj_;
@@ -3522,14 +3600,19 @@ PUBLIC json_t *gobj_node_instances(
         return 0;
     }
     return gobj->gclass->gmt.mt_node_instances(
-        gobj, topic_name, pkey2_field, jn_filter, jn_options
+        gobj, topic_name, pkey2_field, jn_filter, jn_options, src
     );
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_shoot_snap(hgobj gobj_, const char *tag)
+PUBLIC int gobj_shoot_snap(
+    hgobj gobj_,
+    const char *tag,
+    json_t *kw,
+    hgobj src
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3540,6 +3623,7 @@ PUBLIC int gobj_shoot_snap(hgobj gobj_, const char *tag)
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_shoot_snap) {
@@ -3550,15 +3634,21 @@ PUBLIC int gobj_shoot_snap(hgobj gobj_, const char *tag)
             "msg",          "%s", "mt_shoot_snap not defined",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
-    return gobj->gclass->gmt.mt_shoot_snap(gobj, tag);
+    return gobj->gclass->gmt.mt_shoot_snap(gobj, tag, kw, src);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_activate_snap(hgobj gobj_, const char *tag)
+PUBLIC int gobj_activate_snap(
+    hgobj gobj_,
+    const char *tag,
+    json_t *kw,
+    hgobj src
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3569,6 +3659,7 @@ PUBLIC int gobj_activate_snap(hgobj gobj_, const char *tag)
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_activate_snap) {
@@ -3579,15 +3670,20 @@ PUBLIC int gobj_activate_snap(hgobj gobj_, const char *tag)
             "msg",          "%s", "mt_activate_snap not defined",
             NULL
         );
+        KW_DECREF(kw);
         return -1;
     }
-    return gobj->gclass->gmt.mt_activate_snap(gobj, tag);
+    return gobj->gclass->gmt.mt_activate_snap(gobj, tag, kw, src);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_list_snaps(hgobj gobj_, json_t *kw)
+PUBLIC json_t *gobj_list_snaps(
+    hgobj gobj_,
+    json_t *filter,
+    hgobj src
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3598,7 +3694,7 @@ PUBLIC json_t *gobj_list_snaps(hgobj gobj_, json_t *kw)
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(filter);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_snaps) {
@@ -3609,10 +3705,10 @@ PUBLIC json_t *gobj_list_snaps(hgobj gobj_, json_t *kw)
             "msg",          "%s", "mt_list_snaps not defined",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(filter);
         return 0;
     }
-    return gobj->gclass->gmt.mt_list_snaps(gobj, kw);
+    return gobj->gclass->gmt.mt_list_snaps(gobj, filter, src);
 }
 
 
@@ -11651,7 +11747,7 @@ PUBLIC int gobj_set_gobj_no_permission(hgobj gobj_, const char *level, BOOL set)
 /****************************************************************************
  *  Return gobj permission level
  ****************************************************************************/
-PUBLIC uint64_t gobj_permission_level(hgobj gobj_)
+PUBLIC uint64_t gobj_permission_level(hgobj gobj_, json_t *kw, hgobj src)
 {
     GObj_t * gobj = gobj_;
 
@@ -11669,7 +11765,7 @@ PUBLIC uint64_t gobj_permission_level(hgobj gobj_)
 /****************************************************************************
  *  Return gobj no permission level
  ****************************************************************************/
-PUBLIC uint64_t gobj_no_permission_level(hgobj gobj_)
+PUBLIC uint64_t gobj_no_permission_level(hgobj gobj_, json_t *kw, hgobj src)
 {
     GObj_t * gobj = gobj_;
     if(!gobj || !gobj->gclass) {
@@ -11680,194 +11776,194 @@ PUBLIC uint64_t gobj_no_permission_level(hgobj gobj_)
     return bitmask;
 }
 
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC json_t *gobj_get_gclass_permission_level_list(GCLASS *gclass)
-{
-    json_t *jn_list = json_array();
-
-    if(gclass) {
-        json_t *jn_levels = gobj_get_gclass_permission_level(gclass);
-        if(json_array_size(jn_levels)) {
-            json_t *jn_gclass = json_object();
-            json_object_set_new(
-                jn_gclass,
-                "gclass",
-                json_string(gclass->gclass_name)
-            );
-            json_object_set_new(
-                jn_gclass,
-                "permission_levels",
-                jn_levels
-            );
-            json_array_append_new(jn_list, jn_gclass);
-        } else {
-            JSON_DECREF(jn_levels);
-        }
-        return jn_list;
-    }
-
-    gclass_register_t *gclass_reg = dl_first(&dl_gclass);
-    while(gclass_reg) {
-        if(gclass_reg->gclass) {
-            json_t *jn_levels = gobj_get_gclass_permission_level(gclass_reg->gclass);
-            if(json_array_size(jn_levels)) {
-                json_t *jn_gclass = json_object();
-                json_object_set_new(
-                    jn_gclass,
-                    "gclass",
-                    json_string(gclass_reg->gclass->gclass_name)
-                );
-                json_object_set_new(
-                    jn_gclass,
-                    "permission_levels",
-                    jn_levels
-                );
-                json_array_append_new(jn_list, jn_gclass);
-            } else {
-                JSON_DECREF(jn_levels);
-            }
-        }
-
-        gclass_reg = dl_next(gclass_reg);
-    }
-
-    return jn_list;
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC json_t *gobj_get_gclass_no_permission_level_list(GCLASS *gclass)
-{
-    json_t *jn_list = json_array();
-
-    if(gclass) {
-        json_t *jn_levels = gobj_get_gclass_no_permission_level(gclass);
-        if(json_array_size(jn_levels)) {
-            json_t *jn_gclass = json_object();
-            json_object_set_new(
-                jn_gclass,
-                "gclass",
-                json_string(gclass->gclass_name)
-            );
-            json_object_set_new(
-                jn_gclass,
-                "permission_levels",
-                jn_levels
-            );
-            json_array_append_new(jn_list, jn_gclass);
-        } else {
-            JSON_DECREF(jn_levels);
-        }
-        return jn_list;
-    }
-
-    gclass_register_t *gclass_reg = dl_first(&dl_gclass);
-    while(gclass_reg) {
-        if(gclass_reg->gclass) {
-            json_t *jn_levels = gobj_get_gclass_no_permission_level(gclass_reg->gclass);
-            if(json_array_size(jn_levels)) {
-                json_t *jn_gclass = json_object();
-                json_object_set_new(
-                    jn_gclass,
-                    "gclass",
-                    json_string(gclass_reg->gclass->gclass_name)
-                );
-                json_object_set_new(
-                    jn_gclass,
-                    "no_permission_levels",
-                    jn_levels
-                );
-                json_array_append_new(jn_list, jn_gclass);
-            } else {
-                JSON_DECREF(jn_levels);
-            }
-        }
-
-        gclass_reg = dl_next(gclass_reg);
-    }
-
-    return jn_list;
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC json_t *gobj_get_global_permission_level(void)
-{
-    json_t *jn_list;
-    jn_list = bit4level(
-        s_global_permission_level,
-        0,
-        __global_permission_level__
-    );
-    return jn_list;
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC json_t *gobj_get_gclass_permission_level(GCLASS *gclass)
-{
-    json_t *jn_list = bit4level(
-        s_global_permission_level,
-        gclass->s_user_permission_level,
-        gclass->__gclass_permission_level__ | __global_permission_level__
-    );
-    return jn_list;
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC json_t *gobj_get_gclass_no_permission_level(GCLASS *gclass)
-{
-    json_t *jn_list = bit4level(
-        s_global_permission_level,
-        gclass->s_user_permission_level,
-        gclass->__gclass_no_permission_level__
-    );
-    return jn_list;
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC json_t *gobj_get_gobj_permission_level(hgobj gobj_)
-{
-    GObj_t * gobj = gobj_;
-    json_t *jn_list;
-    if(gobj) {
-        jn_list = bit4level(
-            s_global_permission_level,
-            gobj->gclass->s_user_permission_level,
-            gobj_permission_level(gobj)
-        );
-    } else {
-        jn_list = bit4level(
-            s_global_permission_level,
-            0,
-            __global_permission_level__
-        );
-    }
-    return jn_list;
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC json_t *gobj_get_gobj_no_permission_level(hgobj gobj_)
-{
-    GObj_t * gobj = gobj_;
-    json_t *jn_list = bit4level(
-        s_global_permission_level,
-        gobj->gclass->s_user_permission_level,
-        gobj_no_permission_level(gobj)
-    );
-    return jn_list;
-}
+// /***************************************************************************
+//  *
+//  ***************************************************************************/
+// PUBLIC json_t *gobj_get_gclass_permission_level_list(GCLASS *gclass)
+// {
+//     json_t *jn_list = json_array();
+//
+//     if(gclass) {
+//         json_t *jn_levels = gobj_get_gclass_permission_level(gclass);
+//         if(json_array_size(jn_levels)) {
+//             json_t *jn_gclass = json_object();
+//             json_object_set_new(
+//                 jn_gclass,
+//                 "gclass",
+//                 json_string(gclass->gclass_name)
+//             );
+//             json_object_set_new(
+//                 jn_gclass,
+//                 "permission_levels",
+//                 jn_levels
+//             );
+//             json_array_append_new(jn_list, jn_gclass);
+//         } else {
+//             JSON_DECREF(jn_levels);
+//         }
+//         return jn_list;
+//     }
+//
+//     gclass_register_t *gclass_reg = dl_first(&dl_gclass);
+//     while(gclass_reg) {
+//         if(gclass_reg->gclass) {
+//             json_t *jn_levels = gobj_get_gclass_permission_level(gclass_reg->gclass);
+//             if(json_array_size(jn_levels)) {
+//                 json_t *jn_gclass = json_object();
+//                 json_object_set_new(
+//                     jn_gclass,
+//                     "gclass",
+//                     json_string(gclass_reg->gclass->gclass_name)
+//                 );
+//                 json_object_set_new(
+//                     jn_gclass,
+//                     "permission_levels",
+//                     jn_levels
+//                 );
+//                 json_array_append_new(jn_list, jn_gclass);
+//             } else {
+//                 JSON_DECREF(jn_levels);
+//             }
+//         }
+//
+//         gclass_reg = dl_next(gclass_reg);
+//     }
+//
+//     return jn_list;
+// }
+//
+// /***************************************************************************
+//  *
+//  ***************************************************************************/
+// PUBLIC json_t *gobj_get_gclass_no_permission_level_list(GCLASS *gclass)
+// {
+//     json_t *jn_list = json_array();
+//
+//     if(gclass) {
+//         json_t *jn_levels = gobj_get_gclass_no_permission_level(gclass);
+//         if(json_array_size(jn_levels)) {
+//             json_t *jn_gclass = json_object();
+//             json_object_set_new(
+//                 jn_gclass,
+//                 "gclass",
+//                 json_string(gclass->gclass_name)
+//             );
+//             json_object_set_new(
+//                 jn_gclass,
+//                 "permission_levels",
+//                 jn_levels
+//             );
+//             json_array_append_new(jn_list, jn_gclass);
+//         } else {
+//             JSON_DECREF(jn_levels);
+//         }
+//         return jn_list;
+//     }
+//
+//     gclass_register_t *gclass_reg = dl_first(&dl_gclass);
+//     while(gclass_reg) {
+//         if(gclass_reg->gclass) {
+//             json_t *jn_levels = gobj_get_gclass_no_permission_level(gclass_reg->gclass);
+//             if(json_array_size(jn_levels)) {
+//                 json_t *jn_gclass = json_object();
+//                 json_object_set_new(
+//                     jn_gclass,
+//                     "gclass",
+//                     json_string(gclass_reg->gclass->gclass_name)
+//                 );
+//                 json_object_set_new(
+//                     jn_gclass,
+//                     "no_permission_levels",
+//                     jn_levels
+//                 );
+//                 json_array_append_new(jn_list, jn_gclass);
+//             } else {
+//                 JSON_DECREF(jn_levels);
+//             }
+//         }
+//
+//         gclass_reg = dl_next(gclass_reg);
+//     }
+//
+//     return jn_list;
+// }
+//
+// /***************************************************************************
+//  *
+//  ***************************************************************************/
+// PUBLIC json_t *gobj_get_global_permission_level(void)
+// {
+//     json_t *jn_list;
+//     jn_list = bit4level(
+//         s_global_permission_level,
+//         0,
+//         __global_permission_level__
+//     );
+//     return jn_list;
+// }
+//
+// /***************************************************************************
+//  *
+//  ***************************************************************************/
+// PUBLIC json_t *gobj_get_gclass_permission_level(GCLASS *gclass)
+// {
+//     json_t *jn_list = bit4level(
+//         s_global_permission_level,
+//         gclass->s_user_permission_level,
+//         gclass->__gclass_permission_level__ | __global_permission_level__
+//     );
+//     return jn_list;
+// }
+//
+// /***************************************************************************
+//  *
+//  ***************************************************************************/
+// PUBLIC json_t *gobj_get_gclass_no_permission_level(GCLASS *gclass)
+// {
+//     json_t *jn_list = bit4level(
+//         s_global_permission_level,
+//         gclass->s_user_permission_level,
+//         gclass->__gclass_no_permission_level__
+//     );
+//     return jn_list;
+// }
+//
+// /***************************************************************************
+//  *
+//  ***************************************************************************/
+// PUBLIC json_t *gobj_get_gobj_permission_level(hgobj gobj_)
+// {
+//     GObj_t * gobj = gobj_;
+//     json_t *jn_list;
+//     if(gobj) {
+//         jn_list = bit4level(
+//             s_global_permission_level,
+//             gobj->gclass->s_user_permission_level,
+//             gobj_permission_level(gobj)
+//         );
+//     } else {
+//         jn_list = bit4level(
+//             s_global_permission_level,
+//             0,
+//             __global_permission_level__
+//         );
+//     }
+//     return jn_list;
+// }
+//
+// /***************************************************************************
+//  *
+//  ***************************************************************************/
+// PUBLIC json_t *gobj_get_gobj_no_permission_level(hgobj gobj_)
+// {
+//     GObj_t * gobj = gobj_;
+//     json_t *jn_list = bit4level(
+//         s_global_permission_level,
+//         gobj->gclass->s_user_permission_level,
+//         gobj_no_permission_level(gobj)
+//     );
+//     return jn_list;
+// }
 
 
 
