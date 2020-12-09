@@ -326,7 +326,7 @@ typedef struct sdata_desc_s {
     struct sdata_desc_s *schema;
     const char *resource;
     void (*free_fn)(void *);
-    __ace__ ** __acl__; // list of Access Control List: sequence of __ace__ tuples.
+    void ** __acl__; // not used
 
     /*
      *  Internal use

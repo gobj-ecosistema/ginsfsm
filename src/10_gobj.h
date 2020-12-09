@@ -185,6 +185,8 @@ typedef int (*mt_disable_fn)(hgobj gobj);
 typedef int (*mt_enable_fn)(hgobj gobj);
 typedef int (*mt_trace_on_fn)(hgobj gobj, const char *level, json_t *kw);
 typedef int (*mt_trace_off_fn)(hgobj gobj, const char *level, json_t *kw);
+typedef int (*mt_permission_on_fn)(hgobj gobj, const char *level, json_t *kw);
+typedef int (*mt_permission_off_fn)(hgobj gobj, const char *level, json_t *kw);
 
 typedef void (*mt_gobj_created_fn)(hgobj gobj, hgobj gobj_created);
 
@@ -235,8 +237,8 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_trace_on_fn mt_trace_on;                 // Return webix
     mt_trace_off_fn mt_trace_off;               // Return webix
     mt_gobj_created_fn mt_gobj_created;         // ONLY for __yuno__.
-    future_method_fn mt_future33;
-    future_method_fn mt_future34;
+    mt_permission_on_fn mt_permission_on;       // mt_future33 Return webix
+    mt_permission_off_fn mt_permission_off;     // mt_future34 Return webix
     mt_publish_event_fn mt_publish_event;  // Return -1 (broke), 0 continue without publish, 1 continue and publish
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
@@ -275,21 +277,15 @@ typedef struct { // Internal methods
     const char *permission;
 } LMETHOD;
 
-/* Same as Python Pyramid framework
-    __acl__ = [
-##        (Allow, Authenticated, 'view'),
-##        (Allow, Everyone, 'view'),
-        (Allow, 'group:WebStratusLog', ('view', 'log')),
-        (Allow, 'group:WebStratusControl', ('view', 'action', 'log')),
-        (Allow, 'group:WebStratusAdministracion', ('view', 'new', 'action', 'edit', 'delete', 'log')),
-        DENY_ALL
-        ]
-*/
-
 typedef struct {
     const char *name;
     const char *description;
 } trace_level_t;
+
+typedef struct {
+    const char *name;
+    const char *description;
+} permission_level_t;
 
 typedef enum { // WARNING strings in s_gcflag
     gcflag_manual_start             = 0x0001,   // gobj_start_tree() don't start gobjs of this /gclass.
@@ -306,10 +302,16 @@ typedef struct _GCLASS {
     const LMETHOD *lmt;
     const sdata_desc_t *tattr_desc;
     size_t priv_size;
-    __ace__ ** __acl__; // list of Access Control List: sequence of __ace__ tuples.
     /*
-     *  16 levels of user trace, with name and description, applicable to gobj or gclass (all his instances)
-     *  More until 16 internal system levels.
+     *  Until 32 levels of permissions, with name and description,
+     *  applicable to gobj or gclass (all his instances)
+     *  Plus until 32 global permissions.
+     */
+    const permission_level_t *s_user_permission_level;
+    /*
+     *  16 levels of user trace, with name and description,
+     *  applicable to gobj or gclass (all his instances)
+     *  Plus until 16 global levels.
      */
     const trace_level_t *s_user_trace_level;    // up to 16
     const sdata_desc_t *command_table; // if it exits then mt_command is not used. Both must return a webix json.
@@ -322,6 +324,8 @@ typedef struct _GCLASS {
     uint32_t __gclass_trace_level__;
     uint32_t __gclass_no_trace_level__;
     BOOL fsm_checked;
+    uint64_t __gclass_permission_level__;
+    uint64_t __gclass_no_permission_level__;
 } GCLASS;
 
 
@@ -1302,7 +1306,7 @@ PUBLIC const char * gobj_get_message_error(hgobj gobj);
  *  16 higher bits for global use.
  *  16 lower bits for user use.
  */
-enum {
+enum { /* String table in s_global_trace_level */
     TRACE_MACHINE           = 0x00010000,
     TRACE_CREATE_DELETE     = 0x00020000,
     TRACE_CREATE_DELETE2    = 0x00040000,
@@ -1397,12 +1401,101 @@ PUBLIC json_t *gobj_get_gclass_no_trace_level(GCLASS *gclass);
 PUBLIC json_t *gobj_get_gobj_trace_level(hgobj gobj);
 PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
 
+/*--------------------------------------------*
+ *  Permission functions
+ *--------------------------------------------*/
+/*
+ *  Global permission levels
+ *  32 higher bits for global use.
+ *  32 lower bits for user use.
+ */
+enum { /* String table in s_global_permission_level */
+    PERMISSION_XYXYXYX         = 0x0000000100000000,
+};
+#define PERMISSION_USER_LEVEL    0x00000000FFFFFFFF
+#define PERMISSION_GLOBAL_LEVEL  0xFFFFFFFF00000000
+
+/*
+ *  Global permission level names:
+ *
+ *      "xxxx"
+ */
+
+/*
+ *  gobj_repr_gclass_permission_levels():
+ *      Return [{gclass:null, permission_levels:[s]}]
+ */
+
+PUBLIC json_t * gobj_repr_global_permission_levels(void);
+/*
+ *  gobj_repr_gclass_permission_levels():
+ *      Return [{gclass:s, permission_levels:[s]}]
+ */
+PUBLIC json_t * gobj_repr_gclass_permission_levels(const char *gclass_name);
+
+/*
+ *  Return permission level list (internal and user defined)
+ */
+PUBLIC json_t *gobj_permission_level_list(GCLASS *gclass, BOOL not_internals);
+
+/*
+ *  Return list of permission levels
+ *  Remember decref return
+ */
+PUBLIC json_t *gobj_permission_level_list2(
+    GCLASS *gclass,
+    BOOL with_global_levels,
+    BOOL with_gclass_levels
+);
+
+/*
+ *  Set permission levels and no-set permission levels, in gclass and gobj
+ *      - if gobj is null then the permission level is global.
+ *      - if level is empty, all levels are set/reset.
+ *      - if gobj is not null then call mt_permission_on/mt_permission_off
+ */
+PUBLIC int gobj_set_gobj_permission(hgobj gobj, const char* level, BOOL set, json_t* kw);
+PUBLIC int gobj_set_gclass_permission(GCLASS *gclass, const char *level, BOOL set);
+PUBLIC int gobj_set_global_permission(const char* level, BOOL set); // If level is empty, set all global permissions
+
+/*
+ *  Set no-permission-level
+ */
+PUBLIC int gobj_set_gclass_no_permission(GCLASS *gclass, const char *level, BOOL set);
+PUBLIC int gobj_set_gobj_no_permission(hgobj gobj, const char *level, BOOL set);
+
+/*
+ *  Use this functions to see if you must permission in your gclasses
+ */
+PUBLIC uint64_t gobj_permission_level(hgobj gobj);
+PUBLIC uint64_t gobj_no_permission_level(hgobj gobj);
+
+/*
+ *  Get permissions set in tree of gclass or gobj
+ */
+PUBLIC json_t *gobj_get_gclass_permission_level_list(GCLASS *gclass);
+PUBLIC json_t *gobj_get_gclass_no_permission_level_list(GCLASS *gclass);
+PUBLIC json_t *gobj_get_gobj_permission_level_tree(hgobj gobj);
+PUBLIC json_t *gobj_get_gobj_no_permission_level_tree(hgobj gobj);
+
+/*
+ *  Get permissions set in gclass and gobj (return list of strings)
+ */
+PUBLIC json_t *gobj_get_global_permission_level(void);
+PUBLIC json_t *gobj_get_gclass_permission_level(GCLASS *gclass);
+PUBLIC json_t *gobj_get_gclass_no_permission_level(GCLASS *gclass);
+PUBLIC json_t *gobj_get_gobj_permission_level(hgobj gobj);
+PUBLIC json_t *gobj_get_gobj_no_permission_level(hgobj gobj);
+
+/*--------------------------------------------*
+ *  Print/debug functions
+ *--------------------------------------------*/
 PUBLIC int gobj_print_subscriptions(hgobj gobj);
 PUBLIC int gobj_print_childs(dl_list_t *dl_childs, int verbose_level);
 
-/*
+/*--------------------------------------------*
  *  Stats functions
- */
+ *--------------------------------------------*/
 PUBLIC json_int_t gobj_set_stat(hgobj gobj, const char *path, json_int_t value); // return old value
 PUBLIC json_int_t gobj_incr_stat(hgobj gobj, const char *path, json_int_t value); // return new value
 PUBLIC json_int_t gobj_decr_stat(hgobj gobj, const char *path, json_int_t value); // return new value
