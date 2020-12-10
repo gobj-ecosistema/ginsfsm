@@ -104,7 +104,7 @@ PUBLIC json_t * command_parser(hgobj gobj,
 /***************************************************************************
  *  Find an input parameter
  ***************************************************************************/
-PRIVATE const sdata_desc_t *find_cmd(const sdata_desc_t *command_table, const char *cmd)
+PUBLIC const sdata_desc_t *command_find_cmd(const sdata_desc_t *command_table, const char *cmd)
 {
     const sdata_desc_t *pcmd = command_table;
     while(pcmd->name) {
@@ -158,7 +158,7 @@ PRIVATE BOOL command_in_gobj(
         gbmem_free(str);
         return FALSE;
     }
-    const sdata_desc_t *cnf_cmd = find_cmd(command_table, cmd);
+    const sdata_desc_t *cnf_cmd = command_find_cmd(command_table, cmd);
     gbmem_free(str);
     return cnf_cmd?TRUE:FALSE;
 }
@@ -188,7 +188,7 @@ PRIVATE json_t *expand_command(
         gbmem_free(str);
         return json_local_sprintf("No command");
     }
-    const sdata_desc_t *cnf_cmd = find_cmd(command_table, cmd);
+    const sdata_desc_t *cnf_cmd = command_find_cmd(command_table, cmd);
     if(!cnf_cmd) {
         gbmem_free(str);
         return json_local_sprintf("No '%s' command found in '%s'", cmd, gobj_short_name(gobj));
@@ -603,7 +603,7 @@ PUBLIC json_t *gobj_build_cmds_doc(hgobj gobj, json_t *kw)
     if(!empty_string(cmd)) {
         const sdata_desc_t *cnf_cmd;
         if(gobj_gclass(gobj)->command_table) {
-            cnf_cmd = find_cmd(gobj_gclass(gobj)->command_table, cmd);
+            cnf_cmd = command_find_cmd(gobj_gclass(gobj)->command_table, cmd);
             if(cnf_cmd) {
                 GBUFFER *gbuf = gbuf_create(256, 16*1024, 0, 0);
                 gbuf_printf(gbuf, "%s\n", cmd);
@@ -634,7 +634,7 @@ PUBLIC json_t *gobj_build_cmds_doc(hgobj gobj, json_t *kw)
             while(i_child) {
                 hgobj child = child_;
                 if(gobj_gclass(child)->command_table) {
-                    cnf_cmd = find_cmd(gobj_gclass(child)->command_table, cmd);
+                    cnf_cmd = command_find_cmd(gobj_gclass(child)->command_table, cmd);
                     if(cnf_cmd) {
                         GBUFFER *gbuf = gbuf_create(256, 16*1024, 0, 0);
                         gbuf_printf(gbuf, "%s\n", cmd);

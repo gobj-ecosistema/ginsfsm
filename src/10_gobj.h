@@ -66,7 +66,7 @@ typedef struct {
     const char *next_state;
 } EV_ACTION;
 
-typedef enum {
+typedef enum { // HACK strict ascendent value!, strings in event_flag_names[]
 /*
  *  Event with as "kw_writting": the kw is returned to sender with the kw modified by receiver.
  *  This event is to be used locally, not valid for inter-events.
@@ -79,10 +79,15 @@ typedef enum {
     EVF_NO_WARN_SUBS    = 0x0004,   // Don't warn of "Publish event WITHOUT subscribers"
 } event_flag_t;
 
+typedef enum { // HACK strict ascendent value!, strings in event_authz_names[]
+    AUTHZ_INJECT        = 0x0001,   // "inject" authorization
+    AUTHZ_SUBSCRIBE     = 0x0002,   // "subscribe" authorization
+} event_authz_t;
+
 typedef struct {
     const char *event;
     event_flag_t flag;
-    const char *permission;
+    event_authz_t authz;
     const char *description;
 } EVENT;
 
@@ -188,6 +193,7 @@ typedef int (*mt_trace_on_fn)(hgobj gobj, const char *level, json_t *kw);
 typedef int (*mt_trace_off_fn)(hgobj gobj, const char *level, json_t *kw);
 typedef int (*mt_permission_on_fn)(hgobj gobj, const char *level, json_t *kw);
 typedef int (*mt_permission_off_fn)(hgobj gobj, const char *level, json_t *kw);
+typedef int (*mt_has_permission_fn)(hgobj gobj, const char *level, json_t *kw, hgobj src);
 
 typedef void (*mt_gobj_created_fn)(hgobj gobj, hgobj gobj_created);
 
@@ -243,7 +249,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_publish_event_fn mt_publish_event;  // Return -1 (broke), 0 continue without publish, 1 continue and publish
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
-    future_method_fn mt_future38;
+    mt_has_permission_fn mt_has_permission;   // mt_future38;
     future_method_fn mt_future39;
     mt_create_node_fn mt_create_node;
     mt_update_node_fn mt_update_node;
@@ -278,6 +284,10 @@ typedef struct { // Internal methods
     const char *permission;
 } LMETHOD;
 
+/*
+ *  trace_level_t is used to describe trace levels
+ *  and others like s_gcflag,event_flag_names,event_authz_names
+ */
 typedef struct {
     const char *name;
     const char *description;
@@ -285,10 +295,12 @@ typedef struct {
 
 typedef struct {
     const char *name;
+    const char *operation;
+    const char *path;
     const char *description;
 } permission_level_t;
 
-typedef enum { // WARNING strings in s_gcflag
+typedef enum { // HACK strict ascendent value!, strings in s_gcflag
     gcflag_manual_start             = 0x0001,   // gobj_start_tree() don't start gobjs of this /gclass.
     gcflag_no_check_ouput_events    = 0x0002,   // When publishing don't check events in output_event_list.
     gcflag_ignore_unkwnow_attrs     = 0x0004,   // When creating a gobj, ignore not existing attrs
@@ -1302,6 +1314,11 @@ PUBLIC json_t *gobj_command(
     hgobj src
 );
 
+PUBLIC const sdata_desc_t *gobj_find_command(
+    hgobj gobj,
+    const char *command
+);
+
 /*
  *  gobj_list_childs(): return a list with dicc of child's attrs of typeof inherited gclass
  *  Simulate table with childs
@@ -1508,6 +1525,16 @@ PUBLIC int gobj_set_gobj_no_permission(hgobj gobj, const char *level, BOOL set);
  */
 PUBLIC uint64_t gobj_permission_level(hgobj gobj, json_t *kw, hgobj src);
 PUBLIC uint64_t gobj_no_permission_level(hgobj gobj, json_t *kw, hgobj src);
+
+/*
+ *  Return if __md_user__ in src has permission in gobj in context
+ */
+PUBLIC BOOL gobj_has_permission(
+    hgobj gobj,
+    const char *permission,
+    json_t *context,
+    hgobj src
+);
 
 /*
  *  Get permissions set in tree of gclass or gobj

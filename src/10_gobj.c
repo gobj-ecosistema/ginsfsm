@@ -248,12 +248,13 @@ PRIVATE dl_list_t dl_trans_filter = {0};
 
 PRIVATE kw_match_fn __publish_event_match__ = kw_match_simple;
 /*
- *  gcflag's strings
+ *  Strings of enum gcflag_t gcflag
  */
 PRIVATE const trace_level_t s_gcflag[] = {
 {"manual_start",            "gobj_start_tree() don't start gobjs of this /gclass"},
 {"no_check_ouput_events",   "When publishing don't check events in output_event_list"},
 {"ignore_unkwnow_attrs",    "When creating a gobj, ignore not existing attrs"},
+{"required_start_to_play",  "Require start before play"},
 {0, 0},
 };
 /*
@@ -296,11 +297,23 @@ PRIVATE const permission_level_t s_global_permission_level[32] = {
 {0, 0},
 };
 
-PRIVATE const char *event_flag_names[] = {
-    "EVF_KW_WRITING",
-    "EVF_PUBLIC_EVENT",
-    "EVF_NO_WARN_SUBS",
-    0
+/*
+ *  Strings of enum event_flag_t flag
+ */
+PRIVATE const trace_level_t event_flag_names[] = {
+{"EVF_KW_WRITING",      "kw is not owned by functions, the changes in kw remains through sent events"},
+{"EVF_PUBLIC_EVENT",    "Public event, can be executed from outside of yuno"},
+{"EVF_NO_WARN_SUBS",    "Don't warning about publication without subscribers"},
+{0, 0}
+};
+
+/*
+ *  Strings of enum event_authz_t auth
+ */
+PRIVATE const trace_level_t event_authz_names[] = {
+{"AUTHZ_INJECT",        "Event needs 'inject' authorization to be injected to machine"},
+{"AUTHZ_SUBSCRIBE",     "Event needs 'subscribe' authorization to be subscribed"},
+{0, 0}
 };
 
 PRIVATE json_t *__2key__ = 0;
@@ -5614,7 +5627,7 @@ PUBLIC dl_list_t *gobj_find_subscribings(
 /***************************************************************************
  *  Delete subscription
  ***************************************************************************/
-PRIVATE int _delete_subscription(hsdata subs, BOOL force)
+PRIVATE int _delete_subscription(hsdata subs, BOOL force, BOOL not_inform)
 {
     GObj_t * publisher = sdata_read_pointer(subs, "publisher");
     GObj_t * subscriber = sdata_read_pointer(subs, "subscriber");
@@ -5672,11 +5685,13 @@ PRIVATE int _delete_subscription(hsdata subs, BOOL force)
      *      Inform (BEFORE) of subscription removed
      *------------------------------------------------*/
     if(!(publisher->obflag & obflag_destroyed)) {
-        if(publisher->gclass->gmt.mt_subscription_deleted) {
-            publisher->gclass->gmt.mt_subscription_deleted(
-                publisher,
-                subs
-            );
+        if(!not_inform) {
+            if(publisher->gclass->gmt.mt_subscription_deleted) {
+                publisher->gclass->gmt.mt_subscription_deleted(
+                    publisher,
+                    subs
+                );
+            }
         }
     }
 
@@ -5877,10 +5892,14 @@ PUBLIC hsdata gobj_subscribe_event(
      *      Inform new subscription
      *--------------------------------*/
     if(publisher->gclass->gmt.mt_subscription_added) {
-        publisher->gclass->gmt.mt_subscription_added(
+        int result = publisher->gclass->gmt.mt_subscription_added(
             publisher,
             subs
         );
+        if(result < 0) {
+            _delete_subscription(subs, TRUE, TRUE);
+            subs = 0;
+        }
     }
 
     KW_DECREF(kw);
@@ -5953,7 +5972,7 @@ PUBLIC int gobj_unsubscribe_event(
         hsdata next_subs; rc_instance_t *next_i_subs;
         next_i_subs = rc_next_instance(i_subs, (rc_resource_t **)&next_subs);
 
-        _delete_subscription(subs, 0);
+        _delete_subscription(subs, 0, 0);
         deleted++;
 
         i_subs = next_i_subs;
@@ -5986,7 +6005,7 @@ PUBLIC int gobj_unsubscribe_event2(
     hsdata subs
 )
 {
-    return _delete_subscription(subs, 0);
+    return _delete_subscription(subs, 0, 0);
 }
 
 /***************************************************************************
@@ -6004,7 +6023,7 @@ PUBLIC int gobj_unsubscribe_list(
         hsdata next_subs; rc_instance_t *next_i_subs;
         next_i_subs = rc_next_instance(i_subs, (rc_resource_t **)&next_subs);
 
-        _delete_subscription(subs, force);
+        _delete_subscription(subs, force, 0);
 
         i_subs = next_i_subs;
         subs = next_subs;
@@ -8297,8 +8316,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_publish_event"));
     if(gmt->mt_publication_filter)
         json_array_append_new(jn_methods, json_string("mt_publication_filter"));
-    if(gmt->mt_future38)
-        json_array_append_new(jn_methods, json_string("mt_future38"));
+    if(gmt->mt_has_permission)
+        json_array_append_new(jn_methods, json_string("mt_has_permission"));
     if(gmt->mt_future39)
         json_array_append_new(jn_methods, json_string("mt_future39"));
     if(gmt->mt_create_node)
@@ -8373,29 +8392,47 @@ PRIVATE json_t *internalmethods2json(const LMETHOD *lmt)
 }
 
 /***************************************************************************
- *  Get a gbuffer with type strings
+ *  Return a list with event flag strings
  ***************************************************************************/
-PRIVATE GBUFFER *get_event_flag_names_desc(event_flag_t flag)
+PRIVATE json_t *eventflag2json(event_flag_t flag)
 {
-    GBUFFER *gbuf = gbuf_create(1024, 1024, 0, 0);
-    if(!gbuf) {
-        return 0;
-    }
-    BOOL add_sep = FALSE;
+    json_t *jn_dict = json_object();
 
-    char **name = (char **)event_flag_names;
-    while(*name) {
+    const trace_level_t *ef = event_flag_names;
+    while(ef->name) {
         if(flag & 0x01) {
-            if(add_sep) {
-                gbuf_append(gbuf, "|", 1);
-            }
-            gbuf_append(gbuf, *name, strlen(*name));
-            add_sep = TRUE;
+            json_object_set_new(
+                jn_dict,
+                ef->name,
+                json_string(ef->description?ef->description:"")
+            );
         }
         flag = flag >> 1;
-        name++;
+        ef++;
     }
-    return gbuf;
+    return jn_dict;
+}
+
+/***************************************************************************
+ *  Return a list with event auth strings
+ ***************************************************************************/
+PRIVATE json_t *eventauth2json(event_authz_t authz)
+{
+    json_t *jn_dict = json_object();
+
+    const trace_level_t *ef = event_authz_names;
+    while(ef->name) {
+        if(authz & 0x01) {
+            json_object_set_new(
+                jn_dict,
+                ef->name,
+                json_string(ef->description?ef->description:"")
+            );
+        }
+        authz = authz >> 1;
+        ef++;
+    }
+    return jn_dict;
 }
 
 /***************************************************************************
@@ -8408,22 +8445,8 @@ PRIVATE json_t *events2json(const EVENT *events)
     while(events->event) {
         json_t *jn_ev = json_object();
         json_object_set_new(jn_ev, "id", json_string(events->event));
-
-        GBUFFER *gbuf = get_event_flag_names_desc(events->flag);
-        if(gbuf) {
-            int l = gbuf_leftbytes(gbuf);
-            if(l) {
-                char *pflag = gbuf_get(gbuf, l);
-                json_object_set_new(jn_ev, "flag", json_string(pflag));
-            }
-            gbuf_decref(gbuf);
-        }
-
-        json_object_set_new(
-            jn_ev,
-            "permission",
-            events->permission?json_string(events->permission):json_string("")
-        );
+        json_object_set_new(jn_ev, "flag", eventflag2json(events->flag));
+        json_object_set_new(jn_ev, "authz", eventauth2json(events->authz));
 
         json_object_set_new(
             jn_ev,
@@ -8602,6 +8625,9 @@ PUBLIC const char * gobj_gclass_name(hgobj gobj_)
 PUBLIC GCLASS * gobj_gclass(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
+    if(!gobj) {
+        return 0;
+    }
     return gobj->gclass;
 }
 
@@ -8611,6 +8637,9 @@ PUBLIC GCLASS * gobj_gclass(hgobj gobj_)
 PUBLIC int gobj_instances(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
+    if(!gobj) {
+        return 0;
+    }
     return gobj->gclass->__instances__;
 }
 
@@ -9365,7 +9394,12 @@ PUBLIC BOOL gobj_has_stats(
 /***************************************************************************
  *  Execute a command of gclass command table
  ***************************************************************************/
-PUBLIC json_t *gobj_command(hgobj gobj_, const char *command,  json_t *kw, hgobj src)
+PUBLIC json_t *gobj_command(
+    hgobj gobj_,
+    const char *command,
+    json_t *kw,
+    hgobj src
+)
 {
     GObj_t * gobj = gobj_;
 
@@ -9431,6 +9465,23 @@ PUBLIC json_t *gobj_command(hgobj gobj_, const char *command,  json_t *kw, hgobj
             kw
         );
     }
+}
+
+/***************************************************************************
+ *  Find a command of gclass command table
+ ***************************************************************************/
+PUBLIC const sdata_desc_t *gobj_find_command(
+    hgobj gobj,
+    const char *command
+)
+{
+    if(!gobj) {
+        return 0;
+    }
+    if(gobj_gclass(gobj)->command_table) {
+        return command_find_cmd(gobj_gclass(gobj)->command_table, command);
+    }
+    return 0;
 }
 
 /***************************************************************************
@@ -11760,6 +11811,24 @@ PUBLIC uint64_t gobj_permission_level(hgobj gobj_, json_t *kw, hgobj src)
     }
 
     return bitmask;
+}
+
+/****************************************************************************
+ *  Return if __md_user__ in src has permission in gobj in context
+ ****************************************************************************/
+PUBLIC BOOL gobj_has_permission(
+    hgobj gobj,
+    const char *permission,
+    json_t *context,
+    hgobj src
+)
+{
+    BOOL has_permission = TRUE;
+
+    // TODO
+
+    KW_DECREF(context);
+    return has_permission;
 }
 
 /****************************************************************************

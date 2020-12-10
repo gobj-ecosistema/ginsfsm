@@ -77,21 +77,24 @@ typedef dl_list_t       TYPE_ITER;          // Not for snmp
  *  SData field flags.
  */
 typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
-    SDF_NOTACCESS       = 0x0001,   /* snmp/db exposed as not accessible */
-    SDF_RD              = 0x0002,   /* Field only readable by user */
-    SDF_WR              = 0x0004,   /* Field writable (an readable) by user */
-    SDF_REQUIRED        = 0x0008,   /* Required attribute. Must not be null */
-    SDF_PERSIST         = 0x0010,   /* (implicit SDF_WR) Field must be loaded/saved HACK 7-Feb-2020 */
-    SDF_VOLATIL         = 0x0020,   /* (implicit SDF_RD) Field must not be loaded/saved HACK 7-Feb-2020 */
-    SDF_RESOURCE        = 0x0040,   /* Mark as resource.  Use `schema` to specify the sdata schema */
-    SDF_PKEY            = 0x0080,   /* field used as primary key */
-    SDF_PURECHILD       = 0x0100,   /* Pure child, unique child (For n-1 relation) */
-    SDF_PARENTID        = 0x0200,   /* Field with parent_id in a pure child record */
-    SDF_WILD_CMD        = 0x0400,   /* Command with wild options (no checked) */
-    SDF_STATS           = 0x0800,   /* (implicit SDF_RD) Field with stats (METADATA)*/
-    SDF_FKEY            = 0x1000,   /* Foreign key (no pure child) */
-    SDF_RSTATS          = 0x2000,   /* Field with resettable stats, implicitly SDF_STATS */
-    SDF_PSTATS          = 0x4000,   /* Field with persistent stats, implicitly SDF_STATS */
+    SDF_NOTACCESS   = 0x00000001,   /* snmp/db exposed as not accessible */
+    SDF_RD          = 0x00000002,   /* Field only readable by user */
+    SDF_WR          = 0x00000004,   /* Field writable (an readable) by user */
+    SDF_REQUIRED    = 0x00000008,   /* Required attribute. Must not be null */
+    SDF_PERSIST     = 0x00000010,   /* (implicit SDF_WR) Field must be loaded/saved HACK 7-Feb-2020 */
+    SDF_VOLATIL     = 0x00000020,   /* (implicit SDF_RD) Field must not be loaded/saved HACK 7-Feb-2020 */
+    SDF_RESOURCE    = 0x00000040,   /* Mark as resource.  Use `schema` to specify the sdata schema */
+    SDF_PKEY        = 0x00000080,   /* field used as primary key */
+    SDF_PURECHILD   = 0x00000100,   /* Pure child, unique child (For n-1 relation) */
+    SDF_PARENTID    = 0x00000200,   /* Field with parent_id in a pure child record */
+    SDF_WILD_CMD    = 0x00000400,   /* Command with wild options (no checked) */
+    SDF_STATS       = 0x00000800,   /* (implicit SDF_RD) Field with stats (METADATA)*/
+    SDF_FKEY        = 0x00001000,   /* Foreign key (no pure child) */
+    SDF_RSTATS      = 0x00002000,   /* Field with resettable stats, implicitly SDF_STATS */
+    SDF_PSTATS      = 0x00004000,   /* Field with persistent stats, implicitly SDF_STATS */
+    SDF_RAUTH       = 0x00008000,   /* Read authorization */
+    SDF_WAUTH       = 0x00010000,   /* Write authorization */
+    SDF_XAUTH       = 0x00020000,   /* Execute authorization */
 } sdata_flag_t;
 
 

@@ -97,6 +97,9 @@ PRIVATE const char *sdata_flag_names[] = {
     "SDF_FKEY",
     "SDF_RSTATS",
     "SDF_PSTATS",
+    "SDF_RAUTH",
+    "SDF_WAUTH",
+    "SDF_XAUTH",
     0
 };
 
@@ -1271,8 +1274,19 @@ PUBLIC json_t *cmddesc2json(const sdata_desc_t *it)
     }
 
     json_object_set_new(jn_it, "description", json_string(it->description));
+    GBUFFER *gbuf = get_sdata_flag_desc(it->flag);
+    if(gbuf) {
+        int l = gbuf_leftbytes(gbuf);
+        if(l) {
+            char *pflag = gbuf_get(gbuf, l);
+            json_object_set_new(jn_it, "flag", json_string(pflag));
+        } else {
+            json_object_set_new(jn_it, "flag", json_string(""));
+        }
+        gbuf_decref(gbuf);
+    }
 
-    GBUFFER *gbuf = gbuf_create(256, 16*1024, 0, 0);
+    gbuf = gbuf_create(256, 16*1024, 0, 0);
     gbuf_printf(gbuf, "%s ", it->name);
     const sdata_desc_t *pparam = it->schema;
     while(pparam && pparam->name) {
