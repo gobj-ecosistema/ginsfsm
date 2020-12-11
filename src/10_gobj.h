@@ -80,8 +80,8 @@ typedef enum { // HACK strict ascendent value!, strings in event_flag_names[]
 } event_flag_t;
 
 typedef enum { // HACK strict ascendent value!, strings in event_authz_names[]
-    AUTHZ_INJECT        = 0x0001,   // "inject" authorization
-    AUTHZ_SUBSCRIBE     = 0x0002,   // "subscribe" authorization
+    EV_AUTHZ_INJECT     = 0x0001,   // "inject" authorization
+    EV_AUTHZ_SUBSCRIBE  = 0x0002,   // "subscribe" authorization
 } event_authz_t;
 
 typedef struct {
@@ -107,7 +107,7 @@ typedef void  (*mt_create2_fn)(hgobj gobj, json_t *kw);
 typedef void  (*mt_destroy_fn)(hgobj gobj);
 typedef void  (*mt_writing_fn)(hgobj gobj, const char *name);
 typedef SData_Value_t (*mt_reading_fn)(hgobj gobj, const char *name, int type, SData_Value_t data);
-typedef int   (*mt_subscription_added_fn)(hgobj gobj, hsdata subs);
+typedef int   (*mt_subscription_added_fn)(hgobj gobj, hsdata subs); // Negative return -> subsc deleted
 typedef int   (*mt_subscription_deleted_fn)(hgobj gobj, hsdata subs);
 
 /*
@@ -191,9 +191,9 @@ typedef int (*mt_disable_fn)(hgobj gobj);
 typedef int (*mt_enable_fn)(hgobj gobj);
 typedef int (*mt_trace_on_fn)(hgobj gobj, const char *level, json_t *kw);
 typedef int (*mt_trace_off_fn)(hgobj gobj, const char *level, json_t *kw);
-typedef int (*mt_permission_on_fn)(hgobj gobj, const char *level, json_t *kw);
-typedef int (*mt_permission_off_fn)(hgobj gobj, const char *level, json_t *kw);
-typedef int (*mt_has_permission_fn)(hgobj gobj, const char *level, json_t *kw, hgobj src);
+typedef int (*mt_authz_allow_fn)(hgobj gobj, const char *user, const char *level, json_t *kw);
+typedef int (*mt_authz_deny_fn)(hgobj gobj, const char user, const char *level, json_t *kw);
+typedef int (*mt_has_authz_fn)(hgobj gobj, const char *authz, hgobj src);
 
 typedef void (*mt_gobj_created_fn)(hgobj gobj, hgobj gobj_created);
 
@@ -235,7 +235,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_add_child_resource_link_fn mt_add_child_resource_link;
     mt_delete_child_resource_link_fn mt_delete_child_resource_link;
     mt_get_resource_fn mt_get_resource;
-    future_method_fn mt_future24;
+    json_function_t mt_authorization_parser;  // TODO expand mt_future24 User auth parser. Preference over gclass.authz_table. Return webix.
     mt_authenticate_fn mt_authenticate; // Return webix
     mt_list_childs_fn mt_list_childs;
     mt_stats_updated_fn mt_stats_updated;       // Return 0 if own the stats, or -1 if not.
@@ -244,12 +244,12 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_trace_on_fn mt_trace_on;                 // Return webix
     mt_trace_off_fn mt_trace_off;               // Return webix
     mt_gobj_created_fn mt_gobj_created;         // ONLY for __yuno__.
-    mt_permission_on_fn mt_permission_on;       // mt_future33 Return webix
-    mt_permission_off_fn mt_permission_off;     // mt_future34 Return webix
+    mt_authz_allow_fn mt_authz_allow;   // mt_future33 mt_permission_on Return webix TODO expand
+    mt_authz_deny_fn mt_authz_deny;     // mt_future34 mt_permission_off Return webix TODO expand
     mt_publish_event_fn mt_publish_event;  // Return -1 (broke), 0 continue without publish, 1 continue and publish
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
-    mt_has_permission_fn mt_has_permission;   // mt_future38;
+    mt_has_authz_fn mt_has_authz;   // mt_future38;
     future_method_fn mt_future39;
     mt_create_node_fn mt_create_node;
     mt_update_node_fn mt_update_node;
@@ -281,12 +281,11 @@ typedef struct { // GClass methods (Yuneta framework methods)
 typedef struct { // Internal methods
     const char *lname;
     const internal_method_fn lm;
-    const char *permission;
+    const char *authz;
 } LMETHOD;
 
 /*
  *  trace_level_t is used to describe trace levels
- *  and others like s_gcflag,event_flag_names,event_authz_names
  */
 typedef struct {
     const char *name;
@@ -295,10 +294,8 @@ typedef struct {
 
 typedef struct {
     const char *name;
-    const char *operation;
-    const char *path;
     const char *description;
-} permission_level_t;
+} authz_level_t;
 
 typedef enum { // HACK strict ascendent value!, strings in s_gcflag
     gcflag_manual_start             = 0x0001,   // gobj_start_tree() don't start gobjs of this /gclass.
@@ -315,12 +312,7 @@ typedef struct _GCLASS {
     const LMETHOD *lmt;
     const sdata_desc_t *tattr_desc;
     size_t priv_size;
-    /*
-     *  Until 32 levels of permissions, with name and description,
-     *  applicable to gobj or gclass (all his instances)
-     *  Plus until 32 global permissions.
-     */
-    const permission_level_t *s_user_permission_level;
+    const sdata_desc_t *authz_table;
     /*
      *  16 levels of user trace, with name and description,
      *  applicable to gobj or gclass (all his instances)
@@ -337,8 +329,6 @@ typedef struct _GCLASS {
     uint32_t __gclass_trace_level__;
     uint32_t __gclass_no_trace_level__;
     BOOL fsm_checked;
-    uint64_t __gclass_permission_level__;
-    uint64_t __gclass_no_permission_level__;
 } GCLASS;
 
 
@@ -1016,7 +1006,7 @@ PUBLIC int gobj_add_publication_transformation_filter_fn(
 PUBLIC int gobj_publish_event( // Return the sum of sent events returns.
     hgobj publisher,
     const char *event,
-    json_t *kw  // this kw extends kw_request. It can be modified in mt_future24.
+    json_t *kw  // this kw extends kw_request.
 );
 
 PUBLIC int gobj_send_event(
@@ -1314,8 +1304,8 @@ PUBLIC json_t *gobj_command(
     hgobj src
 );
 
-PUBLIC const sdata_desc_t *gobj_find_command(
-    hgobj gobj,
+PUBLIC const sdata_desc_t *gobj_get_command_desc(
+    GCLASS * gclass,
     const char *command
 );
 
@@ -1461,97 +1451,29 @@ PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
  *  Permission functions
  *--------------------------------------------*/
 /*
- *  Global permission levels
- *  32 higher bits for global use.
- *  32 lower bits for user use.
- */
-enum { /* String table in s_global_permission_level */
-    PERMISSION_XYXYXYX         = 0x0000000100000000,
-};
-#define PERMISSION_USER_LEVEL    0x00000000FFFFFFFF
-#define PERMISSION_GLOBAL_LEVEL  0xFFFFFFFF00000000
-
-/*
- *  Global permission level names:
+ *  Global authorization levels
  *
- *      "xxxx"
+    "__read_attribute__",       "Authorization to read gobj's attributes"
+    "__write_attribute__",      "Authorization to write gobj's attributes"
+    "__execute_command__",      "Authorization to execute gobj's commands"
+    "__event_inject__",         "Authorization to inject events to gobj"
+    "__event_subscribe__",      "Authorization to subscribe events of gobj"
  */
 
-/*
- *  gobj_repr_gclass_permission_levels():
- *      Return [{gclass:null, permission_levels:[s]}]
- */
-
-PUBLIC json_t * gobj_repr_global_permission_levels(void);
-/*
- *  gobj_repr_gclass_permission_levels():
- *      Return [{gclass:s, permission_levels:[s]}]
- */
-PUBLIC json_t * gobj_repr_gclass_permission_levels(const char *gclass_name);
-
-/*
- *  Return permission level list (internal and user defined)
- */
-PUBLIC json_t *gobj_permission_level_list(GCLASS *gclass, BOOL not_internals);
-
-/*
- *  Return list of permission levels
- *  Remember decref return
- */
-PUBLIC json_t *gobj_permission_level_list2(
-    GCLASS *gclass,
-    BOOL with_global_levels,
-    BOOL with_gclass_levels
+PUBLIC const sdata_desc_t *gobj_get_authz_desc(
+    GCLASS * gclass,
+    const char *level
 );
 
 /*
- *  Set permission levels and no-set permission levels, in gclass and gobj
- *      - if gobj is null then the permission level is global.
- *      - if level is empty, all levels are set/reset.
- *      - if gobj is not null then call mt_permission_on/mt_permission_off
+ *  Return if __md_user__ in src has authz in gobj in context
  */
-PUBLIC int gobj_set_gobj_permission(hgobj gobj, const char* level, BOOL set, json_t* kw);
-PUBLIC int gobj_set_gclass_permission(GCLASS *gclass, const char *level, BOOL set);
-PUBLIC int gobj_set_global_permission(const char* level, BOOL set); // If level is empty, set all global permissions
-
-/*
- *  Set no-permission-level
- */
-PUBLIC int gobj_set_gclass_no_permission(GCLASS *gclass, const char *level, BOOL set);
-PUBLIC int gobj_set_gobj_no_permission(hgobj gobj, const char *level, BOOL set);
-
-/*
- *  Use this functions to see if you must permission in your gclasses
- */
-PUBLIC uint64_t gobj_permission_level(hgobj gobj, json_t *kw, hgobj src);
-PUBLIC uint64_t gobj_no_permission_level(hgobj gobj, json_t *kw, hgobj src);
-
-/*
- *  Return if __md_user__ in src has permission in gobj in context
- */
-PUBLIC BOOL gobj_has_permission(
+PUBLIC BOOL gobj_has_authz(
     hgobj gobj,
-    const char *permission,
-    json_t *context,
-    hgobj src
+    const char *level,
+    json_t *kw,
+    hgobj src  // HACK __md_user__ must have user info
 );
-
-/*
- *  Get permissions set in tree of gclass or gobj
- */
-// PUBLIC json_t *gobj_get_gclass_permission_level_list(GCLASS *gclass);
-// PUBLIC json_t *gobj_get_gclass_no_permission_level_list(GCLASS *gclass);
-// PUBLIC json_t *gobj_get_gobj_permission_level_tree(hgobj gobj);
-// PUBLIC json_t *gobj_get_gobj_no_permission_level_tree(hgobj gobj);
-
-/*
- *  Get permissions set in gclass and gobj (return list of strings)
- */
-// PUBLIC json_t *gobj_get_global_permission_level(void);
-// PUBLIC json_t *gobj_get_gclass_permission_level(GCLASS *gclass);
-// PUBLIC json_t *gobj_get_gclass_no_permission_level(GCLASS *gclass);
-// PUBLIC json_t *gobj_get_gobj_permission_level(hgobj gobj);
-// PUBLIC json_t *gobj_get_gobj_no_permission_level(hgobj gobj);
 
 /*--------------------------------------------*
  *  Print/debug functions

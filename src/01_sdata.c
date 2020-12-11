@@ -97,9 +97,10 @@ PRIVATE const char *sdata_flag_names[] = {
     "SDF_FKEY",
     "SDF_RSTATS",
     "SDF_PSTATS",
-    "SDF_RAUTH",
-    "SDF_WAUTH",
-    "SDF_XAUTH",
+    "SDF_AUTHZ_R",
+    "SDF_AUTHZ_W",
+    "SDF_AUTHZ_X",
+    "SDF_AUTHZ_P",
     0
 };
 

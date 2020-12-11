@@ -1,12 +1,12 @@
 /***********************************************************************
- *          COMMAND_PARSER.C
+ *          AUTHORIZATION_PARSER.C
  *
- *          Command parser
+ *          Authorization parser
  *
  *          Copyright (c) 2017 Niyamaka.
  *          All Rights Reserved.
 ***********************************************************************/
-#include "13_command_parser.h"
+#include "13_authorization_parser.h"
 
 /***************************************************************
  *              Constants
@@ -19,20 +19,20 @@
 /***************************************************************
  *              Prototypes
  ***************************************************************/
-PRIVATE BOOL command_in_gobj(
+PRIVATE BOOL authorization_in_gobj(
     hgobj gobj,
-    const char *command
+    const char *authorization
 );
-PRIVATE json_t * expand_command(
+PRIVATE json_t * expand_authorization(
     hgobj gobj,
-    const char *command,
+    const char *authorization,
     json_t *kw,     // NOT owned
-    const sdata_desc_t **cmd_desc
+    const sdata_desc_t **authz_desc
 );
-PRIVATE json_t *build_cmd_kw(
+PRIVATE json_t *build_authz_kw(
     hgobj gobj,
-    const char *command,
-    const sdata_desc_t *cnf_cmd,
+    const char *authorization,
+    const sdata_desc_t *cnf_authz,
     char *parameters,
     json_t *kw, // not owned
     int *result
@@ -45,21 +45,21 @@ PRIVATE json_t *build_cmd_kw(
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t * command_parser(hgobj gobj,
-    const char *command,
+PUBLIC json_t * authorization_parser(hgobj gobj,
+    const char *authorization,
     json_t *kw,
     hgobj src
 )
 {
-    const sdata_desc_t *cnf_cmd = 0;
-    if(!command_in_gobj(gobj, command)) {
+    const sdata_desc_t *cnf_authz = 0;
+    if(!authorization_in_gobj(gobj, authorization)) {
         return msg_iev_build_webix(
             gobj,
             -15,
             json_local_sprintf(
-                "%s: command '%s' not available. Try 'help' command.\n",
+                "%s: authorization '%s' not available. Try 'help' authorization.\n",
                 gobj_short_name(gobj),
-                command
+                authorization
             ),
             0,
             0,
@@ -67,33 +67,33 @@ PUBLIC json_t * command_parser(hgobj gobj,
         );
     }
 
-    json_t *kw_cmd = expand_command(gobj, command, kw, &cnf_cmd);
+    json_t *kw_authz = expand_authorization(gobj, authorization, kw, &cnf_authz);
     if(gobj_trace_level(gobj) & (TRACE_EV_KW)) {
-        log_debug_json(0, kw_cmd, "expanded_command: kw_cmd");
+        log_debug_json(0, kw_authz, "expanded_authorization: kw_authz");
     }
-    if(!cnf_cmd) {
+    if(!cnf_authz) {
         return msg_iev_build_webix(
             gobj,
             -14,
-            kw_cmd,
+            kw_authz,
             0,
             0,
             kw
         );
     }
     json_t *webix = 0;
-    if(cnf_cmd->json_fn) {
-        webix = (cnf_cmd->json_fn)(gobj, cnf_cmd->name, kw_cmd, src);
+    if(cnf_authz->json_fn) {
+        webix = (cnf_authz->json_fn)(gobj, cnf_authz->name, kw_authz, src);
     } else {
         /*
-         *  Redirect command to event
+         *  Redirect authorization to event
          */
         const char *event;
-        if(*cnf_cmd->alias)
-            event = *cnf_cmd->alias;
+        if(*cnf_authz->alias)
+            event = *cnf_authz->alias;
         else
-            event = cnf_cmd->name;
-        gobj_send_event(gobj, event, kw_cmd, src);
+            event = cnf_authz->name;
+        gobj_send_event(gobj, event, kw_authz, src);
         KW_DECREF(kw);
         return 0;   /* asynchronous response */
     }
@@ -104,114 +104,114 @@ PUBLIC json_t * command_parser(hgobj gobj,
 /***************************************************************************
  *  Find an input parameter
  ***************************************************************************/
-PUBLIC const sdata_desc_t *command_get_cmd_desc(const sdata_desc_t *command_table, const char *cmd)
+PUBLIC const sdata_desc_t *authorization_get_authz_desc(const sdata_desc_t *authz_table, const char *authz)
 {
-    const sdata_desc_t *pcmd = command_table;
-    while(pcmd->name) {
+    const sdata_desc_t *pauthz = authz_table;
+    while(pauthz->name) {
         /*
-         *  Alias have precedence if there is no json_fn command function.
-         *  It's the combination to redirect the command as `name` event,
+         *  Alias have precedence if there is no json_fn authorization function.
+         *  It's the combination to redirect the authorization as `name` event,
          */
         BOOL alias_checked = FALSE;
-        if(!pcmd->json_fn && pcmd->alias) {
+        if(!pauthz->json_fn && pauthz->alias) {
             alias_checked = TRUE;
-            const char **alias = pcmd->alias;
+            const char **alias = pauthz->alias;
             while(alias && *alias) {
-                if(strcasecmp(*alias, cmd)==0) {
-                    return pcmd;
+                if(strcasecmp(*alias, authz)==0) {
+                    return pauthz;
                 }
                 alias++;
             }
         }
-        if(strcasecmp(pcmd->name, cmd)==0) {
-            return pcmd;
+        if(strcasecmp(pauthz->name, authz)==0) {
+            return pauthz;
         }
         if(!alias_checked) {
-            const char **alias = pcmd->alias;
+            const char **alias = pauthz->alias;
             while(alias && *alias) {
-                if(strcasecmp(*alias, cmd)==0) {
-                    return pcmd;
+                if(strcasecmp(*alias, authz)==0) {
+                    return pauthz;
                 }
                 alias++;
             }
         }
 
-        pcmd++;
+        pauthz++;
     }
     return 0;
 }
 
 /***************************************************************************
- *  Is a command in the gobj?
+ *  Is a authorization in the gobj?
  ***************************************************************************/
-PRIVATE BOOL command_in_gobj(
+PRIVATE BOOL authorization_in_gobj(
     hgobj gobj,
-    const char *command
+    const char *authorization
 )
 {
-    const sdata_desc_t *command_table = gobj_gclass(gobj)->command_table;
+    const sdata_desc_t *authz_table = gobj_gclass(gobj)->authz_table;
 
     char *str, *p;
-    str = p = gbmem_strdup(command);
-    char *cmd = get_parameter(p, &p);  // dejalo como en expand
-    if(empty_string(cmd)) {
+    str = p = gbmem_strdup(authorization);
+    char *authz = get_parameter(p, &p);  // dejalo como en expand
+    if(empty_string(authz)) {
         gbmem_free(str);
         return FALSE;
     }
-    const sdata_desc_t *cnf_cmd = command_get_cmd_desc(command_table, cmd);
+    const sdata_desc_t *cnf_authz = authorization_get_authz_desc(authz_table, authz);
     gbmem_free(str);
-    return cnf_cmd?TRUE:FALSE;
+    return cnf_authz?TRUE:FALSE;
 }
 
 /***************************************************************************
- *  Return a new kw for command, poping the parameters inside of `command`
- *  If cmd_desc is 0 then there is a error
+ *  Return a new kw for authorization, poping the parameters inside of `authorization`
+ *  If authz_desc is 0 then there is a error
  *  and the return json is a json string message with the error.
  ***************************************************************************/
-PRIVATE json_t *expand_command(
+PRIVATE json_t *expand_authorization(
     hgobj gobj,
-    const char *command,
+    const char *authorization,
     json_t *kw,     // NOT owned
-    const sdata_desc_t **cmd_desc
+    const sdata_desc_t **authz_desc
 )
 {
-    const sdata_desc_t *command_table = gobj_gclass(gobj)->command_table;
+    const sdata_desc_t *authz_table = gobj_gclass(gobj)->authz_table;
 
-    if(cmd_desc) {
-        *cmd_desc = 0; // It's error
+    if(authz_desc) {
+        *authz_desc = 0; // It's error
     }
 
     char *str, *p;
-    str = p = gbmem_strdup(command);
-    char *cmd = get_parameter(p, &p);
-    if(empty_string(cmd)) {
+    str = p = gbmem_strdup(authorization);
+    char *authz = get_parameter(p, &p);
+    if(empty_string(authz)) {
         gbmem_free(str);
-        return json_local_sprintf("No command");
+        return json_local_sprintf("No authorization");
     }
-    const sdata_desc_t *cnf_cmd = command_get_cmd_desc(command_table, cmd);
-    if(!cnf_cmd) {
+    const sdata_desc_t *cnf_authz = authorization_get_authz_desc(authz_table, authz);
+    if(!cnf_authz) {
         gbmem_free(str);
-        return json_local_sprintf("No '%s' command found in '%s'", cmd, gobj_short_name(gobj));
+        return json_local_sprintf("No '%s' authorization found in '%s'", authz, gobj_short_name(gobj));
     }
-    if(cmd_desc) {
-        *cmd_desc = cnf_cmd;
+    if(authz_desc) {
+        *authz_desc = cnf_authz;
     }
 
     int ok = 0;
-    json_t *kw_cmd = build_cmd_kw(gobj, cnf_cmd->name, cnf_cmd, p, kw, &ok);
+    json_t *kw_authz = build_authz_kw(gobj, cnf_authz->name, cnf_authz, p, kw, &ok);
     gbmem_free(str);
     if(ok < 0) {
-        if(cmd_desc) {
-            *cmd_desc = 0;
+        if(authz_desc) {
+            *authz_desc = 0;
         }
-        return kw_cmd;
+        return kw_authz;
     }
-    return kw_cmd;
+    return kw_authz;
 }
 
 
 /***************************************************************************
- *  Parameters of command are described as sdata_desc_t
+ *  Parameters of authorization are described as sdata_desc_t
  ***************************************************************************/
 PRIVATE json_t *parameter2json(hgobj gobj, int type, const char *name, const char *s, int *result)
 {
@@ -319,7 +319,7 @@ PRIVATE const sdata_desc_t *find_ip_parameter(const sdata_desc_t *input_paramete
 /***************************************************************************
  *
  ***************************************************************************/
-PRIVATE const char *sdata_command_type(uint8_t type)
+PRIVATE const char *sdata_authorization_type(uint8_t type)
 {
     if(ASN_IS_STRING(type)) {
         return "string";
@@ -339,11 +339,11 @@ PRIVATE const char *sdata_command_type(uint8_t type)
 /***************************************************************************
  *
  ***************************************************************************/
-PRIVATE void add_command_help(GBUFFER *gbuf, const sdata_desc_t *pcmds, BOOL extended)
+PRIVATE void add_authorization_help(GBUFFER *gbuf, const sdata_desc_t *pauthzs, BOOL extended)
 {
-    if(pcmds->alias) {
-        gbuf_printf(gbuf, "- %-28s (", pcmds->name);
-        const char **alias = pcmds->alias;
+    if(pauthzs->alias) {
+        gbuf_printf(gbuf, "- %-28s (", pauthzs->name);
+        const char **alias = pauthzs->alias;
         if(*alias) {
             gbuf_printf(gbuf, "%s ", *alias);
         }
@@ -352,12 +352,12 @@ PRIVATE void add_command_help(GBUFFER *gbuf, const sdata_desc_t *pcmds, BOOL ext
             gbuf_printf(gbuf, ", %s", *alias);
             alias++;
         }
-        gbuf_printf(gbuf, ")", pcmds->name);
+        gbuf_printf(gbuf, ")", pauthzs->name);
     } else {
-        gbuf_printf(gbuf, "- %-28s", pcmds->name);
+        gbuf_printf(gbuf, "- %-28s", pauthzs->name);
     }
     BOOL add_point = FALSE;
-    const sdata_desc_t *pparam = pcmds->schema;
+    const sdata_desc_t *pparam = pauthzs->schema;
     while(pparam && pparam->name) {
         if((pparam->flag & SDF_REQUIRED) && !(pparam->flag & SDF_PERSIST)) { // TODO PERSITS? why?
             gbuf_printf(gbuf, " <%s>", pparam->name);
@@ -368,20 +368,20 @@ PRIVATE void add_command_help(GBUFFER *gbuf, const sdata_desc_t *pcmds, BOOL ext
         pparam++;
     }
     if(add_point) {
-        gbuf_printf(gbuf, ". %s\n", (pcmds->description)?pcmds->description:"");
+        gbuf_printf(gbuf, ". %s\n", (pauthzs->description)?pauthzs->description:"");
     } else {
-        gbuf_printf(gbuf, " %s\n", (pcmds->description)?pcmds->description:"");
+        gbuf_printf(gbuf, " %s\n", (pauthzs->description)?pauthzs->description:"");
     }
 
     if(extended) {
         gbuf_printf(gbuf, "\n");
-        pparam = pcmds->schema;
+        pparam = pauthzs->schema;
         while(pparam && pparam->name) {
             GBUFFER *gbuf_flag = get_sdata_flag_desc(pparam->flag);
             char *p = gbuf_cur_rd_pointer(gbuf_flag);
             gbuf_printf(gbuf, "    - %-16s Type:%-8s, Desc:%-35s, Flag:%s\n",
                 pparam->name,
-                sdata_command_type(pparam->type),
+                sdata_authorization_type(pparam->type),
                 (pparam->description)?pparam->description:"",
                 p?p:""
             );
@@ -395,17 +395,17 @@ PRIVATE void add_command_help(GBUFFER *gbuf, const sdata_desc_t *pcmds, BOOL ext
  *  string parameters to json dict
  *  If error (result < 0) return a json string message
  ***************************************************************************/
-PRIVATE json_t *build_cmd_kw(
+PRIVATE json_t *build_authz_kw(
     hgobj gobj,
-    const char *command,
-    const sdata_desc_t *cnf_cmd,
+    const char *authorization,
+    const sdata_desc_t *cnf_authz,
     char *parameters,   // input line
     json_t *kw, // not owned
     int *result)
 {
-    const sdata_desc_t *input_parameters = cnf_cmd->schema;
-    BOOL wild_command = (cnf_cmd->flag & SDF_WILD_CMD)?1:0;
-    json_t *kw_cmd = json_object();
+    const sdata_desc_t *input_parameters = cnf_authz->schema;
+    BOOL wild_authorization = (cnf_authz->flag & SDF_WILD_CMD)?1:0;
+    json_t *kw_authz = json_object();
     char *pxxx = parameters;
     char bftemp[1] = {0};
     if(!pxxx) {
@@ -413,10 +413,10 @@ PRIVATE json_t *build_cmd_kw(
     }
 
     if(!input_parameters) {
-        return kw_cmd;
+        return kw_authz;
     }
     /*
-     *  Check required paramters of pure command.
+     *  Check required paramters of pure authorization.
      *  Else, it's a redirect2event, let action check parameters.
      */
     /*
@@ -437,16 +437,16 @@ PRIVATE json_t *build_cmd_kw(
             // Si no está en pxxx buscalo en kw
             json_t *jn_param = kw_get_dict_value(kw, ip->name, 0, 0);
             if(jn_param) {
-                json_object_set(kw_cmd, ip->name, jn_param);
+                json_object_set(kw_authz, ip->name, jn_param);
                 ip++;
                 continue;
             } else {
                 *result = -1;
-                JSON_DECREF(kw_cmd);
+                JSON_DECREF(kw_authz);
                 return json_local_sprintf(
-                    "%s: command '%s', parameter '%s' is required",
+                    "%s: authorization '%s', parameter '%s' is required",
                     gobj_short_name(gobj),
-                    command,
+                    authorization,
                     ip->name
                 );
             }
@@ -454,7 +454,7 @@ PRIVATE json_t *build_cmd_kw(
         if(strchr(param, '=')) {
             // es ya un key=value, falta el required
             *result = -1;
-            JSON_DECREF(kw_cmd);
+            JSON_DECREF(kw_authz);
             return json_local_sprintf(
                 "%s: required parameter '%s' not found",
                 gobj_short_name(gobj),
@@ -463,20 +463,20 @@ PRIVATE json_t *build_cmd_kw(
         }
         json_t *jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
         if(*result < 0) {
-            JSON_DECREF(kw_cmd);
+            JSON_DECREF(kw_authz);
             return jn_param;
         }
         if(!jn_param) {
             *result = -1;
-            JSON_DECREF(kw_cmd);
+            JSON_DECREF(kw_authz);
             return json_local_sprintf(
-                "%s: internal error, command '%s', parameter '%s'",
+                "%s: internal error, authorization '%s', parameter '%s'",
                 gobj_short_name(gobj),
-                command,
+                authorization,
                 ip->name
             );
         }
-        json_object_set_new(kw_cmd, ip->name, jn_param);
+        json_object_set_new(kw_authz, ip->name, jn_param);
 
         ip++;
     }
@@ -495,10 +495,10 @@ PRIVATE json_t *build_cmd_kw(
             const char *param = json_string_value(jn_param);
             jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
             if(*result < 0) {
-                JSON_DECREF(kw_cmd);
+                JSON_DECREF(kw_authz);
                 return jn_param;
             }
-            json_object_set_new(kw_cmd, ip->name, jn_param);
+            json_object_set_new(kw_authz, ip->name, jn_param);
             ip++;
             continue;
         }
@@ -507,10 +507,10 @@ PRIVATE json_t *build_cmd_kw(
             char *param = (char *)ip->default_value;
             jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
             if(*result < 0) {
-                JSON_DECREF(kw_cmd);
+                JSON_DECREF(kw_authz);
                 return jn_param;
             }
-            json_object_set_new(kw_cmd, ip->name, jn_param);
+            json_object_set_new(kw_authz, ip->name, jn_param);
 
             ip++;
             continue;
@@ -532,11 +532,11 @@ PRIVATE json_t *build_cmd_kw(
         if(!value) {
             // Non-required parameter must be key=value format
             *result = -1;
-            JSON_DECREF(kw_cmd);
+            JSON_DECREF(kw_authz);
             return json_local_sprintf(
-                "%s: command '%s', optional parameters must be with key=value format ('%s=?')",
+                "%s: authorization '%s', optional parameters must be with key=value format ('%s=?')",
                 gobj_short_name(gobj),
-                command,
+                authorization,
                 key
             );
         }
@@ -545,78 +545,78 @@ PRIVATE json_t *build_cmd_kw(
         if(ip) {
             jn_param = parameter2json(gobj, ip->type, ip->name, value, result);
         } else {
-            if(wild_command) {
+            if(wild_authorization) {
                 jn_param = parameter2json(gobj, ASN_OCTET_STR, "wild-option", value, result);
             } else {
                 *result = -1;
-                JSON_DECREF(kw_cmd);
+                JSON_DECREF(kw_authz);
                 return json_local_sprintf(
-                    "%s: '%s' command has no option '%s'",
+                    "%s: '%s' authorization has no option '%s'",
                     gobj_short_name(gobj),
-                    command,
+                    authorization,
                     key?key:"?"
                 );
             }
         }
         if(*result < 0) {
-            JSON_DECREF(kw_cmd);
+            JSON_DECREF(kw_authz);
             return jn_param;
         }
         if(!jn_param) {
             *result = -1;
-            JSON_DECREF(kw_cmd);
+            JSON_DECREF(kw_authz);
             jn_param = json_local_sprintf(
-                "%s: internal error, command '%s', parameter '%s', value '%s'",
+                "%s: internal error, authorization '%s', parameter '%s', value '%s'",
                 gobj_short_name(gobj),
-                command,
+                authorization,
                 key,
                 value
             );
             return jn_param;
         }
-        json_object_set_new(kw_cmd, key, jn_param);
+        json_object_set_new(kw_authz, key, jn_param);
     }
 
     if(!empty_string(pxxx)) {
         *result = -1;
-        JSON_DECREF(kw_cmd);
+        JSON_DECREF(kw_authz);
         return json_local_sprintf(
-            "%s: command '%s' with extra parameters: '%s'",
+            "%s: authorization '%s' with extra parameters: '%s'",
             gobj_short_name(gobj),
-            command,
+            authorization,
             pxxx
         );
     }
 
-    json_object_update_missing(kw_cmd, kw); // HACK lo quité y dejó de funcionar el GUI
+    json_object_update_missing(kw_authz, kw); // HACK lo quité y dejó de funcionar el GUI
 
-    return kw_cmd;
+    return kw_authz;
 }
 
 /***************************************************************************
  *  Return a webix json
  ***************************************************************************/
-PUBLIC json_t *gobj_build_cmds_doc(hgobj gobj, json_t *kw)
+PUBLIC json_t *gobj_build_authzs_doc(hgobj gobj, json_t *kw)
 {
     int level = kw_get_int(kw, "level", 0, KW_WILD_NUMBER);
-    const char *cmd = kw_get_str(kw, "cmd", 0, 0);
-    if(!empty_string(cmd)) {
-        const sdata_desc_t *cnf_cmd;
-        if(gobj_gclass(gobj)->command_table) {
-            cnf_cmd = command_get_cmd_desc(gobj_gclass(gobj)->command_table, cmd);
-            if(cnf_cmd) {
+    const char *authz = kw_get_str(kw, "authz", 0, 0);
+    if(!empty_string(authz)) {
+        const sdata_desc_t *cnf_authz;
+        if(gobj_gclass(gobj)->authz_table) {
+            cnf_authz = authorization_get_authz_desc(gobj_gclass(gobj)->authz_table, authz);
+            if(cnf_authz) {
                 GBUFFER *gbuf = gbuf_create(256, 16*1024, 0, 0);
-                gbuf_printf(gbuf, "%s\n", cmd);
-                int len = strlen(cmd);
+                gbuf_printf(gbuf, "%s\n", authz);
+                int len = strlen(authz);
                 while(len > 0) {
                     gbuf_printf(gbuf, "%c", '=');
                     len--;
                 }
                 gbuf_printf(gbuf, "\n");
-                if(!empty_string(cnf_cmd->description)) {
-                    gbuf_printf(gbuf, "%s\n", cnf_cmd->description);
+                if(!empty_string(cnf_authz->description)) {
+                    gbuf_printf(gbuf, "%s\n", cnf_authz->description);
                 }
-                add_command_help(gbuf, cnf_cmd, TRUE);
+                add_authorization_help(gbuf, cnf_authz, TRUE);
                 gbuf_printf(gbuf, "\n");
                 json_t *jn_resp = json_string(gbuf_cur_rd_pointer(gbuf));
                 gbuf_decref(gbuf);
@@ -626,28 +626,28 @@ PUBLIC json_t *gobj_build_cmds_doc(hgobj gobj, json_t *kw)
         }
 
         /*
-         *  Search in Child commands
+         *  Search in Child authorizations
          */
         if(level) {
             hgobj child_;
             rc_instance_t *i_child = gobj_first_child(gobj, &child_);
             while(i_child) {
                 hgobj child = child_;
-                if(gobj_gclass(child)->command_table) {
-                    cnf_cmd = command_get_cmd_desc(gobj_gclass(child)->command_table, cmd);
-                    if(cnf_cmd) {
+                if(gobj_gclass(child)->authz_table) {
+                    cnf_authz = authorization_get_authz_desc(gobj_gclass(child)->authz_table, authz);
+                    if(cnf_authz) {
                         GBUFFER *gbuf = gbuf_create(256, 16*1024, 0, 0);
-                        gbuf_printf(gbuf, "%s\n", cmd);
-                        int len = strlen(cmd);
+                        gbuf_printf(gbuf, "%s\n", authz);
+                        int len = strlen(authz);
                         while(len > 0) {
                             gbuf_printf(gbuf, "%c", '=');
                             len--;
                         }
                         gbuf_printf(gbuf, "\n");
-                        if(!empty_string(cnf_cmd->description)) {
-                            gbuf_printf(gbuf, "%s\n", cnf_cmd->description);
+                        if(!empty_string(cnf_authz->description)) {
+                            gbuf_printf(gbuf, "%s\n", cnf_authz->description);
                         }
-                        add_command_help(gbuf, cnf_cmd, TRUE);
+                        add_authorization_help(gbuf, cnf_authz, TRUE);
                         gbuf_printf(gbuf, "\n");
                         json_t *jn_resp = json_string(gbuf_cur_rd_pointer(gbuf));
                         gbuf_decref(gbuf);
@@ -661,64 +661,64 @@ PUBLIC json_t *gobj_build_cmds_doc(hgobj gobj, json_t *kw)
 
         KW_DECREF(kw);
         return json_local_sprintf(
-            "%s: command '%s' not available.\n",
+            "%s: authorization '%s' not available.\n",
             gobj_short_name(gobj),
-            cmd
+            authz
         );
     }
 
     GBUFFER *gbuf = gbuf_create(256, 64*1024, 0, 0);
-    gbuf_printf(gbuf, "Available commands\n");
-    gbuf_printf(gbuf, "==================\n");
+    gbuf_printf(gbuf, "Available authorizations\n");
+    gbuf_printf(gbuf, "========================\n");
 
     /*
-     *  GObj commands
+     *  GObj authorizations
      */
-    if(gobj_gclass(gobj)->command_table) {
+    if(gobj_gclass(gobj)->authz_table) {
         gbuf_printf(gbuf, "\n> %s\n", gobj_short_name(gobj));
-        const sdata_desc_t *pcmds = gobj_gclass(gobj)->command_table;
-        while(pcmds->name) {
-            if(!empty_string(pcmds->name)) {
-                add_command_help(gbuf, pcmds, FALSE);
+        const sdata_desc_t *pauthzs = gobj_gclass(gobj)->authz_table;
+        while(pauthzs->name) {
+            if(!empty_string(pauthzs->name)) {
+                add_authorization_help(gbuf, pauthzs, FALSE);
             } else {
                 /*
-                *  Empty command (not null) is for print a blank line or a title is desc is not empty
+                *  Empty authorization (not null) is for print a blank line or a title is desc is not empty
                 */
-                if(!empty_string(pcmds->description)) {
-                    gbuf_printf(gbuf, "%s\n", pcmds->description);
+                if(!empty_string(pauthzs->description)) {
+                    gbuf_printf(gbuf, "%s\n", pauthzs->description);
                 } else {
                     gbuf_printf(gbuf, "\n");
                 }
             }
-            pcmds++;
+            pauthzs++;
         }
     }
 
     /*
-     *  Child commands
+     *  Child authorizations
      */
     if(level) {
         hgobj child_;
         rc_instance_t *i_child = gobj_first_child(gobj, &child_);
         while(i_child) {
             hgobj child = child_;
-            if(gobj_gclass(child)->command_table) {
+            if(gobj_gclass(child)->authz_table) {
                 gbuf_printf(gbuf, "\n> %s\n", gobj_short_name(child));
-                const sdata_desc_t *pcmds = gobj_gclass(child)->command_table;
-                while(pcmds->name) {
-                    if(!empty_string(pcmds->name)) {
-                        add_command_help(gbuf, pcmds, FALSE);
+                const sdata_desc_t *pauthzs = gobj_gclass(child)->authz_table;
+                while(pauthzs->name) {
+                    if(!empty_string(pauthzs->name)) {
+                        add_authorization_help(gbuf, pauthzs, FALSE);
                     } else {
                         /*
-                        *  Empty command (not null) is for print a blank line or a title is desc is not empty
+                        *  Empty authorization (not null) is for print a blank line or a title is desc is not empty
                         */
-                        if(!empty_string(pcmds->description)) {
-                            gbuf_printf(gbuf, "%s\n", pcmds->description);
+                        if(!empty_string(pauthzs->description)) {
+                            gbuf_printf(gbuf, "%s\n", pauthzs->description);
                         } else {
                             gbuf_printf(gbuf, "\n");
                         }
                     }
-                    pcmds++;
+                    pauthzs++;
                 }
             }
             i_child = gobj_next_child(i_child, &child_);

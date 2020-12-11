@@ -82,7 +82,7 @@ typedef enum { // Used by monitor_event
     MTOR_EVENT_REFUSED,
 } monitor_event_t;
 
-#define MAX_GOBJ_NAME 48 // WARNING changed from 32 to 48, version 2.4.0 (15/03/2017)
+#define MAX_GOBJ_NAME 48
 
 /****************************************************************
  *         Structures
@@ -191,8 +191,8 @@ typedef struct _GObj_t {
     char oid_changed;
     uint32_t __gobj_trace_level__;
     uint32_t __gobj_no_trace_level__;
-    uint64_t __gobj_permission_level__;
-    uint64_t __gobj_no_permission_level__;
+    uint64_t __gobj_authz_level__;
+    uint64_t __gobj_no_authz_level__;
 } GObj_t;
 
 
@@ -247,16 +247,7 @@ PRIVATE dl_list_t dl_service = {0};
 PRIVATE dl_list_t dl_trans_filter = {0};
 
 PRIVATE kw_match_fn __publish_event_match__ = kw_match_simple;
-/*
- *  Strings of enum gcflag_t gcflag
- */
-PRIVATE const trace_level_t s_gcflag[] = {
-{"manual_start",            "gobj_start_tree() don't start gobjs of this /gclass"},
-{"no_check_ouput_events",   "When publishing don't check events in output_event_list"},
-{"ignore_unkwnow_attrs",    "When creating a gobj, ignore not existing attrs"},
-{"required_start_to_play",  "Require start before play"},
-{0, 0},
-};
+
 /*
  *  Global trace levels
  */
@@ -287,24 +278,49 @@ PRIVATE const trace_level_t s_global_trace_level[16] = {
 
 PRIVATE uint32_t __global_trace_level__ = 0;
 PRIVATE volatile uint32_t __panic_trace__ = 0;
-PRIVATE uint64_t __global_permission_level__ = 0;
 
 /*
- *  Global permission levels
+ *  Strings of enum gcflag_t gcflag
  */
-PRIVATE const permission_level_t s_global_permission_level[32] = {
-{"xyxyxyx",         "Sample permission"},
+typedef struct {
+    const char *name;
+    const char *description;
+} s_gcflag_t;
+
+PRIVATE const s_gcflag_t s_gcflag[] = {
+{"manual_start",            "gobj_start_tree() don't start gobjs of this /gclass"},
+{"no_check_ouput_events",   "When publishing don't check events in output_event_list"},
+{"ignore_unkwnow_attrs",    "When creating a gobj, ignore not existing attrs"},
+{"required_start_to_play",  "Require start before play"},
 {0, 0},
 };
 
 /*
  *  Strings of enum event_flag_t flag
  */
-PRIVATE const trace_level_t event_flag_names[] = {
+typedef struct {
+    const char *name;
+    const char *description;
+} event_flag_names_t;
+
+PRIVATE const event_flag_names_t event_flag_names[] = {
 {"EVF_KW_WRITING",      "kw is not owned by functions, the changes in kw remains through sent events"},
 {"EVF_PUBLIC_EVENT",    "Public event, can be executed from outside of yuno"},
 {"EVF_NO_WARN_SUBS",    "Don't warning about publication without subscribers"},
 {0, 0}
+};
+
+/*---------------------------------------------*
+ *      Global authz levels
+ *---------------------------------------------*/
+PRIVATE sdata_desc_t global_authz_table[] = {
+/*-AUTHZ-- type---------name--------------------flag----alias---items---description--*/
+SDATAAUTHZ (ASN_SCHEMA, "__read_attribute__",   0,      0,      0,      "Authorization to read gobj's attributes"),
+SDATAAUTHZ (ASN_SCHEMA, "__write_attribute__",  0,      0,      0,      "Authorization to write gobj's attributes"),
+SDATAAUTHZ (ASN_SCHEMA, "__execute_command__",  0,      0,      0,      "Authorization to execute gobj's commands"),
+SDATAAUTHZ (ASN_SCHEMA, "__event_inject__",     0,      0,      0,      "Authorization to inject events to gobj"),
+SDATAAUTHZ (ASN_SCHEMA, "__event_subscribe__",  0,      0,      0,      "Authorization to subscribe events of gobj"),
+SDATA_END()
 };
 
 /*
@@ -443,18 +459,6 @@ PRIVATE uint32_t level2bit(
     const char *level
 );
 
-PRIVATE int _set_gobj_permission_level(GObj_t * gobj, const char *level, BOOL set);
-
-PRIVATE json_t *bit4level(
-    const permission_level_t *internal_permission_level,
-    const permission_level_t *user_permission_level,
-    uint64_t bit
-);
-PRIVATE uint64_t level4bit(
-    const permission_level_t *internal_permission_level,
-    const permission_level_t *user_permission_level,
-    const char *level
-);
 
 
 
@@ -8288,8 +8292,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_delete_child_resource_link"));
     if(gmt->mt_get_resource)
         json_array_append_new(jn_methods, json_string("mt_get_resource"));
-    if(gmt->mt_future24)
-        json_array_append_new(jn_methods, json_string("mt_future24"));
+    if(gmt->mt_authorization_parser)
+        json_array_append_new(jn_methods, json_string("mt_authorization_parser"));
     if(gmt->mt_authenticate)
         json_array_append_new(jn_methods, json_string("mt_authenticate"));
     if(gmt->mt_list_childs)
@@ -8306,18 +8310,18 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_trace_off"));
     if(gmt->mt_gobj_created)
         json_array_append_new(jn_methods, json_string("mt_gobj_created"));
-    if(gmt->mt_permission_on)
-        json_array_append_new(jn_methods, json_string("mt_permission_on"));
-    if(gmt->mt_permission_off)
-        json_array_append_new(jn_methods, json_string("mt_permission_off"));
+    if(gmt->mt_authz_allow)
+        json_array_append_new(jn_methods, json_string("mt_authz_allow"));
+    if(gmt->mt_authz_deny)
+        json_array_append_new(jn_methods, json_string("mt_authz_deny"));
     if(gmt->mt_publish_event)
         json_array_append_new(jn_methods, json_string("mt_publish_event"));
     if(gmt->mt_publication_pre_filter)
         json_array_append_new(jn_methods, json_string("mt_publish_event"));
     if(gmt->mt_publication_filter)
         json_array_append_new(jn_methods, json_string("mt_publication_filter"));
-    if(gmt->mt_has_permission)
-        json_array_append_new(jn_methods, json_string("mt_has_permission"));
+    if(gmt->mt_has_authz)
+        json_array_append_new(jn_methods, json_string("mt_has_authz"));
     if(gmt->mt_future39)
         json_array_append_new(jn_methods, json_string("mt_future39"));
     if(gmt->mt_create_node)
@@ -8398,7 +8402,7 @@ PRIVATE json_t *eventflag2json(event_flag_t flag)
 {
     json_t *jn_dict = json_object();
 
-    const trace_level_t *ef = event_flag_names;
+    const event_flag_names_t *ef = event_flag_names;
     while(ef->name) {
         if(flag & 0x01) {
             json_object_set_new(
@@ -9468,18 +9472,18 @@ PUBLIC json_t *gobj_command(
 }
 
 /***************************************************************************
- *  Find a command of gclass command table
+ *  Get the command desc of gclass command table
  ***************************************************************************/
-PUBLIC const sdata_desc_t *gobj_find_command(
-    hgobj gobj,
+PUBLIC const sdata_desc_t *gobj_get_command_desc(
+    GCLASS * gclass,
     const char *command
 )
 {
-    if(!gobj) {
+    if(!gclass) {
         return 0;
     }
-    if(gobj_gclass(gobj)->command_table) {
-        return command_find_cmd(gobj_gclass(gobj)->command_table, command);
+    if(gclass->command_table) {
+        return command_get_cmd_desc(gclass->command_table, command);
     }
     return 0;
 }
@@ -9745,25 +9749,25 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
         )
     );
 
-    json_object_set_new(
-        jn_dict,
-        "gclass_permission_level",
-        bit4level(
-            s_global_permission_level,
-            gclass->s_user_permission_level,
-            gclass->__gclass_permission_level__
-        )
-    );
-
-    json_object_set_new(
-        jn_dict,
-        "gclass_no_permission_level",
-        bit4level(
-            s_global_permission_level,
-            gclass->s_user_permission_level,
-            gclass->__gclass_no_permission_level__
-        )
-    );
+// TODO    json_object_set_new(
+//         jn_dict,
+//         "gclass_authz_level",
+//         bit4level(
+//             s_global_authz_level,
+//             gclass->s_user_authz_level,
+//             gclass->__gclass_authz_level__
+//         )
+//     );
+//
+//     json_object_set_new(
+//         jn_dict,
+//         "gclass_no_authz_level",
+//         bit4level(
+//             s_global_authz_level,
+//             gclass->s_user_authz_level,
+//             gclass->__gclass_no_authz_level__
+//         )
+//     );
 
     json_object_set_new(
         jn_dict,
@@ -11290,749 +11294,40 @@ PRIVATE void trace_machine(const char *fmt, ...)
 
 
 
-/***************************************************************************
- *  Debug print global permission levels in json
- ***************************************************************************/
-PUBLIC json_t * gobj_repr_global_permission_levels(void)
-{
-    json_t *jn_register = json_array();
-
-    json_t *jn_internals = json_object();
-
-    json_t *jn_permission_levels = json_object();
-    json_object_set_new(
-        jn_internals,
-        "permission_levels",
-        jn_permission_levels
-    );
-
-    for(int i=0; i<32; i++) {
-        if(!s_global_permission_level[i].name)
-            break;
-        json_object_set_new(
-            jn_permission_levels,
-            s_global_permission_level[i].name,
-            json_string(s_global_permission_level[i].description)
-        );
-    }
-    json_array_append_new(jn_register, jn_internals);
-
-    return jn_register;
-}
-
-/***************************************************************************
- *  Debug print gclass permission levels in json
- ***************************************************************************/
-PUBLIC json_t * gobj_repr_gclass_permission_levels(const char *gclass_name)
-{
-    json_t *jn_register = json_array();
-
-    if(!empty_string(gclass_name)) {
-        GCLASS *gclass = gobj_find_gclass(gclass_name, FALSE);
-        if(gclass) {
-             json_t *jn_gclass = json_object();
-             json_object_set_new(
-                 jn_gclass,
-                 "gclass",
-                 json_string(gclass->gclass_name)
-             );
-            json_object_set_new(
-                jn_gclass,
-                "permission_levels",
-                gobj_permission_level_list(gclass, TRUE)
-            );
-
-            json_array_append_new(jn_register, jn_gclass);
-        }
-        return jn_register;
-    }
-
-    gclass_register_t *gclass_reg = dl_first(&dl_gclass);
-    while(gclass_reg) {
-        if(gclass_reg->gclass) {
-             json_t *jn_gclass = json_object();
-             json_object_set_new(
-                 jn_gclass,
-                 "gclass",
-                 json_string(gclass_reg->gclass->gclass_name)
-             );
-            json_object_set_new(
-                jn_gclass,
-                "permission_levels",
-                gobj_permission_level_list(gclass_reg->gclass, TRUE)
-            );
-
-            json_array_append_new(jn_register, jn_gclass);
-        }
-
-        gclass_reg = dl_next(gclass_reg);
-    }
-
-    return jn_register;
-}
-
 /****************************************************************************
- *  Return list of permission levels
- *  Remember decref return
+ *  Return if __md_user__ in src has authz in gobj in context
  ****************************************************************************/
-PUBLIC json_t *gobj_permission_level_list(GCLASS *gclass, BOOL not_internals)
-{
-    json_t *jn_dict = json_object();
-    if(!not_internals) {
-        for(int i=0; i<32; i++) {
-            if(!s_global_permission_level[i].name)
-                break;
-            json_object_set_new(
-                jn_dict,
-                s_global_permission_level[i].name,
-                json_string(s_global_permission_level[i].description)
-            );
-        }
-    }
-    if(gclass->s_user_permission_level) {
-        for(int i=0; i<32; i++) {
-            if(!gclass->s_user_permission_level[i].name)
-                break;
-            json_object_set_new(
-                jn_dict,
-                gclass->s_user_permission_level[i].name,
-                json_string(gclass->s_user_permission_level[i].description)
-            );
-        }
-    }
-    return jn_dict;
-}
-
-/****************************************************************************
- *  Return list of permission levels
- *  Remember decref return
- ****************************************************************************/
-PUBLIC json_t *gobj_permission_level_list2(
-    GCLASS *gclass,
-    BOOL with_global_levels,
-    BOOL with_gclass_levels
+PUBLIC BOOL gobj_has_authz(
+    hgobj gobj_,
+    const char *level,
+    json_t *kw,
+    hgobj src  // HACK __md_user__ must have user info
 )
 {
-    json_t *jn_dict = json_object();
-    if(with_global_levels) {
-        for(int i=0; i<32; i++) {
-            if(!s_global_permission_level[i].name)
-                break;
-            json_object_set_new(
-                jn_dict,
-                s_global_permission_level[i].name,
-                json_string(s_global_permission_level[i].description)
-            );
-        }
-    }
-    if(with_gclass_levels) {
-        if(gclass->s_user_permission_level) {
-            for(int i=0; i<32; i++) {
-                if(!gclass->s_user_permission_level[i].name)
-                    break;
-                json_object_set_new(
-                    jn_dict,
-                    gclass->s_user_permission_level[i].name,
-                    json_string(gclass->s_user_permission_level[i].description)
-                );
-            }
-        }
-    }
-    return jn_dict;
-}
-
-/****************************************************************************
- *  Convert 64 bit to string level
- ****************************************************************************/
-PRIVATE json_t *bit4level(
-    const permission_level_t *internal_permission_level,
-    const permission_level_t *user_permission_level,
-    uint64_t bit)
-{
-    json_t *jn_list = json_array();
-    for(int i=0; i<32; i++) {
-        if(!internal_permission_level[i].name) {
-            break;
-        }
-        uint64_t bitmask = 1 << i;
-        bitmask <<= 32;
-        if(bit & bitmask) {
-            json_array_append_new(
-                jn_list,
-                json_string(internal_permission_level[i].name)
-            );
-        }
-    }
-    if(user_permission_level) {
-        for(int i=0; i<32; i++) {
-            if(!user_permission_level[i].name) {
-                break;
-            }
-            uint64_t bitmask = 1 << i;
-            if(bit & bitmask) {
-                json_array_append_new(
-                    jn_list,
-                    json_string(user_permission_level[i].name)
-                );
-            }
-        }
-    }
-    return jn_list;
-}
-
-/****************************************************************************
- *  Convert string level to 64 bit
- ****************************************************************************/
-PRIVATE uint64_t level4bit(
-    const permission_level_t *internal_permission_level,
-    const permission_level_t *user_permission_level,
-    const char *level
-)
-{
-    for(int i=0; i<32; i++) {
-        if(!internal_permission_level[i].name) {
-            break;
-        }
-        if(strcasecmp(level, internal_permission_level[i].name)==0) {
-            uint64_t bitmask = 1 << i;
-            bitmask <<= 32;
-            return bitmask;
-        }
-    }
-    if(user_permission_level) {
-        for(int i=0; i<32; i++) {
-            if(!user_permission_level[i].name) {
-                break;
-            }
-            if(strcasecmp(level, user_permission_level[i].name)==0) {
-                uint64_t bitmask = 1 << i;
-                return bitmask;
-            }
-        }
-    }
-
-    // WARNING Don't log errors, this functions are called in main(), before logger is setup.
-    return 0;
-}
-
-/****************************************************************************
- *  Set or Reset gobj permission level
- *  Call mt_permission_on/mt_permission_off
- ****************************************************************************/
-PUBLIC int gobj_set_gobj_permission(hgobj gobj_, const char *level, BOOL set, json_t *kw)
-{
-    GObj_t * gobj = gobj_;
-    if(!gobj) {
-        int ret = gobj_set_global_permission(level, set);
-        KW_DECREF(kw);
-        return ret;
-    }
-
-    if(_set_gobj_permission_level(gobj, level, set)<0) {
-        return -1;
-    }
-    if(set) {
-        if(gobj->gclass->gmt.mt_permission_on) {
-            return gobj->gclass->gmt.mt_permission_on(gobj, level, kw);
-        }
-    } else {
-        if(gobj->gclass->gmt.mt_permission_off) {
-            return gobj->gclass->gmt.mt_permission_off(gobj, level, kw);
-        }
-    }
-    KW_DECREF(kw);
-    return 0;
-}
-
-/****************************************************************************
- *  Set or Reset gclass permission level
- ****************************************************************************/
-PUBLIC int gobj_set_gclass_permission(GCLASS *gclass, const char *level, BOOL set)
-{
-    uint64_t bitmask = 0;
-
-    if(empty_string(level)) {
-        bitmask = TRACE_USER_LEVEL;
-    } else {
-        if(isdigit(*level)) {
-            bitmask = atoi(level);
-        }
-        if(!bitmask) {
-            bitmask = level4bit(s_global_permission_level, gclass->s_user_permission_level, level);
-            if(!bitmask) {
-                if(__initialized__) {
-                    log_error(0,
-                        "gobj",         "%s", __FILE__,
-                        "function",     "%s", __FUNCTION__,
-                        "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-                        "msg",          "%s", "gclass permission level NOT FOUND",
-                        "gclass",       "%s", gclass->gclass_name,
-                        "level",        "%s", level,
-                        NULL
-                    );
-                }
-                return -1;
-            }
-        }
-    }
-
-    if(set) {
-        /*
-         *  Set
-         */
-        gclass->__gclass_permission_level__ |= bitmask;
-    } else {
-        /*
-         *  Reset
-         */
-        gclass->__gclass_permission_level__ &= ~bitmask;
-    }
-
-    return 0;
-}
-
-/****************************************************************************
- *  Set or Reset gobj permission level
- ****************************************************************************/
-PRIVATE int _set_gobj_permission_level(GObj_t * gobj, const char *level, BOOL set)
-{
-    uint64_t bitmask = 0;
-
-    if(empty_string(level)) {
-        bitmask = TRACE_USER_LEVEL;
-    } else {
-        if(isdigit(*level)) {
-            bitmask = atoi(level);
-        }
-        if(!bitmask) {
-            bitmask = level4bit(s_global_permission_level, gobj->gclass->s_user_permission_level, level);
-            if(!bitmask) {
-                if(__initialized__) {
-                    log_error(0,
-                        "gobj",         "%s", __FILE__,
-                        "function",     "%s", __FUNCTION__,
-                        "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-                        "msg",          "%s", "gclass permission level NOT FOUND",
-                        "gobj_name",    "%s", gobj_short_name(gobj),
-                        "level",        "%s", level,
-                        NULL
-                    );
-                }
-                return -1;
-            }
-        }
-    }
-
-    if(set) {
-        /*
-         *  Set
-         */
-        gobj->__gobj_permission_level__ |= bitmask;
-    } else {
-        /*
-         *  Reset
-         */
-        gobj->__gobj_permission_level__ &= ~bitmask;
-    }
-
-    return 0;
-}
-
-/****************************************************************************
- *  Set or Reset global permission level
- ****************************************************************************/
-PUBLIC int gobj_set_global_permission(const char *level, BOOL set)
-{
-    uint64_t bitmask = 0;
-
-    if(empty_string(level)) {
-        bitmask = TRACE_GLOBAL_LEVEL;
-    } else {
-        if(isdigit(*level)) {
-            bitmask = atoi(level);
-        }
-        if(!bitmask) {
-            bitmask = level4bit(s_global_permission_level, 0, level);
-            if(!bitmask) {
-                if(__initialized__) {
-                    log_error(0,
-                        "gobj",         "%s", __FILE__,
-                        "function",     "%s", __FUNCTION__,
-                        "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-                        "msg",          "%s", "global permission level NOT FOUND",
-                        "level",        "%s", level,
-                        NULL
-                    );
-                }
-                return -1;
-            }
-        }
-    }
-
-    if(set) {
-        /*
-         *  Set
-         */
-        __global_permission_level__ |= bitmask;
-    } else {
-        /*
-         *  Reset
-         */
-        __global_permission_level__ &= ~bitmask;
-    }
-    return 0;
-}
-
-/****************************************************************************
- *  Set or Reset NO gclass permission level
- ****************************************************************************/
-PUBLIC int gobj_set_gclass_no_permission(GCLASS *gclass, const char *level, BOOL set)
-{
-    uint64_t bitmask = 0;
-
-    if(empty_string(level)) {
-        bitmask = -1;
-    } else {
-        if(isdigit(*level)) {
-            bitmask = atoi(level);
-        }
-        if(!bitmask) {
-            bitmask = level4bit(s_global_permission_level, gclass->s_user_permission_level, level);
-            if(!bitmask) {
-                if(__initialized__) {
-                    log_error(0,
-                        "gobj",         "%s", __FILE__,
-                        "function",     "%s", __FUNCTION__,
-                        "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-                        "msg",          "%s", "gclass permission level NOT FOUND",
-                        "gclass",       "%s", gclass->gclass_name,
-                        "level",        "%s", level,
-                        NULL
-                    );
-                }
-                return -1;
-            }
-        }
-    }
-
-    if(set) {
-        /*
-         *  Set
-         */
-        gclass->__gclass_no_permission_level__ |= bitmask;
-    } else {
-        /*
-         *  Reset
-         */
-        gclass->__gclass_no_permission_level__ &= ~bitmask;
-    }
-
-    return 0;
-}
-
-/****************************************************************************
- *  Set or Reset NO gobj permission level
- ****************************************************************************/
-PRIVATE int _set_gobj_no_permission_level(hgobj gobj_, const char *level, BOOL set)
-{
-    GObj_t * gobj = gobj_;
-    if(!gobj) {
-        return 0;
-    }
-    uint64_t bitmask = 0;
-
-    if(empty_string(level)) {
-        bitmask = -1;
-    } else {
-        if(isdigit(*level)) {
-            bitmask = atoi(level);
-        }
-        if(!bitmask) {
-            bitmask = level4bit(s_global_permission_level, gobj->gclass->s_user_permission_level, level);
-            if(!bitmask) {
-                if(__initialized__) {
-                    log_error(0,
-                        "gobj",         "%s", __FILE__,
-                        "function",     "%s", __FUNCTION__,
-                        "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-                        "msg",          "%s", "gclass permission level NOT FOUND",
-                        "gobj_name",    "%s", gobj_short_name(gobj),
-                        "level",        "%s", level,
-                        NULL
-                    );
-                }
-                return -1;
-            }
-        }
-    }
-
-    if(set) {
-        /*
-         *  Set
-         */
-        gobj->__gobj_no_permission_level__ |= bitmask;
-    } else {
-        /*
-         *  Reset
-         */
-        gobj->__gobj_no_permission_level__ &= ~bitmask;
-    }
-
-    return 0;
-}
-
-/****************************************************************************
- *  Set or Reset NO gobj permission level
- ****************************************************************************/
-PUBLIC int gobj_set_gobj_no_permission(hgobj gobj_, const char *level, BOOL set)
-{
-    GObj_t * gobj = gobj_;
-    if(!gobj) {
-        return 0;
-    }
-    _set_gobj_no_permission_level(gobj, level, set);
-
-    return 0;
-}
-
-/****************************************************************************
- *  Return gobj permission level
- ****************************************************************************/
-PUBLIC uint64_t gobj_permission_level(hgobj gobj_, json_t *kw, hgobj src)
-{
-    GObj_t * gobj = gobj_;
-
-    uint64_t bitmask = __global_permission_level__;
-    if(gobj) {
-        bitmask |= gobj->__gobj_permission_level__;
-        if(gobj->gclass) {
-            bitmask |= gobj->gclass->__gclass_permission_level__;
-        }
-    }
-
-    return bitmask;
-}
-
-/****************************************************************************
- *  Return if __md_user__ in src has permission in gobj in context
- ****************************************************************************/
-PUBLIC BOOL gobj_has_permission(
-    hgobj gobj,
-    const char *permission,
-    json_t *context,
-    hgobj src
-)
-{
-    BOOL has_permission = TRUE;
+    BOOL has_authz = TRUE;
 
     // TODO
 
-    KW_DECREF(context);
-    return has_permission;
+    KW_DECREF(kw);
+    return has_authz;
 }
 
-/****************************************************************************
- *  Return gobj no permission level
- ****************************************************************************/
-PUBLIC uint64_t gobj_no_permission_level(hgobj gobj_, json_t *kw, hgobj src)
+/***************************************************************************
+ *  Get the command desc of gclass command table
+ ***************************************************************************/
+PUBLIC const sdata_desc_t *gobj_get_authz_desc(
+    GCLASS * gclass,
+    const char *level
+)
 {
-    GObj_t * gobj = gobj_;
-    if(!gobj || !gobj->gclass) {
+    if(!gclass) {
         return 0;
     }
-    uint64_t bitmask = gobj->__gobj_no_permission_level__ | gobj->gclass->__gclass_no_permission_level__;
-
-    return bitmask;
+    if(gclass->authz_table) {
+        return authorization_get_authz_desc(gclass->authz_table, level);
+    }
+    return 0;
 }
-
-// /***************************************************************************
-//  *
-//  ***************************************************************************/
-// PUBLIC json_t *gobj_get_gclass_permission_level_list(GCLASS *gclass)
-// {
-//     json_t *jn_list = json_array();
-//
-//     if(gclass) {
-//         json_t *jn_levels = gobj_get_gclass_permission_level(gclass);
-//         if(json_array_size(jn_levels)) {
-//             json_t *jn_gclass = json_object();
-//             json_object_set_new(
-//                 jn_gclass,
-//                 "gclass",
-//                 json_string(gclass->gclass_name)
-//             );
-//             json_object_set_new(
-//                 jn_gclass,
-//                 "permission_levels",
-//                 jn_levels
-//             );
-//             json_array_append_new(jn_list, jn_gclass);
-//         } else {
-//             JSON_DECREF(jn_levels);
-//         }
-//         return jn_list;
-//     }
-//
-//     gclass_register_t *gclass_reg = dl_first(&dl_gclass);
-//     while(gclass_reg) {
-//         if(gclass_reg->gclass) {
-//             json_t *jn_levels = gobj_get_gclass_permission_level(gclass_reg->gclass);
-//             if(json_array_size(jn_levels)) {
-//                 json_t *jn_gclass = json_object();
-//                 json_object_set_new(
-//                     jn_gclass,
-//                     "gclass",
-//                     json_string(gclass_reg->gclass->gclass_name)
-//                 );
-//                 json_object_set_new(
-//                     jn_gclass,
-//                     "permission_levels",
-//                     jn_levels
-//                 );
-//                 json_array_append_new(jn_list, jn_gclass);
-//             } else {
-//                 JSON_DECREF(jn_levels);
-//             }
-//         }
-//
-//         gclass_reg = dl_next(gclass_reg);
-//     }
-//
-//     return jn_list;
-// }
-//
-// /***************************************************************************
-//  *
-//  ***************************************************************************/
-// PUBLIC json_t *gobj_get_gclass_no_permission_level_list(GCLASS *gclass)
-// {
-//     json_t *jn_list = json_array();
-//
-//     if(gclass) {
-//         json_t *jn_levels = gobj_get_gclass_no_permission_level(gclass);
-//         if(json_array_size(jn_levels)) {
-//             json_t *jn_gclass = json_object();
-//             json_object_set_new(
-//                 jn_gclass,
-//                 "gclass",
-//                 json_string(gclass->gclass_name)
-//             );
-//             json_object_set_new(
-//                 jn_gclass,
-//                 "permission_levels",
-//                 jn_levels
-//             );
-//             json_array_append_new(jn_list, jn_gclass);
-//         } else {
-//             JSON_DECREF(jn_levels);
-//         }
-//         return jn_list;
-//     }
-//
-//     gclass_register_t *gclass_reg = dl_first(&dl_gclass);
-//     while(gclass_reg) {
-//         if(gclass_reg->gclass) {
-//             json_t *jn_levels = gobj_get_gclass_no_permission_level(gclass_reg->gclass);
-//             if(json_array_size(jn_levels)) {
-//                 json_t *jn_gclass = json_object();
-//                 json_object_set_new(
-//                     jn_gclass,
-//                     "gclass",
-//                     json_string(gclass_reg->gclass->gclass_name)
-//                 );
-//                 json_object_set_new(
-//                     jn_gclass,
-//                     "no_permission_levels",
-//                     jn_levels
-//                 );
-//                 json_array_append_new(jn_list, jn_gclass);
-//             } else {
-//                 JSON_DECREF(jn_levels);
-//             }
-//         }
-//
-//         gclass_reg = dl_next(gclass_reg);
-//     }
-//
-//     return jn_list;
-// }
-//
-// /***************************************************************************
-//  *
-//  ***************************************************************************/
-// PUBLIC json_t *gobj_get_global_permission_level(void)
-// {
-//     json_t *jn_list;
-//     jn_list = bit4level(
-//         s_global_permission_level,
-//         0,
-//         __global_permission_level__
-//     );
-//     return jn_list;
-// }
-//
-// /***************************************************************************
-//  *
-//  ***************************************************************************/
-// PUBLIC json_t *gobj_get_gclass_permission_level(GCLASS *gclass)
-// {
-//     json_t *jn_list = bit4level(
-//         s_global_permission_level,
-//         gclass->s_user_permission_level,
-//         gclass->__gclass_permission_level__ | __global_permission_level__
-//     );
-//     return jn_list;
-// }
-//
-// /***************************************************************************
-//  *
-//  ***************************************************************************/
-// PUBLIC json_t *gobj_get_gclass_no_permission_level(GCLASS *gclass)
-// {
-//     json_t *jn_list = bit4level(
-//         s_global_permission_level,
-//         gclass->s_user_permission_level,
-//         gclass->__gclass_no_permission_level__
-//     );
-//     return jn_list;
-// }
-//
-// /***************************************************************************
-//  *
-//  ***************************************************************************/
-// PUBLIC json_t *gobj_get_gobj_permission_level(hgobj gobj_)
-// {
-//     GObj_t * gobj = gobj_;
-//     json_t *jn_list;
-//     if(gobj) {
-//         jn_list = bit4level(
-//             s_global_permission_level,
-//             gobj->gclass->s_user_permission_level,
-//             gobj_permission_level(gobj)
-//         );
-//     } else {
-//         jn_list = bit4level(
-//             s_global_permission_level,
-//             0,
-//             __global_permission_level__
-//         );
-//     }
-//     return jn_list;
-// }
-//
-// /***************************************************************************
-//  *
-//  ***************************************************************************/
-// PUBLIC json_t *gobj_get_gobj_no_permission_level(hgobj gobj_)
-// {
-//     GObj_t * gobj = gobj_;
-//     json_t *jn_list = bit4level(
-//         s_global_permission_level,
-//         gobj->gclass->s_user_permission_level,
-//         gobj_no_permission_level(gobj)
-//     );
-//     return jn_list;
-// }
 
 
 

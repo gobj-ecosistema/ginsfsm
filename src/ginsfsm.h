@@ -16,6 +16,7 @@
 #include "11_inter_event.h"
 #include "11_istream.h"
 #include "12_msg_ievent.h"
+#include "13_authorization_parser.h"
 #include "13_command_parser.h"
 #include "13_stats_parser.h"
 

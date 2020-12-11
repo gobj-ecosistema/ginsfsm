@@ -92,9 +92,10 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     SDF_FKEY        = 0x00001000,   /* Foreign key (no pure child) */
     SDF_RSTATS      = 0x00002000,   /* Field with resettable stats, implicitly SDF_STATS */
     SDF_PSTATS      = 0x00004000,   /* Field with persistent stats, implicitly SDF_STATS */
-    SDF_RAUTH       = 0x00008000,   /* Read authorization */
-    SDF_WAUTH       = 0x00010000,   /* Write authorization */
-    SDF_XAUTH       = 0x00020000,   /* Execute authorization */
+    SDF_AUTHZ_R     = 0x00008000,   /* Need Attribute 'read' authorization */
+    SDF_AUTHZ_W     = 0x00010000,   /* Need Attribute 'write' authorization */
+    SDF_AUTHZ_X     = 0x00020000,   /* Need Command 'execute' authorization */
+    SDF_AUTHZ_P     = 0x00040000,   /* authorization constraint parameter */
 } sdata_flag_t;
 
 
@@ -261,17 +262,28 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
-
+/*-AUTHZ--type----------name------------flag----alias---items---------------description--*/
+#define SDATAAUTHZ(type_, name_, flag_, alias_, items_, description_) \
+{                                                       \
+    .type=type_,                                        \
+    .name=name_,                                        \
+    .alias=alias_,                                      \
+    .json_fn=0,                                         \
+    .flag=flag_,                                        \
+    .default_value=0,                                   \
+    .description=description_,                          \
+    .resource=0,                                        \
+    .header=0,                                          \
+    .fillsp=0,                                          \
+    .schema=items_,                                     \
+    .free_fn=0,                                         \
+    .__acl__=0,                                         \
+    ._offset=0, ._ln=0, ._suboid=0                      \
+}
 
 /*********************************************************************
  *      Structures
  *********************************************************************/
-typedef struct {
-    const char *action;     // "Allow" or "Deny"
-    const char *principal;  // string representing a userid or a group id
-    const char *permission;
-} __ace__;
-
 /*
  *  Cell functions
  */
