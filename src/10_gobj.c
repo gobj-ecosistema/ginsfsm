@@ -215,6 +215,12 @@ PRIVATE json_t * (*__global_stats_parser_fn__)(
     json_t *kw,
     hgobj src
 ) = 0;
+PRIVATE json_t * (*__global_authz_parser_fn__)(
+    hgobj gobj,
+    const char *stats,
+    json_t *kw,
+    hgobj src
+) = 0;
 PRIVATE int (*__audit_command_cb__)(
     const char *audit_command,
     json_t *kw,
@@ -479,7 +485,8 @@ PUBLIC int gobj_start_up(
     int (*remove_persistent_attrs_fn)(hgobj gobj),
     json_t * (*list_persistent_attrs_fn)(void),
     json_function_t global_command_parser_fn,
-    json_function_t global_stats_parser_fn
+    json_function_t global_stats_parser_fn,
+    json_function_t global_authz_parser_fn
 )
 {
     if(__initialized__) {
@@ -498,6 +505,7 @@ PUBLIC int gobj_start_up(
     __global_list_persistent_attrs_fn__ = list_persistent_attrs_fn;
     __global_command_parser_fn__ = global_command_parser_fn;
     __global_stats_parser_fn__ = global_stats_parser_fn;
+    __global_authz_parser_fn__ = global_authz_parser_fn;
 
     dl_init(&dl_gclass);
     dl_init(&dl_service);
@@ -8322,8 +8330,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_publication_filter"));
     if(gmt->mt_has_authz)
         json_array_append_new(jn_methods, json_string("mt_has_authz"));
-    if(gmt->mt_future39)
-        json_array_append_new(jn_methods, json_string("mt_future39"));
+    if(gmt->mt_enable_authorization)
+        json_array_append_new(jn_methods, json_string("mt_enable_authorization"));
     if(gmt->mt_create_node)
         json_array_append_new(jn_methods, json_string("mt_create_node"));
     if(gmt->mt_update_node)
@@ -11287,12 +11295,67 @@ PRIVATE void trace_machine(const char *fmt, ...)
 
 
 
-                    /*---------------------------------*
-                     *  SECTION: Permission functions
-                     *---------------------------------*/
+                    /*------------------------------------*
+                     *  SECTION: Authorization functions
+                     *------------------------------------*/
 
 
 
+
+/***************************************************************************
+ *  Get the command desc of gclass command table
+ ***************************************************************************/
+PUBLIC const sdata_desc_t *gobj_get_authz_desc(
+    GCLASS * gclass,
+    const char *level
+)
+{
+    if(!gclass) {
+        return 0;
+    }
+    if(gclass->authz_table) {
+        return authorization_get_authz_desc(gclass->authz_table, level);
+    }
+    return 0;
+}
+
+/****************************************************************************
+ *  Enable/Disable authorization engine.
+ *  User in  __md_user__ must have permission to do it.
+ ****************************************************************************/
+PUBLIC int gobj_enable_authorization(
+    hgobj gobj_,
+    BOOL set,
+    json_t *kw,
+    hgobj src
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        KW_DECREF(kw);
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_enable_authorization) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "Without mt_enable_authorization method",
+            NULL
+        );
+        KW_DECREF(kw);
+        return 0;
+    }
+
+    return gobj->gclass->gmt.mt_enable_authorization(gobj, set, kw, src);
+}
 
 /****************************************************************************
  *  Return if __md_user__ in src has authz in gobj in context
@@ -11310,23 +11373,6 @@ PUBLIC BOOL gobj_has_authz(
 
     KW_DECREF(kw);
     return has_authz;
-}
-
-/***************************************************************************
- *  Get the command desc of gclass command table
- ***************************************************************************/
-PUBLIC const sdata_desc_t *gobj_get_authz_desc(
-    GCLASS * gclass,
-    const char *level
-)
-{
-    if(!gclass) {
-        return 0;
-    }
-    if(gclass->authz_table) {
-        return authorization_get_authz_desc(gclass->authz_table, level);
-    }
-    return 0;
 }
 
 

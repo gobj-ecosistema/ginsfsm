@@ -194,6 +194,7 @@ typedef int (*mt_trace_off_fn)(hgobj gobj, const char *level, json_t *kw);
 typedef int (*mt_authz_allow_fn)(hgobj gobj, const char *user, const char *level, json_t *kw);
 typedef int (*mt_authz_deny_fn)(hgobj gobj, const char user, const char *level, json_t *kw);
 typedef int (*mt_has_authz_fn)(hgobj gobj, const char *authz, hgobj src);
+typedef int (*mt_enable_authorization_fn)(hgobj gobj, BOOL set, json_t *kw, hgobj src);
 
 typedef void (*mt_gobj_created_fn)(hgobj gobj, hgobj gobj_created);
 
@@ -244,13 +245,13 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_trace_on_fn mt_trace_on;                 // Return webix
     mt_trace_off_fn mt_trace_off;               // Return webix
     mt_gobj_created_fn mt_gobj_created;         // ONLY for __yuno__.
-    mt_authz_allow_fn mt_authz_allow;   // mt_future33 mt_permission_on Return webix TODO expand
-    mt_authz_deny_fn mt_authz_deny;     // mt_future34 mt_permission_off Return webix TODO expand
+    mt_authz_allow_fn mt_authz_allow;   // mt_future33 mt_permission_on TODO expand
+    mt_authz_deny_fn mt_authz_deny;     // mt_future34 mt_permission_off TODO expand
     mt_publish_event_fn mt_publish_event;  // Return -1 (broke), 0 continue without publish, 1 continue and publish
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
-    mt_has_authz_fn mt_has_authz;   // mt_future38;
-    future_method_fn mt_future39;
+    mt_has_authz_fn mt_has_authz;   // mt_future38; TODO Expand
+    mt_enable_authorization_fn mt_enable_authorization; //   mt_future39; TODO expand
     mt_create_node_fn mt_create_node;
     mt_update_node_fn mt_update_node;
     mt_delete_node_fn mt_delete_node;
@@ -345,7 +346,8 @@ PUBLIC int gobj_start_up(
     int (*remove_persistent_attrs_fn)(hgobj gobj),
     json_t * (*list_persistent_attrs_fn)(void),
     json_function_t global_command_parser_fn,
-    json_function_t global_stats_parser_fn
+    json_function_t global_stats_parser_fn,
+    json_function_t global_authz_parser_fn
 );
 PUBLIC void gobj_shutdown(void);
 PUBLIC BOOL gobj_is_shutdowning(void);
@@ -1448,7 +1450,7 @@ PUBLIC json_t *gobj_get_gobj_trace_level(hgobj gobj);
 PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
 
 /*--------------------------------------------*
- *  Permission functions
+ *      Authorization functions
  *--------------------------------------------*/
 /*
  *  Global authorization levels
@@ -1463,6 +1465,17 @@ PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
 PUBLIC const sdata_desc_t *gobj_get_authz_desc(
     GCLASS * gclass,
     const char *level
+);
+
+/*
+ *  Enable/Disable authorization engine.
+ *  User in  __md_user__ must have permission to do it.
+ */
+PUBLIC int gobj_enable_authorization(
+    hgobj gobj,
+    BOOL set,
+    json_t *kw,
+    hgobj src
 );
 
 /*
