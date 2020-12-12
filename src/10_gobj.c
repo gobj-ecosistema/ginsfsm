@@ -343,7 +343,6 @@ PRIVATE json_t *__2key__ = 0;
 /****************************************************************
  *         Prototypes
  ****************************************************************/
-
 PRIVATE void free_gclass_reg(gclass_register_t *gclass_reg);
 PRIVATE void free_service_reg(service_register_t *srv_reg);
 PRIVATE void free_trans_filter(trans_filter_t *trans_reg);
@@ -512,7 +511,6 @@ PUBLIC int gobj_start_up(
     dl_init(&dl_trans_filter);
 
     gobj_add_publication_transformation_filter_fn("webix", webix_trans_filter);
-
 
     helper_quote2doublequote(treedb_schema_gobjs);
 
@@ -1809,9 +1807,7 @@ PRIVATE hgobj _gobj_create(
      *  of named-gobjs and __root__
      *--------------------------------------*/
     if(gobj->obflag & (obflag_unique_name)) {
-        if(__global_load_persistent_attrs_fn__) {
-            __global_load_persistent_attrs_fn__(gobj);
-        }
+        gobj_load_persistent_attrs(gobj);
     }
 
     /*--------------------------------------*
@@ -5904,14 +5900,10 @@ PUBLIC hsdata gobj_subscribe_event(
      *      Inform new subscription
      *--------------------------------*/
     if(publisher->gclass->gmt.mt_subscription_added) {
-        int result = publisher->gclass->gmt.mt_subscription_added(
+        publisher->gclass->gmt.mt_subscription_added(
             publisher,
             subs
         );
-        if(result < 0) {
-            _delete_subscription(subs, TRUE, TRUE);
-            subs = 0;
-        }
     }
 
     KW_DECREF(kw);
@@ -6249,11 +6241,19 @@ PUBLIC int gobj_publish_event(
      *  Default publication method
      *--------------------------------------------------------------*/
     dl_list_t *dl_subs = &publisher->dl_subscriptions;
+    if(tracea) {
+        trace_msg("====> publish event %s, size dl_subs %d", event, dl_size(dl_subs));
+    }
     int ret_sum = 0;
     int sent_count = 0;
     hsdata subs; rc_instance_t *i_subs;
     i_subs = rc_first_instance(dl_subs, (rc_resource_t **)&subs);
     while(i_subs) {
+        if(tracea) {
+            json_t *jn_subs = sdata2json(subs, -1, 0);
+            log_debug_json(0, jn_subs, "match subs to publish");
+            json_decref(jn_subs);
+        }
         // TODO no protegido contra borrados
         if(publisher->gclass->gmt.mt_publication_pre_filter) {
             int topublish = publisher->gclass->gmt.mt_publication_pre_filter(
@@ -6274,106 +6274,119 @@ PUBLIC int gobj_publish_event(
         }
         subs_flag_t subs_flag = sdata_read_uint64(subs, "subs_flag");
         GObj_t *subscriber = sdata_read_pointer(subs, "subscriber");
-        if(subscriber && !(subscriber->obflag & obflag_destroyed)) {
-            const char *event_ = sdata_read_str(subs, "event");
+        if(!(subscriber && !(subscriber->obflag & obflag_destroyed))) {
             /*
-             *  Check if event null or event in event_list
+             *  Next subs
              */
-            if(empty_string(event_) || strcasecmp(event_, event)==0) {
-                json_t *__config__ = sdata_read_json(subs, "__config__");
-                json_t *__global__ = sdata_read_json(subs, "__global__");
-                json_t *__local__ = sdata_read_json(subs, "__local__");
-                json_t *__filter__ = sdata_read_json(subs, "__filter__");
+            i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+            continue;
+        }
+        const char *event_ = sdata_read_str(subs, "event");
+        /*
+         *  Check if event null or event in event_list
+         */
+        if(empty_string(event_) || strcasecmp(event_, event)==0) {
+            json_t *__config__ = sdata_read_json(subs, "__config__");
+            json_t *__global__ = sdata_read_json(subs, "__global__");
+            json_t *__local__ = sdata_read_json(subs, "__local__");
+            json_t *__filter__ = sdata_read_json(subs, "__filter__");
 
+            if(tracea) {
+                trace_msg("match subs to publish YES");
+            }
+
+            /*
+             *  Check renamed_event
+             */
+            const char *event_name = sdata_read_str(subs, "renamed_event");
+            if(empty_string(event_name)) {
+                event_name = event;
+            }
+
+            /*
+             *  Clone the kw to publish if not shared
+             */
+            json_t *kw2publish = 0;
+            if(subs_flag & __share_kw__) {
+                KW_INCREF(kw);
+                kw2publish = kw;
+            } else {
+                kw2publish = kw_duplicate(kw);
+            }
+
+            /*
+                *  User filter or configured filter
+                */
+            int topublish = 1;
+            if(publisher->gclass->gmt.mt_publication_filter) {
+                topublish = publisher->gclass->gmt.mt_publication_filter(
+                    publisher,
+                    event,
+                    kw2publish,  // not owned
+                    subscriber
+                );
+            } else if(__filter__) {
+                if(__publish_event_match__) {
+                    KW_INCREF(__filter__);
+                    topublish = __publish_event_match__(kw2publish , __filter__);
+                }
+            }
+
+            if(topublish<0) {
+                break;
+            } else if(topublish==0) {
                 /*
-                 *  Check renamed_event
+                 *  Must not be publicated
+                 *  Next subs
                  */
-                const char *event_name = sdata_read_str(subs, "renamed_event");
-                if(empty_string(event_name)) {
-                    event_name = event;
-                }
+                KW_DECREF(kw2publish);
+                i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+                continue;
+            }
 
+            /*
+             *  Remove local keys
+             */
+            if(__local__) {
+                kw_pop(
+                    kw2publish,
+                    __local__ // not owned
+                );
+            }
+
+            /*
+             *  Apply transformation filters
+             */
+            if(__config__) {
+                json_t *jn_trans_filters = kw_get_dict_value(__config__, "__trans_filter__", 0, 0);
+                if(jn_trans_filters) {
+                    kw2publish = apply_trans_filters(kw2publish, jn_trans_filters);
+                }
+            }
+
+            /*
+             *  Add global keys
+             */
+            if(__global__) {
+                json_object_update(kw2publish, __global__);
+            }
+
+            /*
+             *  Send event
+             */
+            ret_sum += gobj_send_event(subscriber, event_name, kw2publish, publisher);
+
+            sent_count++;
+
+            if(publisher->obflag & obflag_destroyed) {
                 /*
-                 *  Clone the kw to publish if not shared
+                 *  break all, self publisher deleted
                  */
-                json_t *kw2publish = 0;
-                if(subs_flag & __share_kw__) {
-                    KW_INCREF(kw);
-                    kw2publish = kw;
-                } else {
-                    kw2publish = kw_duplicate(kw);
-                }
-
-                /*
-                 *  User filter or configured filter
-                 */
-                int topublish = 1;
-                if(publisher->gclass->gmt.mt_publication_filter) {
-                    topublish = publisher->gclass->gmt.mt_publication_filter(
-                        publisher,
-                        event,
-                        kw2publish,  // not owned
-                        subscriber
-                    );
-                } else if(__filter__) {
-                    if(__publish_event_match__) {
-                        KW_INCREF(__filter__);
-                        topublish = __publish_event_match__(kw2publish , __filter__);
-                    }
-                }
-
-                if(topublish<0) {
-                    break;
-                } else if(topublish==0) {
-                    /*
-                     *  Must not be publicated
-                     *  Next subs
-                     */
-                    KW_DECREF(kw2publish);
-                    i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
-                    continue;
-                }
-
-                /*
-                 *  Remove local keys
-                 */
-                if(__local__) {
-                    kw_pop(
-                        kw2publish,
-                        __local__ // not owned
-                    );
-                }
-
-                /*
-                 *  Apply transformation filters
-                 */
-                if(__config__) {
-                    json_t *jn_trans_filters = kw_get_dict_value(__config__, "__trans_filter__", 0, 0);
-                    if(jn_trans_filters) {
-                        kw2publish = apply_trans_filters(kw2publish, jn_trans_filters);
-                    }
-                }
-
-                /*
-                 *  Add global keys
-                 */
-                if(__global__) {
-                    json_object_update(kw2publish, __global__);
-                }
-
-                /*
-                 *  Send event
-                 */
-                ret_sum += gobj_send_event(subscriber, event_name, kw2publish, publisher);
-
-                sent_count++;
-
-                if(publisher->obflag & obflag_destroyed) {
-                    /*
-                     *  break all, self publisher deleted
-                     */
-                    break;
-                }
+                break;
+            }
+        } else {
+            if(tracea) {
+                trace_msg("match subs to publish NO");
             }
         }
 
