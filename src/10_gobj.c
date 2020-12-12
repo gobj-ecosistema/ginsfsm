@@ -6241,19 +6241,11 @@ PUBLIC int gobj_publish_event(
      *  Default publication method
      *--------------------------------------------------------------*/
     dl_list_t *dl_subs = &publisher->dl_subscriptions;
-    if(tracea) {
-        trace_msg("====> publish event %s, size dl_subs %d", event, dl_size(dl_subs));
-    }
     int ret_sum = 0;
     int sent_count = 0;
     hsdata subs; rc_instance_t *i_subs;
     i_subs = rc_first_instance(dl_subs, (rc_resource_t **)&subs);
     while(i_subs) {
-        if(tracea) {
-            json_t *jn_subs = sdata2json(subs, -1, 0);
-            log_debug_json(0, jn_subs, "match subs to publish");
-            json_decref(jn_subs);
-        }
         // TODO no protegido contra borrados
         if(publisher->gclass->gmt.mt_publication_pre_filter) {
             int topublish = publisher->gclass->gmt.mt_publication_pre_filter(
@@ -6290,10 +6282,6 @@ PUBLIC int gobj_publish_event(
             json_t *__global__ = sdata_read_json(subs, "__global__");
             json_t *__local__ = sdata_read_json(subs, "__local__");
             json_t *__filter__ = sdata_read_json(subs, "__filter__");
-
-            if(tracea) {
-                trace_msg("match subs to publish YES");
-            }
 
             /*
              *  Check renamed_event
@@ -6383,10 +6371,6 @@ PUBLIC int gobj_publish_event(
                  *  break all, self publisher deleted
                  */
                 break;
-            }
-        } else {
-            if(tracea) {
-                trace_msg("match subs to publish NO");
             }
         }
 
