@@ -8330,8 +8330,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_publication_filter"));
     if(gmt->mt_has_authz)
         json_array_append_new(jn_methods, json_string("mt_has_authz"));
-    if(gmt->mt_enable_authorization)
-        json_array_append_new(jn_methods, json_string("mt_enable_authorization"));
+    if(gmt->mt_future39)
+        json_array_append_new(jn_methods, json_string("mt_future39"));
     if(gmt->mt_create_node)
         json_array_append_new(jn_methods, json_string("mt_create_node"));
     if(gmt->mt_update_node)
@@ -11317,44 +11317,6 @@ PUBLIC const sdata_desc_t *gobj_get_authz_desc(
         return authorization_get_authz_desc(gclass->authz_table, level);
     }
     return 0;
-}
-
-/****************************************************************************
- *  Enable/Disable authorization engine.
- *  User in  __md_user__ must have permission to do it.
- ****************************************************************************/
-PUBLIC int gobj_enable_authorization(
-    hgobj gobj_,
-    BOOL set,
-    json_t *kw,
-    hgobj src
-)
-{
-    GObj_t *gobj = gobj_;
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        KW_DECREF(kw);
-        return 0;
-    }
-    if(!gobj->gclass->gmt.mt_enable_authorization) {
-        log_error(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "Without mt_enable_authorization method",
-            NULL
-        );
-        KW_DECREF(kw);
-        return 0;
-    }
-
-    return gobj->gclass->gmt.mt_enable_authorization(gobj, set, kw, src);
 }
 
 /****************************************************************************
