@@ -319,13 +319,42 @@ PRIVATE const event_flag_names_t event_flag_names[] = {
 /*---------------------------------------------*
  *      Global authz levels
  *---------------------------------------------*/
+PRIVATE sdata_desc_t pm_read_attr[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "path",         0,              0,          "Attribute path"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_write_attr[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "path",         0,              0,          "Attribute path"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_exec_cmd[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "command",      0,              0,          "Command name"),
+SDATAPM (ASN_JSON,      "kw",           0,              0,          "command's kw"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_inject_event[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "event",        0,              0,          "Event name"),
+SDATAPM (ASN_JSON,      "kw",           0,              0,          "event's kw"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_subs_event[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "event",        0,              0,          "Event name"),
+SDATAPM (ASN_JSON,      "kw",           0,              0,          "event's kw"),
+SDATA_END()
+};
+
 PRIVATE sdata_desc_t global_authz_table[] = {
 /*-AUTHZ-- type---------name--------------------flag----alias---items---description--*/
-SDATAAUTHZ (ASN_SCHEMA, "__read_attribute__",   0,      0,      0,      "Authorization to read gobj's attributes"),
-SDATAAUTHZ (ASN_SCHEMA, "__write_attribute__",  0,      0,      0,      "Authorization to write gobj's attributes"),
-SDATAAUTHZ (ASN_SCHEMA, "__execute_command__",  0,      0,      0,      "Authorization to execute gobj's commands"),
-SDATAAUTHZ (ASN_SCHEMA, "__event_inject__",     0,      0,      0,      "Authorization to inject events to gobj"),
-SDATAAUTHZ (ASN_SCHEMA, "__event_subscribe__",  0,      0,      0,      "Authorization to subscribe events of gobj"),
+SDATAAUTHZ (ASN_SCHEMA, "__read_attribute__",   0,      0,      pm_read_attr, "Authorization to read gobj's attributes"),
+SDATAAUTHZ (ASN_SCHEMA, "__write_attribute__",  0,      0,      pm_write_attr, "Authorization to write gobj's attributes"),
+SDATAAUTHZ (ASN_SCHEMA, "__execute_command__",  0,      0,      pm_exec_cmd, "Authorization to execute gobj's commands"),
+SDATAAUTHZ (ASN_SCHEMA, "__inject_event__",     0,      0,      pm_inject_event, "Authorization to inject events to gobj"),
+SDATAAUTHZ (ASN_SCHEMA, "__subscribe_event__",  0,      0,      pm_subs_event, "Authorization to subscribe events of gobj"),
 SDATA_END()
 };
 
@@ -333,8 +362,8 @@ SDATA_END()
  *  Strings of enum event_authz_t auth
  */
 PRIVATE const trace_level_t event_authz_names[] = {
-{"AUTHZ_INJECT",        "Event needs 'inject' authorization to be injected to machine"},
-{"AUTHZ_SUBSCRIBE",     "Event needs 'subscribe' authorization to be subscribed"},
+{"AUTHZ_INJECT",        "Event needs '__inject_event__' authorization to be injected to machine"},
+{"AUTHZ_SUBSCRIBE",     "Event needs '__subscribe_event__' authorization to be subscribed"},
 {0, 0}
 };
 
@@ -5786,6 +5815,47 @@ PUBLIC hsdata gobj_subscribe_event(
     }
 
     /*-------------------------------------------------*
+     *  Check AUTHZ
+     *-------------------------------------------------*/
+    const EVENT *output_event_list = gobj_output_event_list(publisher);
+    while(output_event_list->event) {
+        if(output_event_list->authz & EV_AUTHZ_INJECT) {
+            const char *event = output_event_list->event?output_event_list->event:"";
+            /*
+             *  AUTHZ Required
+             */
+            json_t *kw_authz = json_pack("{s:s}",
+                "event", event
+            );
+            if(kw) {
+                json_object_set(kw_authz, "kw", kw);
+            } else {
+                json_object_set_new(kw_authz, "kw", json_object());
+            }
+            if(!gobj_has_authz(
+                publisher_,
+                "__subscribe_event__",
+                kw_authz,
+                subscriber_
+            )) {
+                log_error(0,
+                    "gobj",         "%s", gobj_full_name(publisher_),
+                    "function",     "%s", __FUNCTION__,
+                    "msgset",       "%s", MSGSET_OAUTH_ERROR,
+                    "msg",          "%s", "No permission to subscribe event",
+                    "user",         "%s", gobj_get_user(subscriber_),
+                    "gclass",       "%s", gobj_gclass_name(publisher_),
+                    "event",        "%s", event?event:"",
+                    NULL
+                );
+                KW_DECREF(kw);
+                return 0;
+            }
+        }
+        output_event_list++;
+    }
+
+    /*-------------------------------------------------*
      *
      *-------------------------------------------------*/
     if(empty_string(event) || strchr(event, '*')) {
@@ -6416,10 +6486,12 @@ PUBLIC int gobj_publish_event(
  *  and transparents for me.
  *
  *  Return:
- *      - no destine or destine destroyed:      -100
- *      - event not accepted:                   -101
+ *      - no permission:.                       -403
+ *      - no destine or destine destroyed:      -1000
+ *      - event not accepted:                   -1001
  *      - if event is accepted:
- *          - no action:                        -102
+ *          - no action:                        -1002
+ *          - input event not defined           -1003
  *          - an action is defined:             the return of action.
  ***************************************************************************/
 #define RETEVENT_NO_GOBJ                    -1000
@@ -6525,6 +6597,38 @@ PUBLIC int gobj_send_event(
         return RETEVENT_INPUT_EVENT_NOT_DEFINED;
     }
 
+    /*----------------------------------*
+     *  Check AUTHZ
+     *----------------------------------*/
+    if(ev_desc->authz & EV_AUTHZ_INJECT) {
+        /*
+         *  AUTHZ Required
+         */
+        json_t *kw_authz = json_pack("{s:s}",
+            "event", event
+        );
+        if(kw) {
+            json_object_set(kw_authz, "kw", kw);
+        } else {
+            json_object_set_new(kw_authz, "kw", json_object());
+        }
+        if(!gobj_has_authz(
+                dst, "__inject_event__", kw_authz, src)
+          ) {
+            log_error(0,
+                "gobj",         "%s", gobj_full_name(dst),
+                "function",     "%s", __FUNCTION__,
+                "msgset",       "%s", MSGSET_OAUTH_ERROR,
+                "msg",          "%s", "No permission to inject event",
+                "user",         "%s", gobj_get_user(src),
+                "gclass",       "%s", gobj_gclass_name(dst),
+                "event",        "%s", event?event:"",
+                NULL
+            );
+            KW_DECREF(kw);
+            return -403;
+        }
+    }
 
     /*----------------------------------*
      *  Search event in current state
@@ -7501,10 +7605,12 @@ PUBLIC void *gobj_danger_attr_ptr2(hgobj gobj, const char *name, const sdata_des
 /***************************************************************************
  *  ATTR: read str
  *  Return is yours! Must be decref. New api (May/2019), js style
+ *  With AUTHZ
  ***************************************************************************/
 PUBLIC json_t *gobj_read_attr(
     hgobj gobj,
-    const char *name
+    const char *name,
+    hgobj src
 )
 {
     hsdata hs = gobj_hsdata2(gobj, name, FALSE);
@@ -7521,8 +7627,29 @@ PUBLIC json_t *gobj_read_attr(
         return 0;
     }
 
-    json_t *jn_value = 0;
     const sdata_desc_t *it = sdata_it_desc(sdata_schema(hs), name);
+    if(it->flag & SDF_AUTHZ_W) {
+        /*
+         *  AUTHZ Required
+         */
+        if(!gobj_has_authz(
+                gobj, "__read_attribute__", json_pack("{s:s}", "path", name), src)
+          ) {
+            log_error(0,
+                "gobj",         "%s", gobj_full_name(gobj),
+                "function",     "%s", __FUNCTION__,
+                "msgset",       "%s", MSGSET_OAUTH_ERROR,
+                "msg",          "%s", "No permission to read attribute",
+                "user",         "%s", gobj_get_user(src),
+                "gclass",       "%s", gobj_gclass_name(gobj),
+                "attr",         "%s", name?name:"",
+                NULL
+            );
+            return 0;
+        }
+    }
+
+    json_t *jn_value = 0;
 
     if(ASN_IS_STRING(it->type)) {
         jn_value = json_string(sdata_read_str(hs, name));
@@ -7899,14 +8026,16 @@ PUBLIC SData_Value_t gobj_read_default_attr_value(hgobj gobj, const char* name) 
 /***************************************************************************
  *  ATTR: write
  *  New api (May/2019), js style
+ *  With AUTHZ
  ***************************************************************************/
 PUBLIC int gobj_write_attr(
     hgobj gobj,
-    const char *name,
-    json_t *value  // owned
+    const char *path,
+    json_t *value,  // owned
+    hgobj src
 )
 {
-    hsdata hs = gobj_hsdata2(gobj, name, FALSE);
+    hsdata hs = gobj_hsdata2(gobj, path, FALSE);
     if(!hs) {
         log_warning(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
@@ -7914,35 +8043,57 @@ PUBLIC int gobj_write_attr(
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute NOT FOUND",
             "gclass",       "%s", gobj_gclass_name(gobj),
-            "attr",         "%s", name?name:"",
+            "attr",         "%s", path?path:"",
             NULL
         );
         JSON_DECREF(value);
         return -1;
     }
 
+    const sdata_desc_t *it = sdata_it_desc(sdata_schema(hs), path);
+    if(it->flag & SDF_AUTHZ_W) {
+        /*
+         *  AUTHZ Required
+         */
+        if(!gobj_has_authz(
+                gobj, "__write_attribute__", json_pack("{s:s}", "path", path), src)
+          ) {
+            log_error(0,
+                "gobj",         "%s", gobj_full_name(gobj),
+                "function",     "%s", __FUNCTION__,
+                "msgset",       "%s", MSGSET_OAUTH_ERROR,
+                "msg",          "%s", "No permission to write attribute",
+                "user",         "%s", gobj_get_user(src),
+                "gclass",       "%s", gobj_gclass_name(gobj),
+                "attr",         "%s", path?path:"",
+                NULL
+            );
+            JSON_DECREF(value);
+            return -403;
+        }
+    }
+
     int ret;
-    const sdata_desc_t *it = sdata_it_desc(sdata_schema(hs), name);
 
     if(ASN_IS_STRING(it->type)) {
-        ret = sdata_write_str(hs, name, json_string_value(value));
+        ret = sdata_write_str(hs, path, json_string_value(value));
     } else if(ASN_IS_BOOLEAN(it->type)) {
-        ret = sdata_write_bool(hs, name, json_boolean_value(value));
+        ret = sdata_write_bool(hs, path, json_boolean_value(value));
     } else if(ASN_IS_UNSIGNED32(it->type)) {
-        ret = sdata_write_uint32(hs, name, json_integer_value(value));
+        ret = sdata_write_uint32(hs, path, json_integer_value(value));
     } else if(ASN_IS_SIGNED32(it->type)) {
-        ret = sdata_write_int32(hs, name, json_integer_value(value));
+        ret = sdata_write_int32(hs, path, json_integer_value(value));
     } else if(ASN_IS_UNSIGNED64(it->type)) {
-        ret = sdata_write_uint64(hs, name, json_integer_value(value));
+        ret = sdata_write_uint64(hs, path, json_integer_value(value));
     } else if(ASN_IS_SIGNED64(it->type)) {
-        ret = sdata_write_int64(hs, name, json_integer_value(value));
+        ret = sdata_write_int64(hs, path, json_integer_value(value));
     } else if(ASN_IS_DOUBLE(it->type)) {
-        ret = sdata_write_real(hs, name, json_real_value(value));
+        ret = sdata_write_real(hs, path, json_real_value(value));
     } else if(ASN_IS_JSON(it->type)) {
-        ret = sdata_write_json(hs, name, value); // WARNING json is incref
+        ret = sdata_write_json(hs, path, value); // WARNING json is incref
         JSON_DECREF(value);
     } else if(ASN_IS_POINTER(it->type)) {
-        ret = sdata_write_pointer(hs, name, (void *)(size_t)json_integer_value(value));
+        ret = sdata_write_pointer(hs, path, (void *)(size_t)json_integer_value(value));
     } else {
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
@@ -7950,7 +8101,7 @@ PUBLIC int gobj_write_attr(
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute Type NOT VALID",
             "gclass",       "%s", gobj_gclass_name(gobj),
-            "attr",         "%s", name?name:"",
+            "attr",         "%s", path?path:"",
             NULL
         );
         ret = -1;
@@ -8232,7 +8383,8 @@ PUBLIC json_t *gobj_get_writable_attrs(hgobj gobj) // Return is yours, decref!
  ***************************************************************************/
 PUBLIC int gobj_update_writable_attrs(
     hgobj gobj,
-    json_t *jn_attrs // owned
+    json_t *jn_attrs, // owned
+    hgobj src
 )
 {
     int ret = 0;
@@ -8240,7 +8392,7 @@ PUBLIC int gobj_update_writable_attrs(
     json_object_foreach(jn_attrs, key, jn_attr) {
         if(gobj_is_writable_attr(gobj, key)) {
             JSON_INCREF(jn_attr);
-            ret += gobj_write_attr(gobj, key, jn_attr);
+            ret += gobj_write_attr(gobj, key, jn_attr, src);
         }
     }
 
@@ -9407,7 +9559,7 @@ PUBLIC BOOL gobj_has_stats(
 /***************************************************************************
  *  Execute a command of gclass command table
  ***************************************************************************/
-PUBLIC json_t *gobj_command(
+PUBLIC json_t *gobj_command( // With AUTHZ
     hgobj gobj_,
     const char *command,
     json_t *kw,
@@ -9722,8 +9874,13 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
     );
     json_object_set_new(
         jn_dict,
-        "ACL", // Access Control List
-        json_array() // TODO
+        "ACL gclass", // Access Control List
+        sdatacmd2json(gclass->authz_table)
+    );
+    json_object_set_new(
+        jn_dict,
+        "ACL global",
+        sdatacmd2json(global_authz_table)
     );
 
     json_object_set_new(
@@ -9757,26 +9914,6 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
             gclass->__gclass_no_trace_level__
         )
     );
-
-// TODO    json_object_set_new(
-//         jn_dict,
-//         "gclass_authz_level",
-//         bit4level(
-//             s_global_authz_level,
-//             gclass->s_user_authz_level,
-//             gclass->__gclass_authz_level__
-//         )
-//     );
-//
-//     json_object_set_new(
-//         jn_dict,
-//         "gclass_no_authz_level",
-//         bit4level(
-//             s_global_authz_level,
-//             gclass->s_user_authz_level,
-//             gclass->__gclass_no_authz_level__
-//         )
-//     );
 
     json_object_set_new(
         jn_dict,
@@ -11332,12 +11469,23 @@ PUBLIC BOOL gobj_has_authz(
 {
     BOOL has_authz = TRUE;
 
+    //*  TODO hay que comprobar los parametros con SDF_AUTHZ_P y si son required
     // TODO
 
     KW_DECREF(kw);
     return has_authz;
 }
 
+/****************************************************************************
+ *  Return user in __md_user__
+ ****************************************************************************/
+PUBLIC const char *gobj_get_user(
+    hgobj src  // HACK __md_user__ must have user info
+)
+{
+    // TODO
+    return "";
+}
 
 
 

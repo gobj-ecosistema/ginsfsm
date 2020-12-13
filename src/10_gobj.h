@@ -227,7 +227,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_child_added_fn mt_child_added;     // called when the child is built, just after mt_create call.
     mt_child_removed_fn mt_child_removed;   // called when the child is almost live
     json_function_t mt_stats;           // must return a webix json object 0 if asynchronous response, like all below. HACK match the stats's prefix only.
-    json_function_t mt_command_parser;  // User command parser. Preference over gclass.command_table. Return webix.
+    json_function_t mt_command_parser;  // User command parser. Preference over gclass.command_table. Return webix. HACK must implement AUTHZ
     gobj_action_fn mt_inject_event;     // Won't use the static built-in gclass machine? process yourself your events.
     mt_create_resource_fn mt_create_resource;
     mt_list_resource_fn mt_list_resource; // Must return an iter, although empty
@@ -313,7 +313,7 @@ typedef struct _GCLASS {
     const LMETHOD *lmt;
     const sdata_desc_t *tattr_desc;
     size_t priv_size;
-    const sdata_desc_t *authz_table;
+    const sdata_desc_t *authz_table; // acl
     /*
      *  16 levels of user trace, with name and description,
      *  applicable to gobj or gclass (all his instances)
@@ -1103,9 +1103,10 @@ PUBLIC void *gobj_danger_attr_ptr2(hgobj gobj_, const char *name, const sdata_de
  *  Attributes read functions
  *------------------------------*/
 
-PUBLIC json_t *gobj_read_attr( // Return is yours! Must be decref.
+PUBLIC json_t *gobj_read_attr( // Return is yours! Must be decref. With AUTHZ
     hgobj gobj,
-    const char *name
+    const char *name,
+    hgobj src
 );
 PUBLIC json_t *gobj_read_user_data(
     hgobj gobj,
@@ -1139,10 +1140,11 @@ PUBLIC SData_Value_t gobj_read_default_attr_value(hgobj gobj, const char* name);
  *  The write functions will cause mt_writing() call.
  *-------------------------------------------------------*/
 
-PUBLIC int gobj_write_attr(
+PUBLIC int gobj_write_attr( // With AUTHZ
     hgobj gobj,
-    const char *name,
-    json_t *value  // owned
+    const char *path,
+    json_t *value,  // owned
+    hgobj src
 );
 PUBLIC int gobj_write_user_data(
     hgobj gobj,
@@ -1167,9 +1169,10 @@ PUBLIC int gobj_write_json_attr(hgobj gobj, const char *name, json_t *value); //
 PUBLIC int gobj_write_pointer_attr(hgobj gobj, const char *name, void *value);
 PUBLIC BOOL gobj_is_writable_attr(hgobj gobj, const char *name);  // True is attr is SDF_WR or SDF_PERSIST (public writable)
 PUBLIC json_t *gobj_get_writable_attrs(hgobj gobj); // Return is yours, decref!
-PUBLIC int gobj_update_writable_attrs(
+PUBLIC int gobj_update_writable_attrs( // with authz
     hgobj gobj,
-    json_t *jn_attrs // owned
+    json_t *jn_attrs, // owned
+    hgobj src
 );
 
 
@@ -1299,7 +1302,7 @@ PUBLIC BOOL gobj_has_stats(
 /*
  *  mt_command must return a webix json or 0 on asynchronous responses.
  */
-PUBLIC json_t *gobj_command(
+PUBLIC json_t *gobj_command( // With AUTHZ
     hgobj gobj,
     const char *command,
     json_t *kw,
@@ -1450,16 +1453,20 @@ PUBLIC json_t *gobj_get_gobj_trace_level(hgobj gobj);
 PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
 
 /*--------------------------------------------*
- *      Authorization functions
+ *      AUTHZ Authorization functions
  *--------------------------------------------*/
 /*
  *  Global authorization levels
  *
     "__read_attribute__",       "Authorization to read gobj's attributes"
+        params: "path"
     "__write_attribute__",      "Authorization to write gobj's attributes"
+        params: "path"
     "__execute_command__",      "Authorization to execute gobj's commands"
-    "__event_inject__",         "Authorization to inject events to gobj"
-    "__event_subscribe__",      "Authorization to subscribe events of gobj"
+        params: "command", "kw"
+    "__inject_event__",         "Authorization to inject events to gobj"
+    "__subscribe_event__",      "Authorization to subscribe events of gobj"
+        params: "event", "kw"
  */
 
 PUBLIC const sdata_desc_t *gobj_get_authz_desc(
@@ -1474,6 +1481,10 @@ PUBLIC BOOL gobj_has_authz(
     hgobj gobj,
     const char *level,
     json_t *kw,
+    hgobj src  // HACK __md_user__ must have user info
+);
+
+PUBLIC const char *gobj_get_user(
     hgobj src  // HACK __md_user__ must have user info
 );
 

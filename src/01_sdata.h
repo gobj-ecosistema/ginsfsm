@@ -92,9 +92,9 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     SDF_FKEY        = 0x00001000,   /* Foreign key (no pure child) */
     SDF_RSTATS      = 0x00002000,   /* Field with resettable stats, implicitly SDF_STATS */
     SDF_PSTATS      = 0x00004000,   /* Field with persistent stats, implicitly SDF_STATS */
-    SDF_AUTHZ_R     = 0x00008000,   /* Need Attribute 'read' authorization */
-    SDF_AUTHZ_W     = 0x00010000,   /* Need Attribute 'write' authorization */
-    SDF_AUTHZ_X     = 0x00020000,   /* Need Command 'execute' authorization */
+    SDF_AUTHZ_R     = 0x00008000,   /* Need Attribute '__read_attribute__' authorization */
+    SDF_AUTHZ_W     = 0x00010000,   /* Need Attribute '__write_attribute__' authorization */
+    SDF_AUTHZ_X     = 0x00020000,   /* Need Command '__execute_command__' authorization */
     SDF_AUTHZ_P     = 0x00040000,   /* authorization constraint parameter */
 } sdata_flag_t;
 
