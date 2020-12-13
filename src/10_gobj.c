@@ -5900,10 +5900,14 @@ PUBLIC hsdata gobj_subscribe_event(
      *      Inform new subscription
      *--------------------------------*/
     if(publisher->gclass->gmt.mt_subscription_added) {
-        publisher->gclass->gmt.mt_subscription_added(
+        int result = publisher->gclass->gmt.mt_subscription_added(
             publisher,
             subs
         );
+        if(result < 0) {
+            _delete_subscription(subs, TRUE, TRUE);
+            subs = 0;
+        }
     }
 
     KW_DECREF(kw);

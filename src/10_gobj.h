@@ -222,7 +222,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_pause_fn mt_pause;
     mt_writing_fn mt_writing; // someone has written in the `name` attr. When path is 0, the gobj has been created with default values
     mt_reading_fn mt_reading;
-    mt_subscription_added_fn mt_subscription_added;      // refcount: 1 on the first subscription of this event.
+    mt_subscription_added_fn mt_subscription_added;      // refcount: 1 on the first subscription of this event. HACK return negative the subscription is rejected (unsubscribe).
     mt_subscription_deleted_fn mt_subscription_deleted;    // refcount: 1 on the last subscription of this event.
     mt_child_added_fn mt_child_added;     // called when the child is built, just after mt_create call.
     mt_child_removed_fn mt_child_removed;   // called when the child is almost live
