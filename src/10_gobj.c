@@ -215,12 +215,10 @@ PRIVATE json_t * (*__global_stats_parser_fn__)(
     json_t *kw,
     hgobj src
 ) = 0;
-PRIVATE json_t * (*__global_authz_parser_fn__)(
-    hgobj gobj,
-    const char *stats,
-    json_t *kw,
-    hgobj src
-) = 0;
+PRIVATE authz_checker_fn __global_authz_checker_fn__ = 0;
+PRIVATE authz_allow_fn __global_authz_allow_fn__ = 0;
+PRIVATE authz_deny_fn __global_authz_deny_fn__ = 0;
+
 PRIVATE int (*__audit_command_cb__)(
     const char *audit_command,
     json_t *kw,
@@ -229,6 +227,7 @@ PRIVATE int (*__audit_command_cb__)(
 PRIVATE void *__audit_command_user_data__ = 0;
 PRIVATE GObj_t * __yuno__ = 0;
 PRIVATE GObj_t * __default_service__ = 0;
+PRIVATE char __realm_domain__[NAME_MAX];
 PRIVATE char __realm_name__[NAME_MAX];
 PRIVATE char __yuno_role__[NAME_MAX];
 PRIVATE char __yuno_name__[NAME_MAX];
@@ -514,7 +513,9 @@ PUBLIC int gobj_start_up(
     json_t * (*list_persistent_attrs_fn)(void),
     json_function_t global_command_parser_fn,
     json_function_t global_stats_parser_fn,
-    json_function_t global_authz_parser_fn
+    authz_checker_fn global_authz_checker,
+    authz_allow_fn global_authz_allow,
+    authz_deny_fn global_authz_deny
 )
 {
     if(__initialized__) {
@@ -533,7 +534,9 @@ PUBLIC int gobj_start_up(
     __global_list_persistent_attrs_fn__ = list_persistent_attrs_fn;
     __global_command_parser_fn__ = global_command_parser_fn;
     __global_stats_parser_fn__ = global_stats_parser_fn;
-    __global_authz_parser_fn__ = global_authz_parser_fn;
+    __global_authz_checker_fn__ = global_authz_checker;
+    __global_authz_allow_fn__ = global_authz_allow;
+    __global_authz_deny_fn__ = global_authz_deny;
 
     dl_init(&dl_gclass);
     dl_init(&dl_service);
@@ -708,6 +711,7 @@ PRIVATE void free_trans_filter(trans_filter_t *trans_reg)
  *  Factory to create yuno gobj
  ***************************************************************************/
 PUBLIC hgobj gobj_yuno_factory(
+    const char *realm_domain,
     const char *realm_name,
     const char *yuno_name,
     const char *yuno_alias,
@@ -739,8 +743,17 @@ PUBLIC hgobj gobj_yuno_factory(
                 "gclass",       "%s", gclass_reg->gclass->gclass_name,
                 NULL
             );
-            snprintf(__realm_name__, sizeof(__realm_name__), "%s", realm_name?realm_name:"");
-            snprintf(__yuno_role__, sizeof(__yuno_role__), "%s", gclass_reg->role);
+            snprintf(
+                __realm_domain__, sizeof(__realm_domain__),
+                "%s", realm_domain?realm_domain:""
+            );
+            snprintf(
+                __realm_name__, sizeof(__realm_name__),
+                "%s", realm_name?realm_name:""
+            );
+            snprintf(
+                __yuno_role__, sizeof(__yuno_role__), "%s", gclass_reg->role
+            );
             if(empty_string(yuno_name)) {
                 snprintf(__yuno_role_plus_name__, sizeof(__yuno_role_plus_name__),
                     "%s",
@@ -755,9 +768,10 @@ PUBLIC hgobj gobj_yuno_factory(
                 );
                 snprintf(__yuno_name__, sizeof(__yuno_name__), "%s", yuno_name);
             }
-            if(!empty_string(yuno_alias)) {
-                snprintf(__yuno_alias__, sizeof(__yuno_alias__), "%s", yuno_alias);
-            }
+            snprintf(
+                __yuno_alias__, sizeof(__yuno_alias__),
+                "%s", yuno_alias?yuno_alias:""
+            );
 
             hgobj gobj = _create_yuno( // it's saved in __yuno__ too
                 yuno_name,
@@ -1066,7 +1080,8 @@ PUBLIC hgobj gobj_service_factory(
     );
     json_object_update_new(
         __json_config_variables__,
-        json_pack("{s:s, s:s, s:s, s:s, s:s}",
+        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s}",
+            "__realm_domain__", __realm_domain__,
             "__realm_name__", __realm_name__,
             "__yuno_role__", __yuno_role__,
             "__yuno_name__", __yuno_name__,
@@ -5832,7 +5847,7 @@ PUBLIC hsdata gobj_subscribe_event(
             } else {
                 json_object_set_new(kw_authz, "kw", json_object());
             }
-            if(!gobj_has_authz(
+            if(!gobj_user_has_authz(
                 publisher_,
                 "__subscribe_event__",
                 kw_authz,
@@ -5843,7 +5858,7 @@ PUBLIC hsdata gobj_subscribe_event(
                     "function",     "%s", __FUNCTION__,
                     "msgset",       "%s", MSGSET_OAUTH_ERROR,
                     "msg",          "%s", "No permission to subscribe event",
-                    "user",         "%s", gobj_get_user(subscriber_),
+                    //"user",         "%s", gobj_get_user(subscriber_),
                     "gclass",       "%s", gobj_gclass_name(publisher_),
                     "event",        "%s", event?event:"",
                     NULL
@@ -6612,7 +6627,7 @@ PUBLIC int gobj_send_event(
         } else {
             json_object_set_new(kw_authz, "kw", json_object());
         }
-        if(!gobj_has_authz(
+        if(!gobj_user_has_authz(
                 dst, "__inject_event__", kw_authz, src)
           ) {
             log_error(0,
@@ -6620,7 +6635,7 @@ PUBLIC int gobj_send_event(
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_OAUTH_ERROR,
                 "msg",          "%s", "No permission to inject event",
-                "user",         "%s", gobj_get_user(src),
+                //"user",         "%s", gobj_get_user(src),
                 "gclass",       "%s", gobj_gclass_name(dst),
                 "event",        "%s", event?event:"",
                 NULL
@@ -7632,7 +7647,7 @@ PUBLIC json_t *gobj_read_attr(
         /*
          *  AUTHZ Required
          */
-        if(!gobj_has_authz(
+        if(!gobj_user_has_authz(
                 gobj, "__read_attribute__", json_pack("{s:s}", "path", name), src)
           ) {
             log_error(0,
@@ -7640,7 +7655,7 @@ PUBLIC json_t *gobj_read_attr(
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_OAUTH_ERROR,
                 "msg",          "%s", "No permission to read attribute",
-                "user",         "%s", gobj_get_user(src),
+                //"user",         "%s", gobj_get_user(src),
                 "gclass",       "%s", gobj_gclass_name(gobj),
                 "attr",         "%s", name?name:"",
                 NULL
@@ -8055,7 +8070,7 @@ PUBLIC int gobj_write_attr(
         /*
          *  AUTHZ Required
          */
-        if(!gobj_has_authz(
+        if(!gobj_user_has_authz(
                 gobj, "__write_attribute__", json_pack("{s:s}", "path", path), src)
           ) {
             log_error(0,
@@ -8063,7 +8078,7 @@ PUBLIC int gobj_write_attr(
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_OAUTH_ERROR,
                 "msg",          "%s", "No permission to write attribute",
-                "user",         "%s", gobj_get_user(src),
+                //"user",         "%s", gobj_get_user(src),
                 "gclass",       "%s", gobj_gclass_name(gobj),
                 "attr",         "%s", path?path:"",
                 NULL
@@ -8453,8 +8468,6 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_delete_child_resource_link"));
     if(gmt->mt_get_resource)
         json_array_append_new(jn_methods, json_string("mt_get_resource"));
-    if(gmt->mt_authorization_parser)
-        json_array_append_new(jn_methods, json_string("mt_authorization_parser"));
     if(gmt->mt_authenticate)
         json_array_append_new(jn_methods, json_string("mt_authenticate"));
     if(gmt->mt_list_childs)
@@ -8481,8 +8494,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_publish_event"));
     if(gmt->mt_publication_filter)
         json_array_append_new(jn_methods, json_string("mt_publication_filter"));
-    if(gmt->mt_has_authz)
-        json_array_append_new(jn_methods, json_string("mt_has_authz"));
+    if(gmt->mt_authz_checker)
+        json_array_append_new(jn_methods, json_string("mt_authz_checker"));
     if(gmt->mt_future39)
         json_array_append_new(jn_methods, json_string("mt_future39"));
     if(gmt->mt_create_node)
@@ -8700,6 +8713,14 @@ PRIVATE json_t *fsm2json(FSM *fsm)
 
 
 
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC const char *gobj_yuno_realm_domain(void)
+{
+    return __realm_domain__;
+}
 
 /***************************************************************************
  *
@@ -9454,6 +9475,7 @@ PUBLIC int append_yuno_metadata(hgobj gobj, json_t *kw, const char *source)
     json_object_set_new(jn_metadatos, "__t__", json_integer(t));
     json_object_set_new(jn_metadatos, "__origin__", json_string(source));
     json_object_set_new(jn_metadatos, "hostname", json_string(hostname));
+    json_object_set_new(jn_metadatos, "realm_domain", json_string(__realm_domain__));
     json_object_set_new(jn_metadatos, "realm_name", json_string(__realm_name__));
     json_object_set_new(jn_metadatos, "yuno_role", json_string(__yuno_role__));
     json_object_set_new(jn_metadatos, "yuno_name", json_string(__yuno_name__));
@@ -9499,8 +9521,8 @@ PUBLIC json_t *gobj_stats(hgobj gobj_, const char *stats, json_t *kw, hgobj src)
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "Stats not available",
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "Stats parser not available",
             "stats",        "%s", stats?stats:"",
             NULL
         );
@@ -11452,40 +11474,163 @@ PUBLIC const sdata_desc_t *gobj_get_authz_desc(
         return 0;
     }
     if(gclass->authz_table) {
-        return authorization_get_authz_desc(gclass->authz_table, level);
+        // TODO return authorization_get_authz_desc(gclass->authz_table, level);
     }
+    return 0;
+}
+
+/****************************************************************************
+ *
+ ****************************************************************************/
+PUBLIC int gobj_set_global_authz_functions(
+    authz_checker_fn global_authz_checker,
+    authz_allow_fn global_authz_allow,
+    authz_deny_fn global_authz_deny
+)
+{
+    __global_authz_checker_fn__ = global_authz_checker;
+    __global_authz_allow_fn__ = global_authz_allow;
+    __global_authz_deny_fn__ = global_authz_deny;
+
     return 0;
 }
 
 /****************************************************************************
  *  Return if __md_user__ in src has authz in gobj in context
  ****************************************************************************/
-PUBLIC BOOL gobj_has_authz(
+PUBLIC BOOL gobj_user_has_authz(
     hgobj gobj_,
     const char *level,
     json_t *kw,
     hgobj src  // HACK __md_user__ must have user info
 )
 {
-    BOOL has_authz = TRUE;
+    GObj_t * gobj = gobj_;
 
-    //*  TODO hay que comprobar los parametros con SDF_AUTHZ_P y si son required
-    // TODO
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        KW_DECREF(kw);
+        return FALSE;
+    }
+
+    /*----------------------------------------------------*
+     *  The local mt_authz_checker has preference
+     *----------------------------------------------------*/
+    if(gobj->gclass->gmt.mt_authz_checker) {
+        return gobj->gclass->gmt.mt_authz_checker(gobj, level, kw, src);
+    }
+
+    /*-----------------------------------------------*
+     *  Then use the global authz checker
+     *-----------------------------------------------*/
+    if(__global_authz_checker_fn__) {
+        return __global_authz_checker_fn__(gobj, level, kw, src);
+    }
 
     KW_DECREF(kw);
-    return has_authz;
+    return TRUE; // HACK if there is no authz checker the authz is TRUE
 }
 
 /****************************************************************************
- *  Return user in __md_user__
+ *
  ****************************************************************************/
-PUBLIC const char *gobj_get_user(
-    hgobj src  // HACK __md_user__ must have user info
+PUBLIC int gobj_authz_allow(
+    hgobj gobj_,
+    const char *user,
+    const char *level,
+    json_t *kw
 )
 {
-    // TODO
-    return "";
+    GObj_t * gobj = gobj_;
+
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        KW_DECREF(kw);
+        return FALSE;
+    }
+
+    /*----------------------------------------------------*
+     *  The local mt_authz_allow has preference
+     *----------------------------------------------------*/
+    if(gobj->gclass->gmt.mt_authz_allow) {
+        return gobj->gclass->gmt.mt_authz_allow(gobj, user, level, kw);
+    }
+
+    /*-----------------------------------------------*
+     *  Then use the global authz checker
+     *-----------------------------------------------*/
+    if(__global_authz_allow_fn__) {
+        return __global_authz_allow_fn__(gobj, user, level, kw);
+    }
+
+    KW_DECREF(kw);
+    return 0;
 }
+
+/****************************************************************************
+ *
+ ****************************************************************************/
+PUBLIC int gobj_authz_deny(
+    hgobj gobj_,
+    const char *user,
+    const char *level,
+    json_t *kw
+)
+{
+    GObj_t * gobj = gobj_;
+
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        KW_DECREF(kw);
+        return FALSE;
+    }
+
+    /*----------------------------------------------------*
+     *  The local mt_authz_deny has preference
+     *----------------------------------------------------*/
+    if(gobj->gclass->gmt.mt_authz_deny) {
+        return gobj->gclass->gmt.mt_authz_deny(gobj, user, level, kw);
+    }
+
+    /*-----------------------------------------------*
+     *  Then use the global authz checker
+     *-----------------------------------------------*/
+    if(__global_authz_deny_fn__) {
+        return __global_authz_deny_fn__(gobj, user, level, kw);
+    }
+
+    KW_DECREF(kw);
+    return 0;
+}
+
+// /****************************************************************************
+//  *  Return user in __md_user__
+//  ****************************************************************************/
+// PUBLIC const char *gobj_get_user(
+//     hgobj src  // HACK __md_user__ must have user info
+// )
+// {
+// TODO    return "";
+// }
+
 
 
 

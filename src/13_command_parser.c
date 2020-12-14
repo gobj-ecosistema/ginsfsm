@@ -97,7 +97,7 @@ PUBLIC json_t * command_parser(hgobj gobj,
         } else {
             json_object_set_new(kw_authz, "kw", json_object());
         }
-        if(!gobj_has_authz(
+        if(!gobj_user_has_authz(
                 gobj,
                 "__execute_command__",
                 kw_authz,
@@ -108,7 +108,7 @@ PUBLIC json_t * command_parser(hgobj gobj,
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_OAUTH_ERROR,
                 "msg",          "%s", "No permission to execute command",
-                "user",         "%s", gobj_get_user(src),
+                //"user",         "%s", gobj_get_user(src),
                 "gclass",       "%s", gobj_gclass_name(gobj),
                 "command",      "%s", command?command:"",
                 NULL
