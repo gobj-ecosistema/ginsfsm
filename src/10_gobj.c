@@ -228,6 +228,7 @@ PRIVATE void *__audit_command_user_data__ = 0;
 PRIVATE GObj_t * __yuno__ = 0;
 PRIVATE GObj_t * __default_service__ = 0;
 PRIVATE char __realm_domain__[NAME_MAX];
+PRIVATE char __realm_role__[NAME_MAX];
 PRIVATE char __realm_name__[NAME_MAX];
 PRIVATE char __yuno_role__[NAME_MAX];
 PRIVATE char __yuno_name__[NAME_MAX];
@@ -236,6 +237,8 @@ PRIVATE char __yuno_role_plus_name__[NAME_MAX];
 
 
 PRIVATE json_t *__jn_global_settings__ = 0;
+PRIVATE int (*__global_startup_persistent_attrs_fn__)(void) = 0;
+PRIVATE void (*__global_end_persistent_attrs_fn__)(void) = 0;
 PRIVATE int (*__global_load_persistent_attrs_fn__)(hgobj gobj) = 0;
 PRIVATE int (*__global_save_persistent_attrs_fn__)(hgobj gobj) = 0;
 PRIVATE int (*__global_remove_persistent_attrs_fn__)(hgobj gobj) = 0;
@@ -507,6 +510,8 @@ PRIVATE uint32_t level2bit(
  ***************************************************************************/
 PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
+    int (*startup_persistent_attrs_fn)(void),
+    void (*end_persistent_attrs_fn)(void),
     int (*load_persistent_attrs_fn)(hgobj gobj),
     int (*save_persistent_attrs_fn)(hgobj gobj),
     int (*remove_persistent_attrs_fn)(hgobj gobj),
@@ -528,6 +533,8 @@ PUBLIC int gobj_start_up(
     __shutdowning__ = 0;
     __jn_global_settings__ =  kw_duplicate(jn_global_settings);
 
+    __global_startup_persistent_attrs_fn__ = startup_persistent_attrs_fn;
+    __global_end_persistent_attrs_fn__ = end_persistent_attrs_fn;
     __global_load_persistent_attrs_fn__ = load_persistent_attrs_fn;
     __global_save_persistent_attrs_fn__ = save_persistent_attrs_fn;
     __global_remove_persistent_attrs_fn__ = remove_persistent_attrs_fn;
@@ -537,6 +544,10 @@ PUBLIC int gobj_start_up(
     __global_authz_checker_fn__ = global_authz_checker;
     __global_authz_allow_fn__ = global_authz_allow;
     __global_authz_deny_fn__ = global_authz_deny;
+
+    if(__global_startup_persistent_attrs_fn__) {
+        __global_startup_persistent_attrs_fn__();
+    }
 
     dl_init(&dl_gclass);
     dl_init(&dl_service);
@@ -615,6 +626,10 @@ PUBLIC void gobj_end(void)
     }
     JSON_DECREF(jn_treedb_schema_gobjs);
     JSON_DECREF(__2key__);
+
+    if(__global_end_persistent_attrs_fn__) {
+        __global_end_persistent_attrs_fn__();
+    }
 }
 
 /***************************************************************************
@@ -712,6 +727,7 @@ PRIVATE void free_trans_filter(trans_filter_t *trans_reg)
  ***************************************************************************/
 PUBLIC hgobj gobj_yuno_factory(
     const char *realm_domain,
+    const char *realm_role,
     const char *realm_name,
     const char *yuno_name,
     const char *yuno_alias,
@@ -746,6 +762,10 @@ PUBLIC hgobj gobj_yuno_factory(
             snprintf(
                 __realm_domain__, sizeof(__realm_domain__),
                 "%s", realm_domain?realm_domain:""
+            );
+            snprintf(
+                __realm_role__, sizeof(__realm_role__),
+                "%s", realm_role?realm_role:""
             );
             snprintf(
                 __realm_name__, sizeof(__realm_name__),
@@ -1080,8 +1100,9 @@ PUBLIC hgobj gobj_service_factory(
     );
     json_object_update_new(
         __json_config_variables__,
-        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s}",
+        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
             "__realm_domain__", __realm_domain__,
+            "__realm_role__", __realm_role__,
             "__realm_name__", __realm_name__,
             "__yuno_role__", __yuno_role__,
             "__yuno_name__", __yuno_name__,
@@ -8725,6 +8746,14 @@ PUBLIC const char *gobj_yuno_realm_domain(void)
 /***************************************************************************
  *
  ***************************************************************************/
+PUBLIC const char *gobj_yuno_realm_role(void)
+{
+    return __realm_role__;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
 PUBLIC const char *gobj_yuno_realm_name(void)
 {
     return __realm_name__;
@@ -9476,6 +9505,7 @@ PUBLIC int append_yuno_metadata(hgobj gobj, json_t *kw, const char *source)
     json_object_set_new(jn_metadatos, "__origin__", json_string(source));
     json_object_set_new(jn_metadatos, "hostname", json_string(hostname));
     json_object_set_new(jn_metadatos, "realm_domain", json_string(__realm_domain__));
+    json_object_set_new(jn_metadatos, "realm_role", json_string(__realm_role__));
     json_object_set_new(jn_metadatos, "realm_name", json_string(__realm_name__));
     json_object_set_new(jn_metadatos, "yuno_role", json_string(__yuno_role__));
     json_object_set_new(jn_metadatos, "yuno_name", json_string(__yuno_name__));

@@ -342,6 +342,8 @@ typedef struct _GCLASS {
  *--------------------------------------------*/
 PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
+    int (*startup_persistent_attrs_fn)(void),
+    void (*end_persistent_attrs_fn)(void),
     int (*load_persistent_attrs_fn)(hgobj gobj),
     int (*save_persistent_attrs_fn)(hgobj gobj),
     int (*remove_persistent_attrs_fn)(hgobj gobj),
@@ -366,6 +368,7 @@ PUBLIC int gobj_register_yuno(
 );
 PUBLIC hgobj gobj_yuno_factory(
     const char *realm_domain,
+    const char *realm_role,
     const char *realm_name,
     const char *yuno_name,
     const char *yuno_alias,
@@ -1184,6 +1187,7 @@ PUBLIC int gobj_update_writable_attrs( // with authz
  *  Info functions
  *--------------------------------------------*/
 PUBLIC const char *gobj_yuno_realm_domain(void);
+PUBLIC const char *gobj_yuno_realm_role(void);
 PUBLIC const char *gobj_yuno_realm_name(void);
 PUBLIC const char *gobj_yuno_role(void);
 PUBLIC const char *gobj_yuno_name(void);
