@@ -1520,6 +1520,7 @@ PUBLIC int gobj_authz_deny(
     const char *level,
     json_t *kw
 );
+PUBLIC const sdata_desc_t *gobj_get_global_authz_table(void);
 
 /*--------------------------------------------*
  *  Print/debug functions

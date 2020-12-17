@@ -20,14 +20,20 @@ extern "C"{
  **************************************************/
 PUBLIC json_t *authzs_list(
     hgobj gobj,
-    const char *level,
+    const char *authz,
+    json_t *kw,
+    hgobj src
+);
+PUBLIC json_t *build_authzs(
+    hgobj gobj,
+    const char *authz,
     json_t *kw,
     hgobj src
 );
 
 PUBLIC const sdata_desc_t *authz_get_level_desc(
     const sdata_desc_t *authz_table,
-    const char *level
+    const char *authz
 );
 
 #ifdef __cplusplus

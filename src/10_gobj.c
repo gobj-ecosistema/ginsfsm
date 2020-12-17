@@ -206,17 +206,17 @@ PRIVATE json_t * (*__global_command_parser_fn__)(
     const char *command,
     json_t *kw,
     hgobj src
-) = command_parser;
+) = 0;
 PRIVATE json_t * (*__global_stats_parser_fn__)(
     hgobj gobj,
     const char *stats,
     json_t *kw,
     hgobj src
-) = stats_parser;
+) = 0;
 PRIVATE authz_checker_fn __global_authz_checker_fn__ = 0;
 PRIVATE authz_allow_fn __global_authz_allow_fn__ = 0;
 PRIVATE authz_deny_fn __global_authz_deny_fn__ = 0;
-PRIVATE json_function_t __global_authzs_list_fn__ = authzs_list;
+PRIVATE json_function_t __global_authzs_list_fn__ = 0;
 
 PRIVATE int (*__audit_command_cb__)(
     const char *audit_command,
@@ -539,18 +539,12 @@ PUBLIC int gobj_start_up(
     __global_save_persistent_attrs_fn__ = save_persistent_attrs;
     __global_remove_persistent_attrs_fn__ = remove_persistent_attrs;
     __global_list_persistent_attrs_fn__ = list_persistent_attrs;
-    if(global_command_parser) {
-        __global_command_parser_fn__ = global_command_parser;
-    }
-    if(global_stats_parser) {
-        __global_stats_parser_fn__ = global_stats_parser;
-    }
+    __global_command_parser_fn__ = global_command_parser;
+    __global_stats_parser_fn__ = global_stats_parser;
     __global_authz_checker_fn__ = global_authz_checker;
     __global_authz_allow_fn__ = global_authz_allow;
     __global_authz_deny_fn__ = global_authz_deny;
-    if(global_authzs_list) {
-        __global_authzs_list_fn__ = global_authzs_list;
-    }
+    __global_authzs_list_fn__ = global_authzs_list;
 
     if(__global_startup_persistent_attrs_fn__) {
         __global_startup_persistent_attrs_fn__();
@@ -9933,13 +9927,13 @@ PUBLIC json_t *gclass2json(GCLASS *gclass)
     );
     json_object_set_new(
         jn_dict,
-        "ACL gclass", // Access Control List
-        sdatacmd2json(gclass->authz_table)
+        "ACL global",
+        sdataauth2json(global_authz_table)
     );
     json_object_set_new(
         jn_dict,
-        "ACL global",
-        sdatacmd2json(global_authz_table)
+        "ACL gclass", // Access Control List
+        sdataauth2json(gclass->authz_table)
     );
 
     json_object_set_new(
@@ -11544,24 +11538,12 @@ PUBLIC json_t *gobj_authzs(
     hgobj src
 )
 {
-    GObj_t * gobj = gobj_;
-
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        KW_DECREF(kw);
-        return 0;
-    }
+    GObj_t *gobj = gobj_; // Can be null
 
     /*--------------------------------------*
      *  The local mt_authzs has preference
      *--------------------------------------*/
-    if(gobj->gclass->gmt.mt_authzs) {
+    if(gobj && gobj->gclass->gmt.mt_authzs) {
         return gobj->gclass->gmt.mt_authzs(gobj, permission, kw, src);
     }
 
@@ -11708,6 +11690,14 @@ PUBLIC int gobj_authz_deny(
 
     KW_DECREF(kw);
     return 0;
+}
+
+/****************************************************************************
+ *
+ ****************************************************************************/
+PUBLIC const sdata_desc_t *gobj_get_global_authz_table(void)
+{
+    return global_authz_table;
 }
 
 // /****************************************************************************

@@ -115,6 +115,8 @@ PRIVATE void clear_values(SData_t *sdata);
 PRIVATE void clear_value(SData_t *sdata, const sdata_desc_t *it);
 PRIVATE void set_default(SData_t *sdata, const sdata_desc_t *it, void *value);
 PRIVATE void *item_pointer(hsdata hs, const sdata_desc_t *it);
+PRIVATE json_t *itdesc2json0(const sdata_desc_t *it);
+PRIVATE json_t *itdesc2json(const sdata_desc_t *it);
 
 
 
@@ -1230,29 +1232,7 @@ PUBLIC const char **sdata_keys( // WARNING remember free with gbmem_free()
 /***************************************************************************
  *  Return a json object describing the hsdata for commands
  ***************************************************************************/
-PUBLIC json_t *sdatacmd2json(
-    const sdata_desc_t *items
-)
-{
-    json_t *jn_items = json_array();
-    const sdata_desc_t *it = items;
-    if(!it) {
-        return jn_items;
-    }
-    while(it->name) {
-        json_t *jn_it = cmddesc2json(it);
-        if(jn_it) {
-            json_array_append_new(jn_items, jn_it);
-        }
-        it++;
-    }
-    return jn_items;
-}
-
-/***************************************************************************
- *  Return a json object describing the hsdata for commands
- ***************************************************************************/
-PUBLIC json_t *cmddesc2json(const sdata_desc_t *it)
+PRIVATE json_t *cmddesc2json(const sdata_desc_t *it)
 {
     int type = it->type;
 
@@ -1315,6 +1295,104 @@ PUBLIC json_t *cmddesc2json(const sdata_desc_t *it)
     }
 
     return jn_it;
+}
+
+/***************************************************************************
+ *  Return a json object describing the hsdata for commands
+ ***************************************************************************/
+PUBLIC json_t *sdatacmd2json(
+    const sdata_desc_t *items
+)
+{
+    json_t *jn_items = json_array();
+    const sdata_desc_t *it = items;
+    if(!it) {
+        return jn_items;
+    }
+    while(it->name) {
+        json_t *jn_it = cmddesc2json(it);
+        if(jn_it) {
+            json_array_append_new(jn_items, jn_it);
+        }
+        it++;
+    }
+    return jn_items;
+}
+
+/***************************************************************************
+ *  Return a json object describing the hsdata for commands
+ ***************************************************************************/
+PRIVATE json_t *authdesc2json(const sdata_desc_t *it)
+{
+    int type = it->type;
+
+    if(!ASN_IS_SCHEMA(type)) {
+        return 0; // Only schemas please
+    }
+
+    json_t *jn_it = json_object();
+
+    json_object_set_new(jn_it, "id", json_string(it->name));
+
+    if(it->alias) {
+        json_t *jn_alias = json_array();
+        json_object_set_new(jn_it, "alias", jn_alias);
+        const char **alias = it->alias;
+        while(*alias) {
+            json_array_append_new(jn_alias, json_string(*alias));
+            alias++;
+        }
+    }
+
+    json_object_set_new(jn_it, "description", json_string(it->description));
+
+    GBUFFER *gbuf = get_sdata_flag_desc(it->flag);
+    if(gbuf) {
+        int l = gbuf_leftbytes(gbuf);
+        if(l) {
+            char *pflag = gbuf_get(gbuf, l);
+            json_object_set_new(jn_it, "flag", json_string(pflag));
+        } else {
+            json_object_set_new(jn_it, "flag", json_string(""));
+        }
+        gbuf_decref(gbuf);
+    }
+
+    json_t *jn_parameters = json_array();
+    json_object_set_new(jn_it, "parameters", jn_parameters);
+
+    const sdata_desc_t *pparam = it->schema;
+    while(pparam && pparam->name) {
+        json_t *jn_param = json_object();
+        json_object_set_new(jn_param, "id", json_string(pparam->name));
+        json_object_update_missing_new(jn_param, itdesc2json0(pparam));
+        json_array_append_new(jn_parameters, jn_param);
+        pparam++;
+    }
+
+    return jn_it;
+}
+
+/***************************************************************************
+ *  Return a json object describing the hsdata for auths
+ ***************************************************************************/
+PUBLIC json_t *sdataauth2json(
+    const sdata_desc_t *items
+)
+{
+    json_t *jn_items = json_array();
+    const sdata_desc_t *it = items;
+    if(!it) {
+        return jn_items;
+    }
+    while(it->name) {
+        json_t *jn_it = authdesc2json(it);
+        if(jn_it) {
+            json_array_append_new(jn_items, jn_it);
+        }
+        it++;
+    }
+    return jn_items;
 }
 
 /***************************************************************************
@@ -1384,9 +1462,9 @@ PUBLIC json_t *sdatadesc2json2(
 }
 
 /***************************************************************************
- *  Return a json object describing the hsdata
+ *  Return a json object describing the parameter
  ***************************************************************************/
-PUBLIC json_t *itdesc2json(const sdata_desc_t *it)
+PRIVATE json_t *itdesc2json(const sdata_desc_t *it)
 {
     json_t *jn_it = json_object();
 
@@ -1431,6 +1509,54 @@ PUBLIC json_t *itdesc2json(const sdata_desc_t *it)
     } else {
         json_object_set_new(jn_it, "type", json_string("???"));
         json_object_set_new(jn_it, "default_value", json_integer((json_int_t)(size_t)it->default_value));
+    }
+
+    json_object_set_new(jn_it, "description", json_string(it->description));
+    GBUFFER *gbuf = get_sdata_flag_desc(it->flag);
+    if(gbuf) {
+        int l = gbuf_leftbytes(gbuf);
+        if(l) {
+            char *pflag = gbuf_get(gbuf, l);
+            json_object_set_new(jn_it, "flag", json_string(pflag));
+        } else {
+            json_object_set_new(jn_it, "flag", json_string(""));
+        }
+        gbuf_decref(gbuf);
+    }
+    return jn_it;
+}
+
+/***************************************************************************
+ *  Return a json object describing the parameter without default_value
+ ***************************************************************************/
+PRIVATE json_t *itdesc2json0(const sdata_desc_t *it)
+{
+    json_t *jn_it = json_object();
+
+    int type = it->type;
+
+    if(ASN_IS_STRING(type)) {
+        json_object_set_new(jn_it, "type", json_string("string"));
+    } else if(ASN_IS_JSON(type)) {
+        json_object_set_new(jn_it, "type", json_string("json"));
+    } else if(ASN_IS_DL_LIST(type)) {
+        json_object_set_new(jn_it, "type", json_string("dl_list"));
+    } else if(ASN_IS_ITER(type)) {
+        json_object_set_new(jn_it, "type", json_string("iter"));
+    } else if(ASN_IS_POINTER(type)) {
+        json_object_set_new(jn_it, "type", json_string("pointer"));
+    } else if(ASN_IS_SIGNED32(type)) {
+        json_object_set_new(jn_it, "type", json_string("signed32"));
+    } else if(ASN_IS_UNSIGNED32(type)) {
+        json_object_set_new(jn_it, "type", json_string("unsigned32"));
+    } else if(ASN_IS_SIGNED64(type)) {
+        json_object_set_new(jn_it, "type", json_string("signed64"));
+    } else if(ASN_IS_UNSIGNED64(type)) {
+        json_object_set_new(jn_it, "type", json_string("unsigned64"));
+    } else if(ASN_IS_DOUBLE(type)) {
+        json_object_set_new(jn_it, "type", json_string("double"));
+    } else {
+        json_object_set_new(jn_it, "type", json_string("???"));
     }
 
     json_object_set_new(jn_it, "description", json_string(it->description));

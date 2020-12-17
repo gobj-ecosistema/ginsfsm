@@ -281,6 +281,25 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
+/*-PM----type-----------name------------flag------------description---------- */
+#define SDATAPM0(type_, name_, flag_, description_)     \
+{                                                       \
+    .type=type_,                                        \
+    .name=name_,                                        \
+    .alias=0,                                           \
+    .json_fn=0,                                         \
+    .flag=flag_,                                        \
+    .default_value=0,                                   \
+    .description=description_,                          \
+    .resource=0,                                        \
+    .header=0,                                          \
+    .fillsp=0,                                          \
+    .schema=0,                                          \
+    .free_fn=0,                                         \
+    .__acl__=0,                                         \
+    ._offset=0, ._ln=0, ._suboid=0                      \
+}
+
 /*********************************************************************
  *      Structures
  *********************************************************************/
@@ -449,7 +468,13 @@ PUBLIC const char **sdata_keys( // WARNING remember free with gbmem_free()
 PUBLIC json_t *sdatacmd2json(
     const sdata_desc_t *items
 );
-PUBLIC json_t *cmddesc2json(const sdata_desc_t *it);
+
+/*
+ *  Return a json object describing the hsdata for permissions
+ */
+PUBLIC json_t *sdataauth2json(
+    const sdata_desc_t *items
+);
 
 /*
  *  Return a json OBJECT describing the hsdata for attrs
@@ -467,7 +492,6 @@ PUBLIC json_t *sdatadesc2json2(
     sdata_flag_t include_flag,
     sdata_flag_t exclude_flag
 );
-PUBLIC json_t *itdesc2json(const sdata_desc_t *it);
 
 PUBLIC int log_debug_sdata(const char *prefix, hsdata hs);
 PUBLIC int log_debug_sdata_iter(
