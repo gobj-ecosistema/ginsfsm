@@ -18,16 +18,11 @@ extern "C"{
 /***************************************************
  *              Prototypes
  **************************************************/
-PUBLIC json_t *authz_parser(
+PUBLIC json_t *authzs_list(
     hgobj gobj,
     const char *level,
     json_t *kw,
     hgobj src
-);
-
-PUBLIC json_t *gobj_build_authzs_doc(
-    hgobj gobj,
-    json_t *kw
 );
 
 PUBLIC const sdata_desc_t *authz_get_level_desc(
