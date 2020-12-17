@@ -251,8 +251,8 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_publish_event_fn mt_publish_event;  // Return -1 (broke), 0 continue without publish, 1 continue and publish
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
-    authz_checker_fn mt_authz_checker;   // mt_future38; TODO Expand
-    future_method_fn  mt_future39;
+    authz_checker_fn mt_authz_checker;   // mt_future38; TODO expand
+    json_function_t  mt_authzs; // mt_future39; TODO expand
     mt_create_node_fn mt_create_node;
     mt_update_node_fn mt_update_node;
     mt_delete_node_fn mt_delete_node;
@@ -342,17 +342,18 @@ typedef struct _GCLASS {
  *--------------------------------------------*/
 PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
-    int (*startup_persistent_attrs_fn)(void),
-    void (*end_persistent_attrs_fn)(void),
-    int (*load_persistent_attrs_fn)(hgobj gobj),
-    int (*save_persistent_attrs_fn)(hgobj gobj),
-    int (*remove_persistent_attrs_fn)(hgobj gobj),
-    json_t * (*list_persistent_attrs_fn)(void),
-    json_function_t global_command_parser_fn,
-    json_function_t global_stats_parser_fn,
+    int (*startup_persistent_attrs)(void),
+    void (*end_persistent_attrs)(void),
+    int (*load_persistent_attrs)(hgobj gobj),
+    int (*save_persistent_attrs)(hgobj gobj),
+    int (*remove_persistent_attrs)(hgobj gobj),
+    json_t * (*list_persistent_attrs)(void),
+    json_function_t global_command_parser,
+    json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
     authz_allow_fn global_authz_allow,
-    authz_deny_fn global_authz_deny
+    authz_deny_fn global_authz_deny,
+    json_function_t global_authzs_parser
 );
 PUBLIC void gobj_shutdown(void);
 PUBLIC BOOL gobj_is_shutdowning(void);
@@ -1486,7 +1487,15 @@ PUBLIC const sdata_desc_t *gobj_get_authz_desc(
 PUBLIC int gobj_set_global_authz_functions(
     authz_checker_fn global_authz_checker,
     authz_allow_fn global_authz_allow,
-    authz_deny_fn global_authz_deny
+    authz_deny_fn global_authz_deny,
+    json_function_t global_authzs_parser
+);
+
+PUBLIC json_t *gobj_authzs( // list authzs of gobj
+    hgobj gobj,
+    const char *level,
+    json_t* kw,
+    hgobj src
 );
 
 /*

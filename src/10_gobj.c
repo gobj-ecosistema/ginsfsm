@@ -191,8 +191,6 @@ typedef struct _GObj_t {
     char oid_changed;
     uint32_t __gobj_trace_level__;
     uint32_t __gobj_no_trace_level__;
-    uint64_t __gobj_authz_level__;
-    uint64_t __gobj_no_authz_level__;
 } GObj_t;
 
 
@@ -208,16 +206,17 @@ PRIVATE json_t * (*__global_command_parser_fn__)(
     const char *command,
     json_t *kw,
     hgobj src
-) = 0;
+) = command_parser;
 PRIVATE json_t * (*__global_stats_parser_fn__)(
     hgobj gobj,
     const char *stats,
     json_t *kw,
     hgobj src
-) = 0;
+) = stats_parser;
 PRIVATE authz_checker_fn __global_authz_checker_fn__ = 0;
 PRIVATE authz_allow_fn __global_authz_allow_fn__ = 0;
 PRIVATE authz_deny_fn __global_authz_deny_fn__ = 0;
+PRIVATE json_function_t __global_authz_parser_fn__ = authz_parser;
 
 PRIVATE int (*__audit_command_cb__)(
     const char *audit_command,
@@ -510,17 +509,18 @@ PRIVATE uint32_t level2bit(
  ***************************************************************************/
 PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
-    int (*startup_persistent_attrs_fn)(void),
-    void (*end_persistent_attrs_fn)(void),
-    int (*load_persistent_attrs_fn)(hgobj gobj),
-    int (*save_persistent_attrs_fn)(hgobj gobj),
-    int (*remove_persistent_attrs_fn)(hgobj gobj),
-    json_t * (*list_persistent_attrs_fn)(void),
-    json_function_t global_command_parser_fn,
-    json_function_t global_stats_parser_fn,
+    int (*startup_persistent_attrs)(void),
+    void (*end_persistent_attrs)(void),
+    int (*load_persistent_attrs)(hgobj gobj),
+    int (*save_persistent_attrs)(hgobj gobj),
+    int (*remove_persistent_attrs)(hgobj gobj),
+    json_t * (*list_persistent_attrs)(void),
+    json_function_t global_command_parser,
+    json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
     authz_allow_fn global_authz_allow,
-    authz_deny_fn global_authz_deny
+    authz_deny_fn global_authz_deny,
+    json_function_t global_authz_parser
 )
 {
     if(__initialized__) {
@@ -533,17 +533,24 @@ PUBLIC int gobj_start_up(
     __shutdowning__ = 0;
     __jn_global_settings__ =  kw_duplicate(jn_global_settings);
 
-    __global_startup_persistent_attrs_fn__ = startup_persistent_attrs_fn;
-    __global_end_persistent_attrs_fn__ = end_persistent_attrs_fn;
-    __global_load_persistent_attrs_fn__ = load_persistent_attrs_fn;
-    __global_save_persistent_attrs_fn__ = save_persistent_attrs_fn;
-    __global_remove_persistent_attrs_fn__ = remove_persistent_attrs_fn;
-    __global_list_persistent_attrs_fn__ = list_persistent_attrs_fn;
-    __global_command_parser_fn__ = global_command_parser_fn;
-    __global_stats_parser_fn__ = global_stats_parser_fn;
+    __global_startup_persistent_attrs_fn__ = startup_persistent_attrs;
+    __global_end_persistent_attrs_fn__ = end_persistent_attrs;
+    __global_load_persistent_attrs_fn__ = load_persistent_attrs;
+    __global_save_persistent_attrs_fn__ = save_persistent_attrs;
+    __global_remove_persistent_attrs_fn__ = remove_persistent_attrs;
+    __global_list_persistent_attrs_fn__ = list_persistent_attrs;
+    if(global_command_parser) {
+        __global_command_parser_fn__ = global_command_parser;
+    }
+    if(global_stats_parser) {
+        __global_stats_parser_fn__ = global_stats_parser;
+    }
     __global_authz_checker_fn__ = global_authz_checker;
     __global_authz_allow_fn__ = global_authz_allow;
     __global_authz_deny_fn__ = global_authz_deny;
+    if(global_authz_parser) {
+        __global_authz_parser_fn__ = global_authz_parser;
+    }
 
     if(__global_startup_persistent_attrs_fn__) {
         __global_startup_persistent_attrs_fn__();
@@ -8517,8 +8524,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_publication_filter"));
     if(gmt->mt_authz_checker)
         json_array_append_new(jn_methods, json_string("mt_authz_checker"));
-    if(gmt->mt_future39)
-        json_array_append_new(jn_methods, json_string("mt_future39"));
+    if(gmt->mt_authzs)
+        json_array_append_new(jn_methods, json_string("mt_authzs"));
     if(gmt->mt_create_node)
         json_array_append_new(jn_methods, json_string("mt_create_node"));
     if(gmt->mt_update_node)
@@ -11515,13 +11522,65 @@ PUBLIC const sdata_desc_t *gobj_get_authz_desc(
 PUBLIC int gobj_set_global_authz_functions(
     authz_checker_fn global_authz_checker,
     authz_allow_fn global_authz_allow,
-    authz_deny_fn global_authz_deny
+    authz_deny_fn global_authz_deny,
+    json_function_t global_authz_parser
 )
 {
     __global_authz_checker_fn__ = global_authz_checker;
     __global_authz_allow_fn__ = global_authz_allow;
     __global_authz_deny_fn__ = global_authz_deny;
+    __global_authz_parser_fn__ = global_authz_parser;
 
+    return 0;
+}
+
+/****************************************************************************
+ *  list authzs of gobj
+ ****************************************************************************/
+PUBLIC json_t *gobj_authzs(
+    hgobj gobj_,
+    const char *level,
+    json_t* kw,
+    hgobj src
+)
+{
+    GObj_t * gobj = gobj_;
+
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        KW_DECREF(kw);
+        return 0;
+    }
+
+    /*--------------------------------------*
+     *  The local mt_authzs has preference
+     *--------------------------------------*/
+    if(gobj->gclass->gmt.mt_authzs) {
+        return gobj->gclass->gmt.mt_authzs(gobj, level, kw, src);
+    }
+
+    /*-----------------------------------------------*
+     *  Then use the global authzs parser
+     *-----------------------------------------------*/
+    if(__global_authz_parser_fn__) {
+        return __global_authz_parser_fn__(gobj, level, kw, src);
+    } else {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "Authz parser not available",
+            "level",        "%s", level?level:"",
+            NULL
+        );
+        KW_DECREF(kw);
+    }
     return 0;
 }
 
