@@ -70,15 +70,7 @@ PUBLIC json_t *build_authzs(
         KW_DECREF(kw);
         return sdataauth2json(gobj_get_global_authz_table());
     }
-    json_t *jn_list = sdataauth2json(gobj_get_global_authz_table());
-    const char *service = kw_get_str(kw, "service", "", 0);
-    hgobj gobj_service = gobj_find_service(service, FALSE);
-    if(gobj_service) {
-        json_array_extend(
-            jn_list,
-            sdataauth2json(gobj_gclass(gobj_service)->authz_table)
-        );
-    }
+    json_t *jn_list = sdataauth2json(gobj_gclass(gobj)->authz_table);
 
     KW_DECREF(kw);
     return jn_list;
