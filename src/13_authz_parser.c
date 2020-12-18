@@ -25,54 +25,18 @@
  ***************************************************************/
 
 /***************************************************************************
- *  Return a webix json
+ *  Return list authzs of gobj
  ***************************************************************************/
 PUBLIC json_t *authzs_list(
     hgobj gobj,
-    const char *auth,
-    json_t *kw,
-    hgobj src
-)
-{
-    /*--------------------------------------*
-     *  Build standard stats
-     *--------------------------------------*/
-    KW_INCREF(kw);
-    json_t *jn_data = build_authzs(
-        gobj,
-        auth,
-        kw,     // owned
-        src
-    );
-    append_yuno_metadata(gobj, jn_data, auth);
-
-    return msg_iev_build_webix(
-        gobj,
-        0,
-        0,
-        0,
-        jn_data,  // owned
-        kw // owned
-    );
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC json_t *build_authzs(
-    hgobj gobj,
-    const char *authz,
-    json_t *kw,
-    hgobj src
+    const char *auth
 )
 {
     if(!gobj) {
-        KW_DECREF(kw);
         return sdataauth2json(gobj_get_global_authz_table());
     }
     json_t *jn_list = sdataauth2json(gobj_gclass(gobj)->authz_table);
 
-    KW_DECREF(kw);
     return jn_list;
 }
 
@@ -117,5 +81,56 @@ PUBLIC const sdata_desc_t *authz_get_level_desc(
         pcmd++;
     }
     return 0;
+}
+
+/***************************************************************************
+ *  Return a webix json
+ ***************************************************************************/
+PUBLIC json_t *gobj_build_authzs_doc(
+    hgobj gobj,
+    const char *cmd,
+    json_t *kw,
+    hgobj src
+)
+{
+    const char *authz = kw_get_str(kw, "authz", "", 0);
+    const char *service = kw_get_str(kw, "service", "", 0);
+
+    hgobj service_gobj = 0;
+
+    if(!empty_string(service)) {
+        service_gobj = gobj_find_service(service, FALSE);
+        if(!service_gobj) {
+            return msg_iev_build_webix(
+                gobj,
+                -1,
+                json_sprintf("Service not found: '%s'", service),
+                0,
+                0,
+                kw // owned
+            );
+        }
+    }
+
+    json_t *jn_authzs = authzs_list(service_gobj, authz);
+    if(!jn_authzs) {
+        return msg_iev_build_webix(
+            gobj,
+            -1,
+            json_sprintf("Authz not found: '%s'", authz),
+            0,
+            0,
+            kw // owned
+        );
+    }
+
+    return msg_iev_build_webix(
+        gobj,
+        0,
+        0,
+        0,
+        jn_authzs,
+        kw // owned
+    );
 }
 

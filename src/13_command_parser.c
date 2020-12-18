@@ -639,7 +639,7 @@ PRIVATE json_t *build_cmd_kw(
 }
 
 /***************************************************************************
- *  Return a webix json
+ *  Return a string json
  ***************************************************************************/
 PUBLIC json_t *gobj_build_cmds_doc(hgobj gobj, json_t *kw)
 {

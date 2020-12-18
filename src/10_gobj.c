@@ -216,7 +216,7 @@ PRIVATE json_t * (*__global_stats_parser_fn__)(
 PRIVATE authz_checker_fn __global_authz_checker_fn__ = 0;
 PRIVATE authz_allow_fn __global_authz_allow_fn__ = 0;
 PRIVATE authz_deny_fn __global_authz_deny_fn__ = 0;
-PRIVATE json_function_t __global_authzs_list_fn__ = 0;
+PRIVATE authzs_fn __global_authzs_list_fn__ = 0;
 
 PRIVATE int (*__audit_command_cb__)(
     const char *audit_command,
@@ -527,7 +527,7 @@ PUBLIC int gobj_start_up(
     authz_checker_fn global_authz_checker,
     authz_allow_fn global_authz_allow,
     authz_deny_fn global_authz_deny,
-    json_function_t global_authzs_list
+    authzs_fn global_authzs_list
 )
 {
     if(__initialized__) {
@@ -11524,7 +11524,7 @@ PUBLIC int gobj_set_global_authz_functions(
     authz_checker_fn global_authz_checker,
     authz_allow_fn global_authz_allow,
     authz_deny_fn global_authz_deny,
-    json_function_t global_authzs_list
+    authzs_fn global_authzs_list
 )
 {
     __global_authz_checker_fn__ = global_authz_checker;
@@ -11540,9 +11540,7 @@ PUBLIC int gobj_set_global_authz_functions(
  ****************************************************************************/
 PUBLIC json_t *gobj_authzs(
     hgobj gobj_,
-    const char *permission,
-    json_t* kw,
-    hgobj src
+    const char *authz
 )
 {
     GObj_t *gobj = gobj_; // Can be null
@@ -11551,24 +11549,23 @@ PUBLIC json_t *gobj_authzs(
      *  The local mt_authzs has preference
      *--------------------------------------*/
     if(gobj && gobj->gclass->gmt.mt_authzs) {
-        return gobj->gclass->gmt.mt_authzs(gobj, permission, kw, src);
+        return gobj->gclass->gmt.mt_authzs(gobj, authz);
     }
 
     /*-----------------------------------------------*
      *  Then use the global authzs parser
      *-----------------------------------------------*/
     if(__global_authzs_list_fn__) {
-        return __global_authzs_list_fn__(gobj, permission, kw, src);
+        return __global_authzs_list_fn__(gobj, authz);
     } else {
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
             "msg",          "%s", "Authz parser not available",
-            "permission",   "%s", permission?permission:"",
+            "authz",        "%s", authz?authz:"",
             NULL
         );
-        KW_DECREF(kw);
     }
     return 0;
 }
@@ -11578,7 +11575,7 @@ PUBLIC json_t *gobj_authzs(
  ****************************************************************************/
 PUBLIC BOOL gobj_user_has_authz(
     hgobj gobj_,
-    const char *level,
+    const char *authz,
     json_t *kw,
     hgobj src  // HACK __md_user__ must have user info
 )
@@ -11601,14 +11598,14 @@ PUBLIC BOOL gobj_user_has_authz(
      *  The local mt_authz_checker has preference
      *----------------------------------------------------*/
     if(gobj->gclass->gmt.mt_authz_checker) {
-        return gobj->gclass->gmt.mt_authz_checker(gobj, level, kw, src);
+        return gobj->gclass->gmt.mt_authz_checker(gobj, authz, kw, src);
     }
 
     /*-----------------------------------------------*
      *  Then use the global authz checker
      *-----------------------------------------------*/
     if(__global_authz_checker_fn__) {
-        return __global_authz_checker_fn__(gobj, level, kw, src);
+        return __global_authz_checker_fn__(gobj, authz, kw, src);
     }
 
     KW_DECREF(kw);
@@ -11621,7 +11618,7 @@ PUBLIC BOOL gobj_user_has_authz(
 PUBLIC int gobj_authz_allow(
     hgobj gobj_,
     const char *user,
-    const char *level,
+    const char *authz,
     json_t *kw
 )
 {
@@ -11643,14 +11640,14 @@ PUBLIC int gobj_authz_allow(
      *  The local mt_authz_allow has preference
      *----------------------------------------------------*/
     if(gobj->gclass->gmt.mt_authz_allow) {
-        return gobj->gclass->gmt.mt_authz_allow(gobj, user, level, kw);
+        return gobj->gclass->gmt.mt_authz_allow(gobj, user, authz, kw);
     }
 
     /*-----------------------------------------------*
      *  Then use the global authz checker
      *-----------------------------------------------*/
     if(__global_authz_allow_fn__) {
-        return __global_authz_allow_fn__(gobj, user, level, kw);
+        return __global_authz_allow_fn__(gobj, user, authz, kw);
     }
 
     KW_DECREF(kw);
@@ -11663,7 +11660,7 @@ PUBLIC int gobj_authz_allow(
 PUBLIC int gobj_authz_deny(
     hgobj gobj_,
     const char *user,
-    const char *level,
+    const char *authz,
     json_t *kw
 )
 {
@@ -11685,14 +11682,14 @@ PUBLIC int gobj_authz_deny(
      *  The local mt_authz_deny has preference
      *----------------------------------------------------*/
     if(gobj->gclass->gmt.mt_authz_deny) {
-        return gobj->gclass->gmt.mt_authz_deny(gobj, user, level, kw);
+        return gobj->gclass->gmt.mt_authz_deny(gobj, user, authz, kw);
     }
 
     /*-----------------------------------------------*
      *  Then use the global authz checker
      *-----------------------------------------------*/
     if(__global_authz_deny_fn__) {
-        return __global_authz_deny_fn__(gobj, user, level, kw);
+        return __global_authz_deny_fn__(gobj, user, authz, kw);
     }
 
     KW_DECREF(kw);

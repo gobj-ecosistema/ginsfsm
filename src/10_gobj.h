@@ -84,9 +84,10 @@ typedef enum { // HACK strict ascendent value!, strings in event_authz_names[]
     EV_AUTHZ_SUBSCRIBE  = 0x0002,   // "subscribe" authorization
 } event_authz_t;
 
-typedef BOOL (*authz_checker_fn)(hgobj gobj, const char *level, json_t *kw, hgobj src);
-typedef int (*authz_allow_fn)(hgobj gobj, const char *user, const char *level, json_t *kw);
-typedef int (*authz_deny_fn)(hgobj gobj, const char *user, const char *level, json_t *kw);
+typedef BOOL (*authz_checker_fn)(hgobj gobj, const char *authz, json_t *kw, hgobj src);
+typedef int (*authz_allow_fn)(hgobj gobj, const char *user, const char *authz, json_t *kw);
+typedef int (*authz_deny_fn)(hgobj gobj, const char *user, const char *authz, json_t *kw);
+typedef json_t * (*authzs_fn)(hgobj gobj, const char *authz);
 
 typedef struct {
     const char *event;
@@ -251,7 +252,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
     authz_checker_fn mt_authz_checker;   // mt_future38; TODO expand
-    json_function_t mt_authzs; // mt_future39; TODO expand
+    authzs_fn mt_authzs; // mt_future39; TODO expand
     mt_create_node_fn mt_create_node;
     mt_update_node_fn mt_update_node;
     mt_delete_node_fn mt_delete_node;
@@ -352,7 +353,7 @@ PUBLIC int gobj_start_up(
     authz_checker_fn global_authz_checker,
     authz_allow_fn global_authz_allow,
     authz_deny_fn global_authz_deny,
-    json_function_t global_authzs_list
+    authzs_fn global_authzs_list
 );
 PUBLIC void gobj_shutdown(void);
 PUBLIC BOOL gobj_is_shutdowning(void);
@@ -1487,14 +1488,12 @@ PUBLIC int gobj_set_global_authz_functions(
     authz_checker_fn global_authz_checker,
     authz_allow_fn global_authz_allow,
     authz_deny_fn global_authz_deny,
-    json_function_t global_authzs_list
+    authzs_fn global_authzs_list
 );
 
 PUBLIC json_t *gobj_authzs( // list authzs of gobj
     hgobj gobj,
-    const char *level,
-    json_t* kw,
-    hgobj src
+    const char *authz
 );
 
 /*
@@ -1503,7 +1502,7 @@ PUBLIC json_t *gobj_authzs( // list authzs of gobj
  */
 PUBLIC BOOL gobj_user_has_authz(
     hgobj gobj,
-    const char *level,
+    const char *authz,
     json_t *kw,
     hgobj src  // HACK __md_user__ must have user info
 );
@@ -1511,13 +1510,13 @@ PUBLIC BOOL gobj_user_has_authz(
 PUBLIC int gobj_authz_allow(
     hgobj gobj,
     const char *user,
-    const char *level,
+    const char *authz,
     json_t *kw
 );
 PUBLIC int gobj_authz_deny(
     hgobj gobj,
     const char *user,
-    const char *level,
+    const char *authz,
     json_t *kw
 );
 PUBLIC const sdata_desc_t *gobj_get_global_authz_table(void);
