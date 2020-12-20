@@ -214,8 +214,6 @@ PRIVATE json_t * (*__global_stats_parser_fn__)(
     hgobj src
 ) = 0;
 PRIVATE authz_checker_fn __global_authz_checker_fn__ = 0;
-PRIVATE authz_allow_fn __global_authz_allow_fn__ = 0;
-PRIVATE authz_deny_fn __global_authz_deny_fn__ = 0;
 PRIVATE authzs_fn __global_authzs_list_fn__ = 0;
 
 PRIVATE int (*__audit_command_cb__)(
@@ -525,8 +523,6 @@ PUBLIC int gobj_start_up(
     json_function_t global_command_parser,
     json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
-    authz_allow_fn global_authz_allow,
-    authz_deny_fn global_authz_deny,
     authzs_fn global_authzs_list
 )
 {
@@ -549,8 +545,6 @@ PUBLIC int gobj_start_up(
     __global_command_parser_fn__ = global_command_parser;
     __global_stats_parser_fn__ = global_stats_parser;
     __global_authz_checker_fn__ = global_authz_checker;
-    __global_authz_allow_fn__ = global_authz_allow;
-    __global_authz_deny_fn__ = global_authz_deny;
     __global_authzs_list_fn__ = global_authzs_list;
 
     if(__global_startup_persistent_attrs_fn__) {
@@ -3201,6 +3195,38 @@ PUBLIC json_t *gobj_topic_hooks(
         return 0;
     }
     return gobj->gclass->gmt.mt_topic_hooks(gobj, treedb_name, topic_name, kw, src);
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC size_t gobj_topic_size(
+    hgobj gobj_,
+    const char *topic_name
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_topic_size) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_topic_size not defined",
+            NULL
+        );
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_topic_size(gobj, topic_name);
 }
 
 /***************************************************************************
@@ -8513,10 +8539,10 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_trace_off"));
     if(gmt->mt_gobj_created)
         json_array_append_new(jn_methods, json_string("mt_gobj_created"));
-    if(gmt->mt_authz_allow)
-        json_array_append_new(jn_methods, json_string("mt_authz_allow"));
-    if(gmt->mt_authz_deny)
-        json_array_append_new(jn_methods, json_string("mt_authz_deny"));
+    if(gmt->mt_future33)
+        json_array_append_new(jn_methods, json_string("mt_future33"));
+    if(gmt->mt_future34)
+        json_array_append_new(jn_methods, json_string("mt_future34"));
     if(gmt->mt_publish_event)
         json_array_append_new(jn_methods, json_string("mt_publish_event"));
     if(gmt->mt_publication_pre_filter)
@@ -8569,8 +8595,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_node_instances"));
     if(gmt->mt_save_node)
         json_array_append_new(jn_methods, json_string("mt_save_node"));
-    if(gmt->mt_future61)
-        json_array_append_new(jn_methods, json_string("mt_future61"));
+    if(gmt->mt_topic_size)
+        json_array_append_new(jn_methods, json_string("mt_topic_size"));
     if(gmt->mt_future62)
         json_array_append_new(jn_methods, json_string("mt_future62"));
     if(gmt->mt_future63)
@@ -11518,24 +11544,6 @@ PUBLIC const sdata_desc_t *gobj_get_authz_desc(
 }
 
 /****************************************************************************
- *
- ****************************************************************************/
-PUBLIC int gobj_set_global_authz_functions(
-    authz_checker_fn global_authz_checker,
-    authz_allow_fn global_authz_allow,
-    authz_deny_fn global_authz_deny,
-    authzs_fn global_authzs_list
-)
-{
-    __global_authz_checker_fn__ = global_authz_checker;
-    __global_authz_allow_fn__ = global_authz_allow;
-    __global_authz_deny_fn__ = global_authz_deny;
-    __global_authzs_list_fn__ = global_authzs_list;
-
-    return 0;
-}
-
-/****************************************************************************
  *  list authzs of gobj
  ****************************************************************************/
 PUBLIC json_t *gobj_authzs(
@@ -11571,13 +11579,14 @@ PUBLIC json_t *gobj_authzs(
 }
 
 /****************************************************************************
- *  Return if __md_user__ in src has authz in gobj in context
+ *  Return if user has authz in gobj in context
+ *  HACK if there is no authz checker the authz is TRUE
  ****************************************************************************/
 PUBLIC BOOL gobj_user_has_authz(
     hgobj gobj_,
     const char *authz,
     json_t *kw,
-    hgobj src  // HACK __md_user__ must have user info
+    hgobj src
 )
 {
     GObj_t * gobj = gobj_;
@@ -11610,90 +11619,6 @@ PUBLIC BOOL gobj_user_has_authz(
 
     KW_DECREF(kw);
     return TRUE; // HACK if there is no authz checker the authz is TRUE
-}
-
-/****************************************************************************
- *
- ****************************************************************************/
-PUBLIC int gobj_authz_allow(
-    hgobj gobj_,
-    const char *user,
-    const char *authz,
-    json_t *kw
-)
-{
-    GObj_t * gobj = gobj_;
-
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        KW_DECREF(kw);
-        return FALSE;
-    }
-
-    /*----------------------------------------------------*
-     *  The local mt_authz_allow has preference
-     *----------------------------------------------------*/
-    if(gobj->gclass->gmt.mt_authz_allow) {
-        return gobj->gclass->gmt.mt_authz_allow(gobj, user, authz, kw);
-    }
-
-    /*-----------------------------------------------*
-     *  Then use the global authz checker
-     *-----------------------------------------------*/
-    if(__global_authz_allow_fn__) {
-        return __global_authz_allow_fn__(gobj, user, authz, kw);
-    }
-
-    KW_DECREF(kw);
-    return 0;
-}
-
-/****************************************************************************
- *
- ****************************************************************************/
-PUBLIC int gobj_authz_deny(
-    hgobj gobj_,
-    const char *user,
-    const char *authz,
-    json_t *kw
-)
-{
-    GObj_t * gobj = gobj_;
-
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        KW_DECREF(kw);
-        return FALSE;
-    }
-
-    /*----------------------------------------------------*
-     *  The local mt_authz_deny has preference
-     *----------------------------------------------------*/
-    if(gobj->gclass->gmt.mt_authz_deny) {
-        return gobj->gclass->gmt.mt_authz_deny(gobj, user, authz, kw);
-    }
-
-    /*-----------------------------------------------*
-     *  Then use the global authz checker
-     *-----------------------------------------------*/
-    if(__global_authz_deny_fn__) {
-        return __global_authz_deny_fn__(gobj, user, authz, kw);
-    }
-
-    KW_DECREF(kw);
-    return 0;
 }
 
 /****************************************************************************

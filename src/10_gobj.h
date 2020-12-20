@@ -85,8 +85,6 @@ typedef enum { // HACK strict ascendent value!, strings in event_authz_names[]
 } event_authz_t;
 
 typedef BOOL (*authz_checker_fn)(hgobj gobj, const char *authz, json_t *kw, hgobj src);
-typedef int (*authz_allow_fn)(hgobj gobj, const char *user, const char *authz, json_t *kw);
-typedef int (*authz_deny_fn)(hgobj gobj, const char *user, const char *authz, json_t *kw);
 typedef json_t * (*authzs_fn)(hgobj gobj, const char *authz);
 
 typedef struct {
@@ -179,7 +177,10 @@ typedef json_t *(*mt_node_instances_fn)(
     json_t *jn_options,
     hgobj src
 );
-
+typedef size_t (*mt_topic_size_fn)(
+    hgobj gobj,
+    const char *topic_name
+);
 
 typedef void *(*internal_method_fn)(hgobj gobj, void *data);
 typedef json_t *(*mt_authenticate_fn)(hgobj gobj, const char *service, json_t *kw, hgobj src);
@@ -246,8 +247,8 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_trace_on_fn mt_trace_on;                 // Return webix
     mt_trace_off_fn mt_trace_off;               // Return webix
     mt_gobj_created_fn mt_gobj_created;         // ONLY for __yuno__.
-    authz_allow_fn mt_authz_allow;   // mt_future33 mt_permission_on TODO expand
-    authz_deny_fn mt_authz_deny;     // mt_future34 mt_permission_off TODO expand
+    future_method_fn mt_future33;   // mt_permission_on TODO repon
+    future_method_fn mt_future34;     // mt_permission_off TODO repon
     mt_publish_event_fn mt_publish_event;  // Return -1 (broke), 0 continue without publish, 1 continue and publish
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
@@ -274,7 +275,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_node_childs_fn mt_node_childs;
     mt_node_instances_fn mt_node_instances;
     mt_save_node_fn mt_save_node;
-    future_method_fn mt_future61;
+    mt_topic_size_fn mt_topic_size; // mt_future61; TODO expand
     future_method_fn mt_future62;
     future_method_fn mt_future63;
     future_method_fn mt_future64;
@@ -351,8 +352,6 @@ PUBLIC int gobj_start_up(
     json_function_t global_command_parser,
     json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
-    authz_allow_fn global_authz_allow,
-    authz_deny_fn global_authz_deny,
     authzs_fn global_authzs_list
 );
 PUBLIC void gobj_shutdown(void);
@@ -551,6 +550,11 @@ PUBLIC json_t *gobj_topic_hooks(
     const char *topic_name,
     json_t *kw,
     hgobj src
+);
+
+PUBLIC size_t gobj_topic_size(
+    hgobj gobj,
+    const char *topic_name
 );
 
 PUBLIC json_t *gobj_create_node( // Return is NOT YOURS, WARNING This does NOT auto build links
@@ -1484,41 +1488,22 @@ PUBLIC const sdata_desc_t *gobj_get_authz_desc(
     const char *level
 );
 
-PUBLIC int gobj_set_global_authz_functions(
-    authz_checker_fn global_authz_checker,
-    authz_allow_fn global_authz_allow,
-    authz_deny_fn global_authz_deny,
-    authzs_fn global_authzs_list
-);
-
 PUBLIC json_t *gobj_authzs( // list authzs of gobj
     hgobj gobj,
     const char *authz
 );
 
 /*
- *  Return if __md_user__ in src has authz in gobj in context
+ *  Return if user has authz in gobj in context
  *  HACK if there is no authz checker the authz is TRUE
  */
 PUBLIC BOOL gobj_user_has_authz(
     hgobj gobj,
     const char *authz,
     json_t *kw,
-    hgobj src  // HACK __md_user__ must have user info
+    hgobj src
 );
 
-PUBLIC int gobj_authz_allow(
-    hgobj gobj,
-    const char *user,
-    const char *authz,
-    json_t *kw
-);
-PUBLIC int gobj_authz_deny(
-    hgobj gobj,
-    const char *user,
-    const char *authz,
-    json_t *kw
-);
 PUBLIC const sdata_desc_t *gobj_get_global_authz_table(void);
 
 /*--------------------------------------------*
