@@ -247,13 +247,13 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_trace_on_fn mt_trace_on;                 // Return webix
     mt_trace_off_fn mt_trace_off;               // Return webix
     mt_gobj_created_fn mt_gobj_created;         // ONLY for __yuno__.
-    future_method_fn mt_future33;   // mt_permission_on TODO repon
-    future_method_fn mt_future34;     // mt_permission_off TODO repon
+    future_method_fn mt_future33;
+    future_method_fn mt_future34;
     mt_publish_event_fn mt_publish_event;  // Return -1 (broke), 0 continue without publish, 1 continue and publish
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
-    authz_checker_fn mt_authz_checker;   // mt_future38; TODO expand
-    authzs_fn mt_authzs; // mt_future39; TODO expand
+    authz_checker_fn mt_authz_checker;
+    authzs_fn mt_authzs;
     mt_create_node_fn mt_create_node;
     mt_update_node_fn mt_update_node;
     mt_delete_node_fn mt_delete_node;
@@ -275,7 +275,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_node_childs_fn mt_node_childs;
     mt_node_instances_fn mt_node_instances;
     mt_save_node_fn mt_save_node;
-    mt_topic_size_fn mt_topic_size; // mt_future61; TODO expand
+    mt_topic_size_fn mt_topic_size;
     future_method_fn mt_future62;
     future_method_fn mt_future63;
     future_method_fn mt_future64;
