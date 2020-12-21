@@ -234,7 +234,7 @@ PRIVATE char __yuno_role_plus_name__[NAME_MAX];
 
 
 PRIVATE json_t *__jn_global_settings__ = 0;
-PRIVATE int (*__global_startup_persistent_attrs_fn__)(void) = 0;
+PRIVATE void *(*__global_startup_persistent_attrs_fn__)(void) = 0;
 PRIVATE void (*__global_end_persistent_attrs_fn__)(void) = 0;
 PRIVATE int (*__global_load_persistent_attrs_fn__)(hgobj gobj) = 0;
 PRIVATE int (*__global_save_persistent_attrs_fn__)(hgobj gobj) = 0;
@@ -514,7 +514,7 @@ PRIVATE uint32_t level2bit(
  ***************************************************************************/
 PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
-    int (*startup_persistent_attrs)(void),
+    void * (*startup_persistent_attrs)(void),
     void (*end_persistent_attrs)(void),
     int (*load_persistent_attrs)(hgobj gobj),
     int (*save_persistent_attrs)(hgobj gobj),

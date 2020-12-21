@@ -343,7 +343,7 @@ typedef struct _GCLASS {
  *--------------------------------------------*/
 PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
-    int (*startup_persistent_attrs)(void),
+    void *(*startup_persistent_attrs)(void),
     void (*end_persistent_attrs)(void),
     int (*load_persistent_attrs)(hgobj gobj),
     int (*save_persistent_attrs)(hgobj gobj),
