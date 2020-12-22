@@ -4565,6 +4565,39 @@ PUBLIC hgobj gobj_find_service(const char *service, BOOL verbose)
 }
 
 /***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC hgobj gobj_find_gclass_service(const char *gclass_name, BOOL verbose)
+{
+    if(empty_string(gclass_name)) {
+        return 0;
+    }
+
+    service_register_t *srv_reg = dl_first(&dl_service);
+    while(srv_reg) {
+        if(srv_reg->service) {
+            if(srv_reg->gobj &&
+                    strcasecmp(srv_reg->gobj->gclass->gclass_name, gclass_name)==0) {
+                return srv_reg->gobj;
+            }
+        }
+        srv_reg = dl_next(srv_reg);
+    }
+
+    if(verbose) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "service of gclass NOT FOUND",
+            "gclass",       "%s", gclass_name,
+            NULL
+        );
+    }
+    return 0;
+}
+
+/***************************************************************************
  *  Return nearest top service of gobj (service or __yuno__)
  ***************************************************************************/
 PUBLIC hgobj gobj_nearest_top_service(hgobj gobj_)

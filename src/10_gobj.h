@@ -717,6 +717,7 @@ PUBLIC int gobj_get_exit_code(void);
 
 PUBLIC hgobj gobj_default_service(void);
 PUBLIC hgobj gobj_find_service(const char *service, BOOL verbose);
+PUBLIC hgobj gobj_find_gclass_service(const char *gclass_name, BOOL verbose);
 PUBLIC hgobj gobj_nearest_top_service(hgobj gobj); // Return nearest top service of gobj (service or __yuno__)
 
 PUBLIC hgobj gobj_find_gobj(const char *gobj_path); // find gobj by path (name or oid)
