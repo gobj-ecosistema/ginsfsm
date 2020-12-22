@@ -147,7 +147,7 @@ PUBLIC json_t * command_parser(hgobj gobj,
 }
 
 /***************************************************************************
- *  Find an input parameter
+ *  Find the command descriptor
  ***************************************************************************/
 PUBLIC const sdata_desc_t *command_get_cmd_desc(const sdata_desc_t *command_table, const char *cmd)
 {

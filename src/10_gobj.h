@@ -1474,13 +1474,24 @@ PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
  *
     "__read_attribute__",       "Authorization to read gobj's attributes"
         params: "path"
+
     "__write_attribute__",      "Authorization to write gobj's attributes"
         params: "path"
+
     "__execute_command__",      "Authorization to execute gobj's commands"
         params: "command", "kw"
+
     "__inject_event__",         "Authorization to inject events to gobj"
+
     "__subscribe_event__",      "Authorization to subscribe events of gobj"
         params: "event", "kw"
+
+    "__read_stats__"            "Authorization to read gobj's stats"
+        params: "stats", "kw"
+
+    "__reset_stats__"           "Authorization to reset gobj's stats"
+        params: "stats", "kw"
+
  */
 
 PUBLIC const sdata_desc_t *gobj_get_authz_desc(

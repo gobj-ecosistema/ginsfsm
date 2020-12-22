@@ -96,6 +96,8 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     SDF_AUTHZ_W     = 0x00010000,   /* Need Attribute '__write_attribute__' authorization */
     SDF_AUTHZ_X     = 0x00020000,   /* Need Command '__execute_command__' authorization */
     SDF_AUTHZ_P     = 0x00040000,   /* authorization constraint parameter */
+    SDF_AUTHZ_S     = 0x00080000,   /* Need Stats '__read_stats__' authorization */
+    SDF_AUTHZ_RS    = 0x00100000,   /* Need Stats '__reset_stats__' authorization */
 } sdata_flag_t;
 
 

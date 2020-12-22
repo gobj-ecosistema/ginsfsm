@@ -101,6 +101,8 @@ PRIVATE const char *sdata_flag_names[] = {
     "SDF_AUTHZ_W",
     "SDF_AUTHZ_X",
     "SDF_AUTHZ_P",
+    "SDF_AUTHZ_S",
+    "SDF_AUTHZ_RS",
     0
 };
 

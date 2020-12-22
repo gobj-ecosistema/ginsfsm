@@ -334,12 +334,6 @@ SDATAPM (ASN_OCTET_STR, "command",      0,              0,          "Command nam
 SDATAPM (ASN_JSON,      "kw",           0,              0,          "command's kw"),
 SDATA_END()
 };
-PRIVATE sdata_desc_t pm_exec_stats[] = {
-/*-PM----type-----------name------------flag------------default-----description---------- */
-SDATAPM (ASN_OCTET_STR, "stats",        0,              0,          "Stats name"),
-SDATAPM (ASN_JSON,      "kw",           0,              0,          "stats's kw"),
-SDATA_END()
-};
 PRIVATE sdata_desc_t pm_inject_event[] = {
 /*-PM----type-----------name------------flag------------default-----description---------- */
 SDATAPM (ASN_OCTET_STR, "event",        0,              0,          "Event name"),
@@ -352,15 +346,28 @@ SDATAPM (ASN_OCTET_STR, "event",        0,              0,          "Event name"
 SDATAPM (ASN_JSON,      "kw",           0,              0,          "event's kw"),
 SDATA_END()
 };
+PRIVATE sdata_desc_t pm_read_stats[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "stats",        0,              0,          "Stats name"),
+SDATAPM (ASN_JSON,      "kw",           0,              0,          "stats's kw"),
+SDATA_END()
+};
+PRIVATE sdata_desc_t pm_reset_stats[] = {
+/*-PM----type-----------name------------flag------------default-----description---------- */
+SDATAPM (ASN_OCTET_STR, "stats",        0,              0,          "Stats name"),
+SDATAPM (ASN_JSON,      "kw",           0,              0,          "stats's kw"),
+SDATA_END()
+};
 
 PRIVATE sdata_desc_t global_authz_table[] = {
 /*-AUTHZ-- type---------name--------------------flag----alias---items---description--*/
 SDATAAUTHZ (ASN_SCHEMA, "__read_attribute__",   0,      0,      pm_read_attr, "Authorization to read gobj's attributes"),
 SDATAAUTHZ (ASN_SCHEMA, "__write_attribute__",  0,      0,      pm_write_attr, "Authorization to write gobj's attributes"),
 SDATAAUTHZ (ASN_SCHEMA, "__execute_command__",  0,      0,      pm_exec_cmd, "Authorization to execute gobj's commands"),
-SDATAAUTHZ (ASN_SCHEMA, "__execute_stats__",    0,      0,      pm_exec_stats, "Authorization to execute gobj's stats"),
 SDATAAUTHZ (ASN_SCHEMA, "__inject_event__",     0,      0,      pm_inject_event, "Authorization to inject events to gobj"),
 SDATAAUTHZ (ASN_SCHEMA, "__subscribe_event__",  0,      0,      pm_subs_event, "Authorization to subscribe events of gobj"),
+SDATAAUTHZ (ASN_SCHEMA, "__read_stats__",       0,      0,      pm_read_stats, "Authorization to read gobj's stats"),
+SDATAAUTHZ (ASN_SCHEMA, "__reset_stats__",      0,      0,      pm_reset_stats, "Authorization to reset gobj's stats"),
 SDATA_END()
 };
 
