@@ -47,7 +47,7 @@ set (SRCS
     src/11_inter_event.c
     src/11_istream.c
     src/12_msg_ievent.c
-    src/13_authz_parser.c
+    src/13_authz_helper.c
     src/13_command_parser.c
     src/13_stats_parser.c
     src/ginsfsm.c
@@ -62,7 +62,7 @@ set (HDRS
     src/11_inter_event.h
     src/11_istream.h
     src/12_msg_ievent.h
-    src/13_authz_parser.h
+    src/13_authz_helper.h
     src/13_command_parser.h
     src/13_stats_parser.h
     src/ginsfsm.h

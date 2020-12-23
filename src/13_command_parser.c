@@ -85,46 +85,46 @@ PUBLIC json_t * command_parser(hgobj gobj,
     /*-----------------------------------------------*
      *  Check AUTHZ
      *-----------------------------------------------*/
-    if(cnf_cmd->flag & SDF_AUTHZ_X) {
-        /*
-         *  AUTHZ Required
-         */
-        json_t *kw_authz = json_pack("{s:s}",
-            "command", command
-        );
-        if(kw) {
-            json_object_set(kw_authz, "kw", kw);
-        } else {
-            json_object_set_new(kw_authz, "kw", json_object());
-        }
-        if(!gobj_user_has_authz(
-                gobj,
-                "__execute_command__",
-                kw_authz,
-                src
-          )) {
-            log_error(0,
-                "gobj",         "%s", gobj_full_name(gobj),
-                "function",     "%s", __FUNCTION__,
-                "msgset",       "%s", MSGSET_OAUTH_ERROR,
-                "msg",          "%s", "No permission to execute command",
-                //"user",         "%s", gobj_get_user(src),
-                "gclass",       "%s", gobj_gclass_name(gobj),
-                "command",      "%s", command?command:"",
-                NULL
-            );
-            return msg_iev_build_webix(
-                gobj,
-                -403,
-                json_local_sprintf(
-                    "No permission to execute command"
-                ),
-                0,
-                0,
-                kw
-            );
-        }
-    }
+//     if(cnf_cmd->flag & SDF_AUTHZ_X) {
+//         /*
+//          *  AUTHZ Required
+//          */
+//         json_t *kw_authz = json_pack("{s:s}",
+//             "command", command
+//         );
+//         if(kw) {
+//             json_object_set(kw_authz, "kw", kw);
+//         } else {
+//             json_object_set_new(kw_authz, "kw", json_object());
+//         }
+//         if(!gobj_user_has_authz(
+//                 gobj,
+//                 "__execute_command__",
+//                 kw_authz,
+//                 src
+//           )) {
+//             log_error(0,
+//                 "gobj",         "%s", gobj_full_name(gobj),
+//                 "function",     "%s", __FUNCTION__,
+//                 "msgset",       "%s", MSGSET_OAUTH_ERROR,
+//                 "msg",          "%s", "No permission to execute command",
+//                 //"user",         "%s", gobj_get_user(src),
+//                 "gclass",       "%s", gobj_gclass_name(gobj),
+//                 "command",      "%s", command?command:"",
+//                 NULL
+//             );
+//             return msg_iev_build_webix(
+//                 gobj,
+//                 -403,
+//                 json_local_sprintf(
+//                     "No permission to execute command"
+//                 ),
+//                 0,
+//                 0,
+//                 kw
+//             );
+//         }
+//     }
 
     json_t *webix = 0;
     if(cnf_cmd->json_fn) {

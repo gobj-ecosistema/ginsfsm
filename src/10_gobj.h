@@ -85,7 +85,7 @@ typedef enum { // HACK strict ascendent value!, strings in event_authz_names[]
 } event_authz_t;
 
 typedef BOOL (*authz_checker_fn)(hgobj gobj, const char *authz, json_t *kw, hgobj src);
-typedef json_t * (*authzs_fn)(hgobj gobj, const char *authz);
+typedef json_t *(*authenticate_parser_fn)(hgobj gobj, json_t *kw, hgobj src);
 
 typedef struct {
     const char *event;
@@ -183,7 +183,7 @@ typedef size_t (*mt_topic_size_fn)(
 );
 
 typedef void *(*internal_method_fn)(hgobj gobj, void *data);
-typedef json_t *(*mt_authenticate_fn)(hgobj gobj, const char *service, json_t *kw, hgobj src);
+typedef json_t *(*mt_authenticate_fn)(hgobj gobj, json_t *kw, hgobj src);
 typedef json_t *(*mt_list_childs_fn)(hgobj gobj, const char *child_gclass, const char **attributes);
 typedef int (*mt_stats_updated_fn)(
     hgobj gobj,
@@ -253,7 +253,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_publication_pre_filter_fn mt_publication_pre_filter; // Return -1,0,1
     mt_publication_filter_fn mt_publication_filter; // Return -1,0,1
     authz_checker_fn mt_authz_checker;
-    authzs_fn mt_authzs;
+    future_method_fn mt_future39;
     mt_create_node_fn mt_create_node;
     mt_update_node_fn mt_update_node;
     mt_delete_node_fn mt_delete_node;
@@ -352,7 +352,7 @@ PUBLIC int gobj_start_up(
     json_function_t global_command_parser,
     json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
-    authzs_fn global_authzs_list
+    authenticate_parser_fn global_authenticate_parser
 );
 PUBLIC void gobj_shutdown(void);
 PUBLIC BOOL gobj_is_shutdowning(void);
@@ -404,16 +404,6 @@ PUBLIC json_t * gobj_repr_unique_register(void);
 PUBLIC hgobj gobj_service_factory(
     const char *name,
     json_t * jn_service_config // owned
-);
-
-/*
- *  Return webix response ({"result": 0,...} 0 successful authentication, -1 error)
- */
-PUBLIC json_t *gobj_authenticate(
-    hgobj gobj,
-    const char *service,
-    json_t *kw,
-    hgobj src
 );
 
 /*--------------------------------------------*
@@ -1495,9 +1485,24 @@ PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
 
  */
 
-PUBLIC const sdata_desc_t *gobj_get_authz_desc(
-    GCLASS * gclass,
-    const char *level
+/*
+ *  Authenticate
+ *  Return json response
+ *
+        {
+            "result": 0,        // 0 successful authentication, -1 error
+            "comment": "",
+            "username": ""      // username authenticated
+        }
+
+ *  HACK if there is no authentication parser the authentication is TRUE
+    and the username is the current system user
+ *  WARNING Becare and use no parser only in local services!
+ */
+PUBLIC json_t *gobj_authenticate(
+    hgobj gobj,
+    json_t *kw,
+    hgobj src
 );
 
 PUBLIC json_t *gobj_authzs( // list authzs of gobj

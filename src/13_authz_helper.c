@@ -1,12 +1,12 @@
 /***********************************************************************
- *          AUTHZ_PARSER.C
+ *          AUTHZ_HELPER.H
  *
- *          Authz parser
+ *          Authz helper
  *
- *          Copyright (c) 2017 Niyamaka.
+ *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
 ***********************************************************************/
-#include "13_authz_parser.h"
+#include "13_authz_helper.h"
 
 /***************************************************************
  *              Constants
@@ -32,7 +32,7 @@ PUBLIC json_t *authzs_list(
     const char *auth
 )
 {
-    if(!gobj) {
+    if(!gobj) { // Can be null
         return sdataauth2json(gobj_get_global_authz_table());
     }
     json_t *jn_list = sdataauth2json(gobj_gclass(gobj)->authz_table);

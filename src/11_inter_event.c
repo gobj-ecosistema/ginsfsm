@@ -137,7 +137,7 @@ PRIVATE int iev_create_from_json(iev_msg_t *iev_msg, json_t *jn_msg)
         iev_msg->kw = 0;
         return -1;
     }
-    if(!kw) {
+    if(!kw) { // WARNING cannot be null!
         log_error(0,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,

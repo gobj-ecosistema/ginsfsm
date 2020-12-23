@@ -1,9 +1,9 @@
 /****************************************************************************
- *          AUTHZ_PARSER.H
+ *          AUTHZ_HELPER.H
  *
- *          Authz parser
+ *          Authz helper
  *
- *          Copyright (c) 2017 Niyamaka.
+ *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
  ****************************************************************************/
 #pragma once
