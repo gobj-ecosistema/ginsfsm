@@ -224,9 +224,10 @@ PRIVATE int (*__audit_command_cb__)(
 PRIVATE void *__audit_command_user_data__ = 0;
 PRIVATE GObj_t * __yuno__ = 0;
 PRIVATE GObj_t * __default_service__ = 0;
-PRIVATE char __realm_domain__[NAME_MAX];
+PRIVATE char __realm_owner__[NAME_MAX];
 PRIVATE char __realm_role__[NAME_MAX];
 PRIVATE char __realm_name__[NAME_MAX];
+PRIVATE char __realm_env__[NAME_MAX];
 PRIVATE char __yuno_role__[NAME_MAX];
 PRIVATE char __yuno_name__[NAME_MAX];
 PRIVATE char __yuno_alias__[NAME_MAX];
@@ -735,9 +736,10 @@ PRIVATE void free_trans_filter(trans_filter_t *trans_reg)
  *  Factory to create yuno gobj
  ***************************************************************************/
 PUBLIC hgobj gobj_yuno_factory(
-    const char *realm_domain,
+    const char *realm_owner,
     const char *realm_role,
     const char *realm_name,
+    const char *realm_env,
     const char *yuno_name,
     const char *yuno_alias,
     json_t *jn_yuno_settings) // own
@@ -769,8 +771,8 @@ PUBLIC hgobj gobj_yuno_factory(
                 NULL
             );
             snprintf(
-                __realm_domain__, sizeof(__realm_domain__),
-                "%s", realm_domain?realm_domain:""
+                __realm_owner__, sizeof(__realm_owner__),
+                "%s", realm_owner?realm_owner:""
             );
             snprintf(
                 __realm_role__, sizeof(__realm_role__),
@@ -779,6 +781,10 @@ PUBLIC hgobj gobj_yuno_factory(
             snprintf(
                 __realm_name__, sizeof(__realm_name__),
                 "%s", realm_name?realm_name:""
+            );
+            snprintf(
+                __realm_env__, sizeof(__realm_env__),
+                "%s", realm_env?realm_env:""
             );
             snprintf(
                 __yuno_role__, sizeof(__yuno_role__), "%s", gclass_reg->role
@@ -1109,10 +1115,11 @@ PUBLIC hgobj gobj_service_factory(
     );
     json_object_update_new(
         __json_config_variables__,
-        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
-            "__realm_domain__", __realm_domain__,
+        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+            "__realm_owner__", __realm_owner__,
             "__realm_role__", __realm_role__,
             "__realm_name__", __realm_name__,
+            "__realm_env__", __realm_env__,
             "__yuno_role__", __yuno_role__,
             "__yuno_name__", __yuno_name__,
             "__yuno_alias__", __yuno_alias__,
@@ -8785,9 +8792,9 @@ PRIVATE json_t *fsm2json(FSM *fsm)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC const char *gobj_yuno_realm_domain(void)
+PUBLIC const char *gobj_yuno_realm_owner(void)
 {
-    return __realm_domain__;
+    return __realm_owner__;
 }
 
 /***************************************************************************
@@ -8804,6 +8811,14 @@ PUBLIC const char *gobj_yuno_realm_role(void)
 PUBLIC const char *gobj_yuno_realm_name(void)
 {
     return __realm_name__;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC const char *gobj_yuno_realm_env(void)
+{
+    return __realm_env__;
 }
 
 /***************************************************************************
@@ -9551,9 +9566,10 @@ PUBLIC int append_yuno_metadata(hgobj gobj, json_t *kw, const char *source)
     json_object_set_new(jn_metadatos, "__t__", json_integer(t));
     json_object_set_new(jn_metadatos, "__origin__", json_string(source));
     json_object_set_new(jn_metadatos, "hostname", json_string(hostname));
-    json_object_set_new(jn_metadatos, "realm_domain", json_string(__realm_domain__));
+    json_object_set_new(jn_metadatos, "realm_owner", json_string(__realm_owner__));
     json_object_set_new(jn_metadatos, "realm_role", json_string(__realm_role__));
     json_object_set_new(jn_metadatos, "realm_name", json_string(__realm_name__));
+    json_object_set_new(jn_metadatos, "realm_env", json_string(__realm_env__));
     json_object_set_new(jn_metadatos, "yuno_role", json_string(__yuno_role__));
     json_object_set_new(jn_metadatos, "yuno_name", json_string(__yuno_name__));
     json_object_set_new(jn_metadatos, "gobj_name", json_string(gobj_short_name(gobj)));

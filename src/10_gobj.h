@@ -367,9 +367,10 @@ PUBLIC int gobj_register_yuno(
     BOOL to_free
 );
 PUBLIC hgobj gobj_yuno_factory(
-    const char *realm_domain,
+    const char *realm_owner,
     const char *realm_role,
     const char *realm_name,
+    const char *realm_env,
     const char *yuno_name,
     const char *yuno_alias,
     json_t *jn_yuno_settings // own
@@ -1182,9 +1183,10 @@ PUBLIC int gobj_update_writable_attrs( // with authz
 /*--------------------------------------------*
  *  Info functions
  *--------------------------------------------*/
-PUBLIC const char *gobj_yuno_realm_domain(void);
+PUBLIC const char *gobj_yuno_realm_owner(void);
 PUBLIC const char *gobj_yuno_realm_role(void);
 PUBLIC const char *gobj_yuno_realm_name(void);
+PUBLIC const char *gobj_yuno_realm_env(void);
 PUBLIC const char *gobj_yuno_role(void);
 PUBLIC const char *gobj_yuno_name(void);
 PUBLIC const char *gobj_yuno_role_plus_name(void);
