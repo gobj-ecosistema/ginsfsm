@@ -623,6 +623,10 @@ PUBLIC int gobj_unlink_nodes(
         Return the kwid style:
             [{"id": "$id", "topic_name":"$topic_name", "hook_name":"$hook_name"}, ...]
 
+    "fkey-ref-size"
+        Return the kwid style:
+            [{"topic_name":"$topic_name", "hook_name":"$hook_name", "size": $size}, ...]
+
     "hook-ref-only-id"
         Return the 'hook ref' with only the 'id' field
             ["$id",...]
@@ -630,6 +634,10 @@ PUBLIC int gobj_unlink_nodes(
     "hook-ref-list-dict"
         Return the kwid style:
             [{"id": "$id", "topic_name":"$topic_name"}, ...]
+
+    "hook-ref-size"
+        Return the kwid style:
+            [{"topic_name":"$topic_name", "size": $size}, ...]
 
     HACK id is converted in ids (using kwid_get_ids())
     HACK if __filter__ exists in jn_filter it will be used as filter
@@ -654,6 +662,7 @@ PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
 
 /*
  *  Return a list of parent **references** pointed by the link (fkey)
+ *  If no link return all links
  */
 PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     hgobj gobj,
@@ -666,6 +675,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
 
 /*
  *  Return a list of child **references** of the hook
+ *  If no hook return all hooks
  */
 PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     hgobj gobj,

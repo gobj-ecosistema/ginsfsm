@@ -3522,6 +3522,7 @@ PUBLIC json_t *gobj_list_nodes(
 
 /***************************************************************************
  *  Return a list of parent **references** pointed by the link (fkey)
+ *  If no link return all links
  ***************************************************************************/
 PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     hgobj gobj_,
@@ -3560,6 +3561,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
 
 /***************************************************************************
  *  Return a list of child **references** of the hook
+ *  If no hook return all hooks
  ***************************************************************************/
 PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     hgobj gobj_,
