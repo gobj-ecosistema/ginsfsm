@@ -554,9 +554,9 @@ PUBLIC json_t *gobj_create_node( // Return is NOT YOURS
     hgobj src
 );
 
-PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
+PUBLIC int gobj_save_node( // Direct saving to tranger
     hgobj gobj,
-    json_t *node, // NOT owned
+    json_t *node, // NOT owned, WARNING be care, must be a pure node
     hgobj src
 );
 
@@ -594,11 +594,53 @@ PUBLIC int gobj_unlink_nodes(
     hgobj src
 );
 
+/**rst**
+    Meaning of parent and child 'references' (fkeys, hooks)
+    -----------------------------------------------------
+    'fkey ref'
+        The parent's references (link to up) have 3 ^ fields:
+
+            "topic_name^id^hook_name"
+
+        WARNING: Parents references are never return with full node,
+        to get parent data you must to access to the parent node.
+        It's a hierarchy structure: Full access to childs, not to parents.
+
+    'hook ref'
+        The child's references (link to down) have 2 ^ fields:
+
+            "topic_name^id"
+
+    Options
+    -------
+    "collapsed" WARNING HARDCODE to TRUE
+
+    "fkey-ref-only-id"
+        Return the 'fkey ref' with only the 'id' field
+            ["$id",...]
+
+    "fkey-ref-list-dict"
+        Return the kwid style:
+            [{"id": "$id", "topic_name":"$topic_name", "hook_name":"$hook_name"}, ...]
+
+    "hook-ref-only-id"
+        Return the 'hook ref' with only the 'id' field
+            ["$id",...]
+
+    "hook-ref-list-dict"
+        Return the kwid style:
+            [{"id": "$id", "topic_name":"$topic_name"}, ...]
+
+    HACK id is converted in ids (using kwid_get_ids())
+    HACK if __filter__ exists in jn_filter it will be used as filter
+
+**rst**/
+
 PUBLIC json_t *gobj_get_node( // Return is NOT YOURS
     hgobj gobj,
     const char *topic_name,
     const char *id,
-    json_t *jn_options, // "collapsed"
+    json_t *jn_options, // owned "fkey-ref-*", "hook-ref-*"
     hgobj src
 );
 
@@ -606,25 +648,31 @@ PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
     json_t *jn_filter,
-    json_t *jn_options, // "collapsed"
+    json_t *jn_options, // owned "fkey-ref-*", "hook-ref-*"
     hgobj src
 );
 
+/*
+ *  Return a list of parent **references** pointed by the link (fkey)
+ */
 PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
     const char *id,
     const char *link,
-    json_t *jn_options,  // "collapsed"
+    json_t *jn_options, // owned , "fkey-ref-*"
     hgobj src
 );
 
+/*
+ *  Return a list of child **references** of the hook
+ */
 PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
     const char *id,
     const char *hook,
-    json_t *jn_options,  // "collapsed"
+    json_t *jn_options, // owned "hook-ref-*"
     hgobj src
 );
 
@@ -633,7 +681,7 @@ PUBLIC json_t *gobj_node_instances(
     const char *topic_name,
     const char *pkey2_field,
     json_t *jn_filter,
-    json_t *jn_options, // "collapsed"
+    json_t *jn_options, // owned, "fkey-ref-*", "hook-ref-*"
     hgobj src
 );
 

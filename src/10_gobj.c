@@ -3256,9 +3256,9 @@ PUBLIC json_t *gobj_create_node(
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be a pure node
+PUBLIC int gobj_save_node( // Direct saving to tranger
     hgobj gobj_,
-    json_t *node, // not owned
+    json_t *node, // not owned, WARNING be care, must be a pure node
     hgobj src
 )
 {
@@ -3447,7 +3447,7 @@ PUBLIC json_t *gobj_get_node(
     hgobj gobj_,
     const char *topic_name,
     const char *id,
-    json_t *jn_options, // "collapsed"
+    json_t *jn_options, // owned "fkey-ref-*", "hook-ref-*"
     hgobj src
 )
 {
@@ -3484,7 +3484,7 @@ PUBLIC json_t *gobj_list_nodes(
     hgobj gobj_,
     const char *topic_name,
     json_t *jn_filter,
-    json_t *jn_options, // "collapsed"
+    json_t *jn_options, // owned "fkey-ref-*", "hook-ref-*"
     hgobj src
 )
 {
@@ -3513,18 +3513,22 @@ PUBLIC json_t *gobj_list_nodes(
         JSON_DECREF(jn_options);
         return 0;
     }
+
+    // TODO "collapsed" WARNING HARDCODE to TRUE
+
+    // TODO Filtra la lista con los nodos con permiso para leer
     return gobj->gclass->gmt.mt_list_nodes(gobj, topic_name, jn_filter, jn_options, src);
 }
 
 /***************************************************************************
- *
+ *  Return a list of parent **references** pointed by the link (fkey)
  ***************************************************************************/
 PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     hgobj gobj_,
     const char *topic_name,
     const char *id,
     const char *link,
-    json_t *jn_options,  // "collapsed"
+    json_t *jn_options, // owned , "fkey-ref-*"
     hgobj src
 )
 {
@@ -3555,14 +3559,14 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
 }
 
 /***************************************************************************
- *
+ *  Return a list of child **references** of the hook
  ***************************************************************************/
 PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     hgobj gobj_,
     const char *topic_name,
     const char *id,
     const char *hook,
-    json_t *jn_options,  // "collapsed"
+    json_t *jn_options, // owned "hook-ref-*"
     hgobj src
 )
 {
@@ -3600,7 +3604,7 @@ PUBLIC json_t *gobj_node_instances(
     const char *topic_name,
     const char *pkey2_field,
     json_t *jn_filter,
-    json_t *jn_options, // "collapsed"
+    json_t *jn_options, // owned, "fkey-ref-*", "hook-ref-*"
     hgobj src
 )
 {
@@ -3630,6 +3634,10 @@ PUBLIC json_t *gobj_node_instances(
         JSON_DECREF(jn_options);
         return 0;
     }
+
+    // TODO "collapsed" WARNING HARDCODE to TRUE
+    // TODO Filtra la lista con los nodos con permiso para leer
+
     return gobj->gclass->gmt.mt_node_instances(
         gobj, topic_name, pkey2_field, jn_filter, jn_options, src
     );
