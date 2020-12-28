@@ -3405,43 +3405,6 @@ PUBLIC int gobj_link_nodes(
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_link_nodes2(
-    hgobj gobj_,
-    const char *parent_ref,     // parent_topic_name^parent_id^hook_name
-    const char *child_ref,       // child_topic_name^child_id
-    json_t *kw,
-    hgobj src
-)
-{
-    GObj_t *gobj = gobj_;
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        KW_DECREF(kw);
-        return -1;
-    }
-    if(!gobj->gclass->gmt.mt_link_nodes2) {
-        log_error(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_link_nodes2 not defined",
-            NULL
-        );
-        KW_DECREF(kw);
-        return -1;
-    }
-    return gobj->gclass->gmt.mt_link_nodes2(gobj, parent_ref, child_ref, kw, src);
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
 PUBLIC int gobj_unlink_nodes(
     hgobj gobj_,
     const char *hook,
@@ -3475,43 +3438,6 @@ PUBLIC int gobj_unlink_nodes(
         return -1;
     }
     return gobj->gclass->gmt.mt_unlink_nodes(gobj, hook, parent_node, child_node, kw, src);
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC int gobj_unlink_nodes2(
-    hgobj gobj_,
-    const char *parent_ref,     // parent_topic_name^parent_id^hook_name
-    const char *child_ref,      // child_topic_name^child_id
-    json_t *kw,
-    hgobj src
-)
-{
-    GObj_t *gobj = gobj_;
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        KW_DECREF(kw);
-        return -1;
-    }
-    if(!gobj->gclass->gmt.mt_unlink_nodes2) {
-        log_error(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_unlink_nodes not defined",
-            NULL
-        );
-        KW_DECREF(kw);
-        return -1;
-    }
-    return gobj->gclass->gmt.mt_unlink_nodes2(gobj, parent_ref, child_ref, kw, src);
 }
 
 /***************************************************************************
@@ -8581,12 +8507,12 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_delete_node"));
     if(gmt->mt_link_nodes)
         json_array_append_new(jn_methods, json_string("mt_link_nodes"));
-    if(gmt->mt_link_nodes2)
-        json_array_append_new(jn_methods, json_string("mt_link_nodes2"));
+    if(gmt->mt_future44)
+        json_array_append_new(jn_methods, json_string("mt_future44"));
     if(gmt->mt_unlink_nodes)
         json_array_append_new(jn_methods, json_string("mt_unlink_nodes"));
-    if(gmt->mt_unlink_nodes2)
-        json_array_append_new(jn_methods, json_string("mt_unlink_nodes2"));
+    if(gmt->mt_future46)
+        json_array_append_new(jn_methods, json_string("mt_future46"));
     if(gmt->mt_get_node)
         json_array_append_new(jn_methods, json_string("mt_get_node"));
     if(gmt->mt_list_nodes)

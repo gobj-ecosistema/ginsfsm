@@ -149,9 +149,7 @@ typedef int (*mt_save_node_fn)(hgobj gobj, json_t *node, hgobj src);
 typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, json_t *kw, hgobj src);
-typedef int   (*mt_link_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref, json_t *kw, hgobj src);
 typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, json_t *kw, hgobj src);
-typedef int   (*mt_unlink_nodes2_fn)(hgobj gobj, const char *parent_ref, const char *child_ref, json_t *kw, hgobj src);
 typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char *id, json_t *options, hgobj src);
 typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options, hgobj src);
 typedef int   (*mt_shoot_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hgobj src);
@@ -258,9 +256,9 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_update_node_fn mt_update_node;
     mt_delete_node_fn mt_delete_node;
     mt_link_nodes_fn mt_link_nodes;
-    mt_link_nodes2_fn mt_link_nodes2;
+    future_method_fn mt_future44;
     mt_unlink_nodes_fn mt_unlink_nodes;
-    mt_unlink_nodes2_fn mt_unlink_nodes2;
+    future_method_fn mt_future46;
     mt_get_node_fn mt_get_node;
     mt_list_nodes_fn mt_list_nodes;
     mt_shoot_snap_fn mt_shoot_snap;
@@ -587,27 +585,11 @@ PUBLIC int gobj_link_nodes(
     hgobj src
 );
 
-PUBLIC int gobj_link_nodes2(
-    hgobj gobj,
-    const char *parent_ref,     // parent_topic_name^parent_id^hook_name
-    const char *child_ref,       // child_topic_name^child_id
-    json_t *kw,
-    hgobj src
-);
-
 PUBLIC int gobj_unlink_nodes(
     hgobj gobj,
     const char *hook,
     json_t *parent_node,    // NOT owned
     json_t *child_node,     // NOT owned
-    json_t *kw,
-    hgobj src
-);
-
-PUBLIC int gobj_unlink_nodes2(
-    hgobj gobj,
-    const char *parent_ref,     // parent_topic_name^parent_id^hook_name
-    const char *child_ref,      // child_topic_name^child_id
     json_t *kw,
     hgobj src
 );
