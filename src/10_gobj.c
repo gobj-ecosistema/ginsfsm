@@ -3215,13 +3215,13 @@ PUBLIC size_t gobj_topic_size(
 }
 
 /***************************************************************************
- *  Return is NOT YOURS, WARNING This does NOT auto build links
+ *  Return is NOT YOURS
  ***************************************************************************/
 PUBLIC json_t *gobj_create_node(
     hgobj gobj_,
     const char *topic_name,
     json_t *kw,
-    json_t *jn_options, // bool "permissive"
+    json_t *jn_options,
     hgobj src
 )
 {
@@ -3287,13 +3287,13 @@ PUBLIC int gobj_save_node( // Direct saving to tranger. WARNING be care, must be
 }
 
 /***************************************************************************
- *  Return is NOT YOURS, High level: DOES auto build links
+ *  Return is NOT YOURS
  ***************************************************************************/
 PUBLIC json_t *gobj_update_node(
     hgobj gobj_,
     const char *topic_name,
     json_t *kw,
-    json_t *jn_options, // "create" ["permissive"], "clean"
+    json_t *jn_options, // "create"
     hgobj src
 )
 {
