@@ -573,7 +573,7 @@ PUBLIC json_t *gobj_update_node( // Return is NOT YOURS
 PUBLIC int gobj_delete_node(
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,
+    json_t *kw, // owned (WARNING only 'id' field is used to find the node to delete)
     json_t *jn_options, // "force"
     hgobj src
 );
