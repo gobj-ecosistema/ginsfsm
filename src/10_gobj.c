@@ -378,6 +378,12 @@ SDATA_END()
 PRIVATE const trace_level_t event_authz_names[] = {
 {"AUTHZ_INJECT",        "Event needs '__inject_event__' authorization to be injected to machine"},
 {"AUTHZ_SUBSCRIBE",     "Event needs '__subscribe_event__' authorization to be subscribed"},
+{"AUTHZ_CREATE",        "Event needs 'create' authorization"},
+{"AUTHZ_READ",          "Event needs 'read' authorization"},
+{"AUTHZ_UPDATE",        "Event needs 'update' authorization"},
+{"AUTHZ_DELETE",        "Event needs 'delete' authorization"},
+{"AUTHZ_LINK",          "Event needs 'link' authorization"},
+{"AUTHZ_UNLINK",        "Event needs 'unlink' authorization"},
 {0, 0}
 };
 

@@ -80,8 +80,14 @@ typedef enum { // HACK strict ascendent value!, strings in event_flag_names[]
 } event_flag_t;
 
 typedef enum { // HACK strict ascendent value!, strings in event_authz_names[]
-    EV_AUTHZ_INJECT     = 0x0001,   // "inject" authorization
-    EV_AUTHZ_SUBSCRIBE  = 0x0002,   // "subscribe" authorization
+    AUTHZ_INJECT        = 0x0001,   // "inject" authorization
+    AUTHZ_SUBSCRIBE     = 0x0002,   // "subscribe" authorization
+    AUTHZ_CREATE        = 0x0004,   // "create" authorization
+    AUTHZ_READ          = 0x0008,   // "read" authorization
+    AUTHZ_UPDATE        = 0x0010,   // "update" authorization
+    AUTHZ_DELETE        = 0x0020,   // "delete" authorization
+    AUTHZ_LINK          = 0x0040,   // "link" authorization
+    AUTHZ_UNLINK        = 0x0080,   // "unlink" authorization
 } event_authz_t;
 
 typedef BOOL (*authz_checker_fn)(hgobj gobj, const char *authz, json_t *kw, hgobj src);
