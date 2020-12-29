@@ -613,8 +613,6 @@ PUBLIC int gobj_unlink_nodes(
 
     Options
     -------
-    "collapsed" WARNING HARDCODE to TRUE
-
     "fkey-ref-only-id"
         Return the 'fkey ref' with only the 'id' field
             ["$id",...]

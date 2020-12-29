@@ -3514,9 +3514,6 @@ PUBLIC json_t *gobj_list_nodes(
         return 0;
     }
 
-    // TODO "collapsed" WARNING HARDCODE to TRUE
-
-    // TODO Filtra la lista con los nodos con permiso para leer
     return gobj->gclass->gmt.mt_list_nodes(gobj, topic_name, jn_filter, jn_options, src);
 }
 
@@ -3636,9 +3633,6 @@ PUBLIC json_t *gobj_node_instances(
         JSON_DECREF(jn_options);
         return 0;
     }
-
-    // TODO "collapsed" WARNING HARDCODE to TRUE
-    // TODO Filtra la lista con los nodos con permiso para leer
 
     return gobj->gclass->gmt.mt_node_instances(
         gobj, topic_name, pkey2_field, jn_filter, jn_options, src
