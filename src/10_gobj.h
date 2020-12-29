@@ -658,6 +658,15 @@ PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj src
 );
 
+PUBLIC json_t *gobj_node_instances(
+    hgobj gobj,
+    const char *topic_name,
+    const char *pkey2_field,
+    json_t *jn_filter,
+    json_t *jn_options, // owned, "fkey-ref-*", "hook-ref-*"
+    hgobj src
+);
+
 /*
  *  Return a list of parent **references** pointed by the link (fkey)
  *  If no link return all links
@@ -681,15 +690,6 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     const char *id,
     const char *hook,
     json_t *jn_options, // owned "hook-ref-*"
-    hgobj src
-);
-
-PUBLIC json_t *gobj_node_instances(
-    hgobj gobj,
-    const char *topic_name,
-    const char *pkey2_field,
-    json_t *jn_filter,
-    json_t *jn_options, // owned, "fkey-ref-*", "hook-ref-*"
     hgobj src
 );
 
