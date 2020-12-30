@@ -551,7 +551,7 @@ PUBLIC size_t gobj_topic_size(
     const char *topic_name
 );
 
-PUBLIC json_t *gobj_create_node( // Return is YOURS TODO
+PUBLIC json_t *gobj_create_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
     json_t *kw,
@@ -559,18 +559,18 @@ PUBLIC json_t *gobj_create_node( // Return is YOURS TODO
     hgobj src
 );
 
-PUBLIC json_t *gobj_update_node( // Return is YOURS TODO
+PUBLIC json_t *gobj_update_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
     json_t *kw,
-    json_t *jn_options, // owned "create" "fkey-ref-*", "hook-ref-*""
+    json_t *jn_options, // "create" "fkey-ref-*", "hook-ref-*""
     hgobj src
 );
 
 PUBLIC int gobj_delete_node(
     hgobj gobj,
     const char *topic_name,
-    json_t *kw, // owned (WARNING only 'id' field is used to find the node to delete)
+    json_t *kw,         // WARNING only 'id' field is used to find the node to delete
     json_t *jn_options, // "force"
     hgobj src
 );
@@ -578,8 +578,8 @@ PUBLIC int gobj_delete_node(
 PUBLIC int gobj_link_nodes(
     hgobj gobj,
     const char *hook,
-    json_t *parent_node,    // NOT owned
-    json_t *child_node,     // NOT owned
+    json_t *parent_node,    // TODO NOT owned
+    json_t *child_node,     // TODO NOT owned
     json_t *kw,
     hgobj src
 );
@@ -587,8 +587,8 @@ PUBLIC int gobj_link_nodes(
 PUBLIC int gobj_unlink_nodes(
     hgobj gobj,
     const char *hook,
-    json_t *parent_node,    // NOT owned
-    json_t *child_node,     // NOT owned
+    json_t *parent_node,    // TODO NOT owned
+    json_t *child_node,     // TODO NOT owned
     json_t *kw,
     hgobj src
 );

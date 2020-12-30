@@ -3221,9 +3221,9 @@ PUBLIC size_t gobj_topic_size(
 }
 
 /***************************************************************************
- *  Return is NOT YOURS
+ *
  ***************************************************************************/
-PUBLIC json_t *gobj_create_node(
+PUBLIC json_t *gobj_create_node( // Return is YOURS
     hgobj gobj_,
     const char *topic_name,
     json_t *kw,
@@ -3260,9 +3260,9 @@ PUBLIC json_t *gobj_create_node(
 }
 
 /***************************************************************************
- *  Return is NOT YOURS
+ *
  ***************************************************************************/
-PUBLIC json_t *gobj_update_node(
+PUBLIC json_t *gobj_update_node( // Return is YOURS
     hgobj gobj_,
     const char *topic_name,
     json_t *kw,
@@ -3343,8 +3343,8 @@ PUBLIC int gobj_delete_node(
 PUBLIC int gobj_link_nodes(
     hgobj gobj_,
     const char *hook,
-    json_t *parent_node,    // NOT owned
-    json_t *child_node,     // NOT owned
+    json_t *parent_node,    // owned
+    json_t *child_node,     // owned
     json_t *kw,
     hgobj src
 )
