@@ -151,7 +151,6 @@ typedef int   (*mt_delete_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, 
 typedef hsdata (*mt_get_resource_fn)(hgobj gobj, const char *resource, json_int_t parent_id, json_int_t id);
 
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
-typedef int (*mt_save_node_fn)(hgobj gobj, json_t *node, hgobj src);
 typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, json_t *kw, hgobj src);
@@ -278,7 +277,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_node_parents_fn mt_node_parents;
     mt_node_childs_fn mt_node_childs;
     mt_node_instances_fn mt_node_instances;
-    mt_save_node_fn mt_save_node;
+    future_method_fn mt_future60;
     mt_topic_size_fn mt_topic_size;
     future_method_fn mt_future62;
     future_method_fn mt_future63;
@@ -552,7 +551,7 @@ PUBLIC size_t gobj_topic_size(
     const char *topic_name
 );
 
-PUBLIC json_t *gobj_create_node( // Return is NOT YOURS
+PUBLIC json_t *gobj_create_node( // Return is YOURS TODO
     hgobj gobj,
     const char *topic_name,
     json_t *kw,
@@ -560,17 +559,11 @@ PUBLIC json_t *gobj_create_node( // Return is NOT YOURS
     hgobj src
 );
 
-PUBLIC int gobj_save_node( // Direct saving to tranger
-    hgobj gobj,
-    json_t *node, // NOT owned, WARNING be care, must be a pure node
-    hgobj src
-);
-
-PUBLIC json_t *gobj_update_node( // Return is NOT YOURS
+PUBLIC json_t *gobj_update_node( // Return is YOURS TODO
     hgobj gobj,
     const char *topic_name,
     json_t *kw,
-    json_t *jn_options, // "create"
+    json_t *jn_options, // owned "create" "fkey-ref-*", "hook-ref-*""
     hgobj src
 );
 
@@ -648,7 +641,7 @@ PUBLIC int gobj_unlink_nodes(
 
 **rst**/
 
-PUBLIC json_t *gobj_get_node( // Return is NOT YOURS
+PUBLIC json_t *gobj_get_node( // Return is YOURS // TODO
     hgobj gobj,
     const char *topic_name,
     const char *id,

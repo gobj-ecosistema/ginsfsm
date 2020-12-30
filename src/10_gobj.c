@@ -3260,39 +3260,6 @@ PUBLIC json_t *gobj_create_node(
 }
 
 /***************************************************************************
- *
- ***************************************************************************/
-PUBLIC int gobj_save_node( // Direct saving to tranger
-    hgobj gobj_,
-    json_t *node, // not owned, WARNING be care, must be a pure node
-    hgobj src
-)
-{
-    GObj_t *gobj = gobj_;
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        return 0;
-    }
-    if(!gobj->gclass->gmt.mt_save_node) {
-        log_error(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_save_node not defined",
-            NULL
-        );
-        return 0;
-    }
-    return gobj->gclass->gmt.mt_save_node(gobj, node, src);
-}
-
-/***************************************************************************
  *  Return is NOT YOURS
  ***************************************************************************/
 PUBLIC json_t *gobj_update_node(
@@ -8549,8 +8516,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_node_childs"));
     if(gmt->mt_node_instances)
         json_array_append_new(jn_methods, json_string("mt_node_instances"));
-    if(gmt->mt_save_node)
-        json_array_append_new(jn_methods, json_string("mt_save_node"));
+    if(gmt->mt_future60)
+        json_array_append_new(jn_methods, json_string("mt_future60"));
     if(gmt->mt_topic_size)
         json_array_append_new(jn_methods, json_string("mt_topic_size"));
     if(gmt->mt_future62)
