@@ -599,10 +599,6 @@ PUBLIC int gobj_unlink_nodes(
 
             "topic_name^id^hook_name"
 
-        WARNING: Parents references are never return with full node,
-        to get parent data you must to access to the parent node.
-        It's a hierarchy structure: Full access to childs, not to parents.
-
     'hook ref'
         The child's references (link to down) have 2 ^ fields:
 
@@ -610,6 +606,10 @@ PUBLIC int gobj_unlink_nodes(
 
     Options
     -------
+    ""
+        Return 'fkey ref'
+            ["topic_name^id^hook_name"]
+
     "fkey-ref-only-id"
         Return the 'fkey ref' with only the 'id' field
             ["$id",...]
@@ -621,6 +621,11 @@ PUBLIC int gobj_unlink_nodes(
     "fkey-ref-size"
         Return the kwid style:
             [{"topic_name":"$topic_name", "hook_name":"$hook_name", "size": $size}, ...]
+
+
+    ""
+        Return 'hook ref'
+            ["topic_name^id"]
 
     "hook-ref-only-id"
         Return the 'hook ref' with only the 'id' field
@@ -639,7 +644,7 @@ PUBLIC int gobj_unlink_nodes(
 
 **rst**/
 
-PUBLIC json_t *gobj_get_node( // Return is YOURS // TODO
+PUBLIC json_t *gobj_get_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
     const char *id,
