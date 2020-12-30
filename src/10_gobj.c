@@ -3343,9 +3343,8 @@ PUBLIC int gobj_delete_node(
 PUBLIC int gobj_link_nodes(
     hgobj gobj_,
     const char *hook,
-    json_t *parent_node,    // owned
-    json_t *child_node,     // owned
-    json_t *kw,
+    json_t *parent_record,  // owned
+    json_t *child_record,  // owned
     hgobj src
 )
 {
@@ -3358,7 +3357,8 @@ PUBLIC int gobj_link_nodes(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        JSON_DECREF(parent_record);
+        JSON_DECREF(child_record);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_link_nodes) {
@@ -3369,10 +3369,11 @@ PUBLIC int gobj_link_nodes(
             "msg",          "%s", "mt_link_nodes not defined",
             NULL
         );
-        KW_DECREF(kw);
+        JSON_DECREF(parent_record);
+        JSON_DECREF(child_record);
         return -1;
     }
-    return gobj->gclass->gmt.mt_link_nodes(gobj, hook, parent_node, child_node, kw, src);
+    return gobj->gclass->gmt.mt_link_nodes(gobj, hook, parent_record, child_record, src);
 }
 
 /***************************************************************************
@@ -3381,9 +3382,8 @@ PUBLIC int gobj_link_nodes(
 PUBLIC int gobj_unlink_nodes(
     hgobj gobj_,
     const char *hook,
-    json_t *parent_node,    // NOT owned
-    json_t *child_node,     // NOT owned
-    json_t *kw,
+    json_t *parent_record,  // owned
+    json_t *child_record,  // owned
     hgobj src
 )
 {
@@ -3396,7 +3396,8 @@ PUBLIC int gobj_unlink_nodes(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        JSON_DECREF(parent_record);
+        JSON_DECREF(child_record);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_unlink_nodes) {
@@ -3407,10 +3408,11 @@ PUBLIC int gobj_unlink_nodes(
             "msg",          "%s", "mt_unlink_nodes not defined",
             NULL
         );
-        KW_DECREF(kw);
+        JSON_DECREF(parent_record);
+        JSON_DECREF(child_record);
         return -1;
     }
-    return gobj->gclass->gmt.mt_unlink_nodes(gobj, hook, parent_node, child_node, kw, src);
+    return gobj->gclass->gmt.mt_unlink_nodes(gobj, hook, parent_record, child_record, src);
 }
 
 /***************************************************************************
