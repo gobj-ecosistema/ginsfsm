@@ -155,7 +155,7 @@ typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t 
 typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, hgobj src);
 typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, hgobj src);
-typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, const char *id, json_t *options, hgobj src);
+typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *options, hgobj src);
 typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options, hgobj src);
 typedef int   (*mt_shoot_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hgobj src);
 typedef int   (*mt_activate_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hgobj src);
@@ -647,8 +647,8 @@ PUBLIC int gobj_unlink_nodes(
 PUBLIC json_t *gobj_get_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
-    const char *id,
-    json_t *jn_options, // owned "fkey-ref-*", "hook-ref-*"
+    json_t *kw,         // WARNING only 'id' field is used to find the node to delete
+    json_t *jn_options, // "fkey-ref-*", "hook-ref-*"
     hgobj src
 );
 
@@ -656,7 +656,7 @@ PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
     json_t *jn_filter,
-    json_t *jn_options, // owned "fkey-ref-*", "hook-ref-*"
+    json_t *jn_options, // "fkey-ref-*", "hook-ref-*"
     hgobj src
 );
 
@@ -678,7 +678,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *link,
-    json_t *jn_options, // owned , "fkey-ref-*"
+    json_t *jn_options, // "fkey-ref-*"
     hgobj src
 );
 
@@ -691,7 +691,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *hook,
-    json_t *jn_options, // owned "hook-ref-*"
+    json_t *jn_options, // "hook-ref-*"
     hgobj src
 );
 

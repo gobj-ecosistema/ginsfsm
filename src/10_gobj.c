@@ -3304,7 +3304,7 @@ PUBLIC json_t *gobj_update_node( // Return is YOURS
 PUBLIC int gobj_delete_node(
     hgobj gobj_,
     const char *topic_name,
-    json_t *kw,
+    json_t *kw,         // WARNING only 'id' field is used to find the node to delete
     json_t *jn_options, // "force"
     hgobj src
 )
@@ -3421,8 +3421,8 @@ PUBLIC int gobj_unlink_nodes(
 PUBLIC json_t *gobj_get_node(
     hgobj gobj_,
     const char *topic_name,
-    const char *id,
-    json_t *jn_options, // owned "fkey-ref-*", "hook-ref-*"
+    json_t *kw,         // WARNING only 'id' field is used to find the node to delete
+    json_t *jn_options, // "fkey-ref-*", "hook-ref-*"
     hgobj src
 )
 {
@@ -3435,6 +3435,7 @@ PUBLIC json_t *gobj_get_node(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        JSON_DECREF(kw);
         JSON_DECREF(jn_options);
         return 0;
     }
@@ -3446,10 +3447,11 @@ PUBLIC json_t *gobj_get_node(
             "msg",          "%s", "mt_get_node not defined",
             NULL
         );
+        JSON_DECREF(kw);
         JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_get_node(gobj, topic_name, id, jn_options, src);
+    return gobj->gclass->gmt.mt_get_node(gobj, topic_name, kw, jn_options, src);
 }
 
 /***************************************************************************
@@ -3459,7 +3461,7 @@ PUBLIC json_t *gobj_list_nodes(
     hgobj gobj_,
     const char *topic_name,
     json_t *jn_filter,
-    json_t *jn_options, // owned "fkey-ref-*", "hook-ref-*"
+    json_t *jn_options, // "fkey-ref-*", "hook-ref-*"
     hgobj src
 )
 {
@@ -3545,7 +3547,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *link,
-    json_t *jn_options, // owned , "fkey-ref-*"
+    json_t *jn_options, // "fkey-ref-*"
     hgobj src
 )
 {
@@ -3584,7 +3586,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *hook,
-    json_t *jn_options, // owned "hook-ref-*"
+    json_t *jn_options, // "hook-ref-*"
     hgobj src
 )
 {
