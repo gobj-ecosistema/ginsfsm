@@ -1829,6 +1829,16 @@ PRIVATE hgobj _gobj_create(
         return (hgobj)0;
     }
 
+    /*--------------------------------*
+     *      Alloc user_data
+     *--------------------------------*/
+    gobj->jn_user_data = json_object();
+
+    /*--------------------------------*
+     *      Alloc stats_data
+     *--------------------------------*/
+    gobj->jn_stats = json_object();
+
     /*--------------------------*
      *  Register unique names
      *--------------------------*/
@@ -1892,16 +1902,6 @@ PRIVATE hgobj _gobj_create(
             monitor_gobj(MTOR_GOBJ_CREATED, gobj);
         }
     }
-
-    /*--------------------------------*
-     *      Alloc user_data
-     *--------------------------------*/
-    gobj->jn_user_data = json_object();
-
-    /*--------------------------------*
-     *      Alloc stats_data
-     *--------------------------------*/
-    gobj->jn_stats = json_object();
 
     /*--------------------------------*
      *      Exec mt_create
@@ -7237,6 +7237,8 @@ PRIVATE int gobj_write_json_parameters(
         }
     }
 
+    json_t *__user_data__ = kw_get_dict(new_kw, "__user_data__", 0, KW_EXTRACT);
+
     int ret = json2sdata(
         hs,
         new_kw,
@@ -7245,7 +7247,6 @@ PRIVATE int gobj_write_json_parameters(
         gobj
     );
 
-    json_t *__user_data__ = kw_get_dict(new_kw, "__user_data__", 0, 0);
     if(__user_data__) {
         json_object_update(((GObj_t *)gobj)->jn_user_data, __user_data__);
     }
@@ -7695,7 +7696,11 @@ PUBLIC json_t *gobj_read_user_data(
 )
 {
     if(gobj) {
-        return json_object_get(((GObj_t *)gobj)->jn_user_data, name);
+        if(empty_string(name)) {
+            return ((GObj_t *)gobj)->jn_user_data;
+        } else {
+            return json_object_get(((GObj_t *)gobj)->jn_user_data, name);
+        }
     } else {
         return 0;
     }
