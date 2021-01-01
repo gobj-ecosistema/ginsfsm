@@ -8125,7 +8125,7 @@ PUBLIC int gobj_write_user_data(
  ***************************************************************************/
 PUBLIC int gobj_kw_set_user_data(
     hgobj gobj,
-    const char *path,   // The last word after . is the key
+    const char *path,   // The last word after ` is the key
     json_t *value // owned
 )
 {
