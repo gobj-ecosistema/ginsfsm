@@ -7249,6 +7249,7 @@ PRIVATE int gobj_write_json_parameters(
 
     if(__user_data__) {
         json_object_update(((GObj_t *)gobj)->jn_user_data, __user_data__);
+        json_decref(__user_data__);
     }
     json_decref(new_kw);
     return ret;

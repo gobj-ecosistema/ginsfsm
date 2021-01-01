@@ -1152,11 +1152,11 @@ PUBLIC json_t *gobj_read_attr( // Return is yours! Must be decref. With AUTHZ
     const char *name,
     hgobj src
 );
-PUBLIC json_t *gobj_read_user_data(
+PUBLIC json_t *gobj_read_user_data( // Return is NOT yours
     hgobj gobj,
     const char *name
 );
-PUBLIC json_t *gobj_kw_get_user_data(
+PUBLIC json_t *gobj_kw_get_user_data( // Return is NOT yours except using KW_EXTRACT
     hgobj gobj,
     const char *path,
     json_t *default_value,
