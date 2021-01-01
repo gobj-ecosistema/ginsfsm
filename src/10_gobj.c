@@ -7244,6 +7244,11 @@ PRIVATE int gobj_write_json_parameters(
         (gobj->gclass->gcflag & gcflag_ignore_unkwnow_attrs)?0:print_attr_not_found,
         gobj
     );
+
+    json_t *__user_data__ = kw_get_dict(new_kw, "__user_data__", 0, 0);
+    if(__user_data__) {
+        json_object_update(((GObj_t *)gobj)->jn_user_data, __user_data__);
+    }
     json_decref(new_kw);
     return ret;
 }
@@ -7689,7 +7694,11 @@ PUBLIC json_t *gobj_read_user_data(
     const char *name
 )
 {
-    return json_object_get(((GObj_t *)gobj)->jn_user_data, name);
+    if(gobj) {
+        return json_object_get(((GObj_t *)gobj)->jn_user_data, name);
+    } else {
+        return 0;
+    }
 }
 
 /***************************************************************************
@@ -7702,7 +7711,11 @@ PUBLIC json_t *gobj_kw_get_user_data(
     kw_flag_t flag
 )
 {
-    return kw_get_dict_value(((GObj_t *)gobj)->jn_user_data, path, default_value, flag);
+    if(gobj) {
+        return kw_get_dict_value(((GObj_t *)gobj)->jn_user_data, path, default_value, flag);
+    } else {
+        return 0;
+    }
 }
 
 /***************************************************************************
@@ -8117,7 +8130,11 @@ PUBLIC int gobj_write_user_data(
     json_t *value // owned
 )
 {
-    return json_object_set_new(((GObj_t *)gobj)->jn_user_data, name, value);
+    if(gobj) {
+        return json_object_set_new(((GObj_t *)gobj)->jn_user_data, name, value);
+    } else {
+        return -1;
+    }
 }
 
 /***************************************************************************
@@ -8129,7 +8146,11 @@ PUBLIC int gobj_kw_set_user_data(
     json_t *value // owned
 )
 {
-    return kw_set_dict_value(((GObj_t *)gobj)->jn_user_data, path, value);
+    if(gobj) {
+        return kw_set_dict_value(((GObj_t *)gobj)->jn_user_data, path, value);
+    } else {
+        return -1;
+    }
 }
 
 /***************************************************************************
