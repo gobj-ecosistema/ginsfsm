@@ -370,6 +370,7 @@ PUBLIC int gobj_register_yuno(
     BOOL to_free
 );
 PUBLIC hgobj gobj_yuno_factory(
+    const char *realm_id,
     const char *realm_owner,
     const char *realm_role,
     const char *realm_name,
@@ -1223,6 +1224,7 @@ PUBLIC int gobj_update_writable_attrs( // with authz
 /*--------------------------------------------*
  *  Info functions
  *--------------------------------------------*/
+PUBLIC const char *gobj_yuno_realm_id(void);
 PUBLIC const char *gobj_yuno_realm_owner(void);
 PUBLIC const char *gobj_yuno_realm_role(void);
 PUBLIC const char *gobj_yuno_realm_name(void);

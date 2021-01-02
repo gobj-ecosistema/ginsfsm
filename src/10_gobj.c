@@ -224,6 +224,7 @@ PRIVATE int (*__audit_command_cb__)(
 PRIVATE void *__audit_command_user_data__ = 0;
 PRIVATE GObj_t * __yuno__ = 0;
 PRIVATE GObj_t * __default_service__ = 0;
+PRIVATE char __realm_id__[NAME_MAX];
 PRIVATE char __realm_owner__[NAME_MAX];
 PRIVATE char __realm_role__[NAME_MAX];
 PRIVATE char __realm_name__[NAME_MAX];
@@ -742,6 +743,7 @@ PRIVATE void free_trans_filter(trans_filter_t *trans_reg)
  *  Factory to create yuno gobj
  ***************************************************************************/
 PUBLIC hgobj gobj_yuno_factory(
+    const char *realm_id,
     const char *realm_owner,
     const char *realm_role,
     const char *realm_name,
@@ -770,11 +772,16 @@ PUBLIC hgobj gobj_yuno_factory(
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_STARTUP,
                 "msg",          "%s", "Create yuno",
+                "realm_id",     "%s", realm_id,
                 "yuno_role",    "%s", gclass_reg->role,
                 "yuno_name",    "%s", yuno_name,
                 "yuno_alias",   "%s", yuno_alias,
                 "gclass",       "%s", gclass_reg->gclass->gclass_name,
                 NULL
+            );
+            snprintf(
+                __realm_id__, sizeof(__realm_id__),
+                "%s", realm_id?realm_id:""
             );
             snprintf(
                 __realm_owner__, sizeof(__realm_owner__),
@@ -1121,7 +1128,8 @@ PUBLIC hgobj gobj_service_factory(
     );
     json_object_update_new(
         __json_config_variables__,
-        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+            "__realm_id__", __realm_id__,
             "__realm_owner__", __realm_owner__,
             "__realm_role__", __realm_role__,
             "__realm_name__", __realm_name__,
@@ -8722,6 +8730,14 @@ PRIVATE json_t *fsm2json(FSM *fsm)
 
 
 
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC const char *gobj_yuno_realm_id(void)
+{
+    return __realm_id__;
+}
 
 /***************************************************************************
  *
