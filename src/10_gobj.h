@@ -670,7 +670,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *link,
-    json_t *jn_options, // "fkey-ref-*"
+    json_t *jn_options, // fkey options
     hgobj src
 );
 
@@ -683,7 +683,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     const char *topic_name,
     const char *id,
     const char *hook,
-    json_t *jn_options, // "hook-ref-*"
+    json_t *jn_options, // hook options
     hgobj src
 );
 
