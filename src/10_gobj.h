@@ -376,7 +376,7 @@ PUBLIC hgobj gobj_yuno_factory(
     const char *realm_name,
     const char *realm_env,
     const char *yuno_name,
-    const char *yuno_alias,
+    const char *yuno_tag,
     json_t *jn_yuno_settings // own
 );
 PUBLIC int gobj_register_gclass(GCLASS *gclass);
@@ -1223,7 +1223,7 @@ PUBLIC const char *gobj_yuno_realm_env(void);
 PUBLIC const char *gobj_yuno_role(void);
 PUBLIC const char *gobj_yuno_name(void);
 PUBLIC const char *gobj_yuno_role_plus_name(void);
-PUBLIC const char *gobj_yuno_alias(void);
+PUBLIC const char *gobj_yuno_tag(void);
 
 PUBLIC hgobj gobj_yuno(void);
 PUBLIC const char * gobj_name(hgobj gobj);

@@ -231,7 +231,7 @@ PRIVATE char __realm_name__[NAME_MAX];
 PRIVATE char __realm_env__[NAME_MAX];
 PRIVATE char __yuno_role__[NAME_MAX];
 PRIVATE char __yuno_name__[NAME_MAX];
-PRIVATE char __yuno_alias__[NAME_MAX];
+PRIVATE char __yuno_tag__[NAME_MAX];
 PRIVATE char __yuno_role_plus_name__[NAME_MAX];
 
 
@@ -749,7 +749,7 @@ PUBLIC hgobj gobj_yuno_factory(
     const char *realm_name,
     const char *realm_env,
     const char *yuno_name,
-    const char *yuno_alias,
+    const char *yuno_tag,
     json_t *jn_yuno_settings) // own
 {
     if(__yuno__) {
@@ -775,7 +775,7 @@ PUBLIC hgobj gobj_yuno_factory(
                 "realm_id",     "%s", realm_id,
                 "yuno_role",    "%s", gclass_reg->role,
                 "yuno_name",    "%s", yuno_name,
-                "yuno_alias",   "%s", yuno_alias,
+                "yuno_tag",   "%s", yuno_tag,
                 "gclass",       "%s", gclass_reg->gclass->gclass_name,
                 NULL
             );
@@ -817,8 +817,8 @@ PUBLIC hgobj gobj_yuno_factory(
                 snprintf(__yuno_name__, sizeof(__yuno_name__), "%s", yuno_name);
             }
             snprintf(
-                __yuno_alias__, sizeof(__yuno_alias__),
-                "%s", yuno_alias?yuno_alias:""
+                __yuno_tag__, sizeof(__yuno_tag__),
+                "%s", yuno_tag?yuno_tag:""
             );
 
             hgobj gobj = _create_yuno( // it's saved in __yuno__ too
@@ -1136,7 +1136,7 @@ PUBLIC hgobj gobj_service_factory(
             "__realm_env__", __realm_env__,
             "__yuno_role__", __yuno_role__,
             "__yuno_name__", __yuno_name__,
-            "__yuno_alias__", __yuno_alias__,
+            "__yuno_tag__", __yuno_tag__,
             "__yuno_role_plus_name__", __yuno_role_plus_name__
         )
     );
@@ -8798,9 +8798,9 @@ PUBLIC const char *gobj_yuno_role_plus_name(void)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC const char *gobj_yuno_alias(void)
+PUBLIC const char *gobj_yuno_tag(void)
 {
-    return __yuno_alias__;
+    return __yuno_tag__;
 }
 
 /***************************************************************************
