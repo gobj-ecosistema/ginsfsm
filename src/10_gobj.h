@@ -564,7 +564,7 @@ PUBLIC json_t *gobj_update_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
     json_t *kw,
-    json_t *jn_options, // "create" "fkey-ref-*", "hook-ref-*""
+    json_t *jn_options, // "create" fkey,hook options"
     hgobj src
 );
 
@@ -605,38 +605,29 @@ PUBLIC int gobj_unlink_nodes(
 
             "topic_name^id"
 
-    Options
-    -------
+    fkey,hook options
+    -----------------
     ""
         Return 'fkey ref'
             ["topic_name^id^hook_name"]
-
-    "fkey-ref-only-id"
-        Return the 'fkey ref' with only the 'id' field
-            ["$id",...]
-
-    "fkey-ref-list-dict"
-        Return the kwid style:
-            [{"id": "$id", "topic_name":"$topic_name", "hook_name":"$hook_name"}, ...]
-
-    "fkey-ref-size"
-        Return the kwid style:
-            [{"topic_name":"$topic_name", "hook_name":"$hook_name", "size": $size}, ...]
-
-
-    ""
         Return 'hook ref'
             ["topic_name^id"]
 
-    "hook-ref-only-id"
+    "only-id"
+        Return the 'fkey ref' with only the 'id' field
+            ["$id",...]
         Return the 'hook ref' with only the 'id' field
             ["$id",...]
 
-    "hook-ref-list-dict"
+    "list-dict"
+        Return the kwid style:
+            [{"id": "$id", "topic_name":"$topic_name", "hook_name":"$hook_name"}, ...]
         Return the kwid style:
             [{"id": "$id", "topic_name":"$topic_name"}, ...]
 
-    "hook-ref-size"
+    "size"
+        Return the kwid style:
+            [{"topic_name":"$topic_name", "hook_name":"$hook_name", "size": $size}, ...]
         Return the kwid style:
             [{"topic_name":"$topic_name", "size": $size}, ...]
 
@@ -649,7 +640,7 @@ PUBLIC json_t *gobj_get_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
     json_t *kw,         // WARNING only 'id' field is used to find the node to delete
-    json_t *jn_options, // "fkey-ref-*", "hook-ref-*"
+    json_t *jn_options, // fkey,hook options
     hgobj src
 );
 
@@ -657,7 +648,7 @@ PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
     json_t *jn_filter,
-    json_t *jn_options, // "fkey-ref-*", "hook-ref-*"
+    json_t *jn_options, // fkey,hook options
     hgobj src
 );
 
@@ -666,7 +657,7 @@ PUBLIC json_t *gobj_node_instances(
     const char *topic_name,
     const char *pkey2_field,
     json_t *jn_filter,
-    json_t *jn_options, // owned, "fkey-ref-*", "hook-ref-*"
+    json_t *jn_options, // owned, fkey,hook options
     hgobj src
 );
 

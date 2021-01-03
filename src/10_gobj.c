@@ -3430,7 +3430,7 @@ PUBLIC json_t *gobj_get_node(
     hgobj gobj_,
     const char *topic_name,
     json_t *kw,         // WARNING only 'id' field is used to find the node to delete
-    json_t *jn_options, // "fkey-ref-*", "hook-ref-*"
+    json_t *jn_options, // fkey,hook options
     hgobj src
 )
 {
@@ -3469,7 +3469,7 @@ PUBLIC json_t *gobj_list_nodes(
     hgobj gobj_,
     const char *topic_name,
     json_t *jn_filter,
-    json_t *jn_options, // "fkey-ref-*", "hook-ref-*"
+    json_t *jn_options, // fkey,hook options
     hgobj src
 )
 {
@@ -3510,7 +3510,7 @@ PUBLIC json_t *gobj_node_instances(
     const char *topic_name,
     const char *pkey2_field,
     json_t *jn_filter,
-    json_t *jn_options, // owned, "fkey-ref-*", "hook-ref-*"
+    json_t *jn_options, // owned, fkey,hook options
     hgobj src
 )
 {
