@@ -556,7 +556,7 @@ PUBLIC json_t *gobj_create_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
     json_t *kw,
-    json_t *jn_options,
+    json_t *jn_options, // fkey,hook options
     hgobj src
 );
 
@@ -564,7 +564,7 @@ PUBLIC json_t *gobj_update_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
     json_t *kw,
-    json_t *jn_options, // "create" fkey,hook options"
+    json_t *jn_options, // "create" "autolink" "volatil" fkey,hook options
     hgobj src
 );
 
