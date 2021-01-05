@@ -563,7 +563,7 @@ PUBLIC json_t *gobj_create_node( // Return is YOURS
 PUBLIC json_t *gobj_update_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,  // WARNING only 'id' and topic_pkey2s fields are used to find the node to update
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     json_t *jn_options, // "create" "autolink" "volatil" fkey,hook options
     hgobj src
 );
@@ -571,7 +571,7 @@ PUBLIC json_t *gobj_update_node( // Return is YOURS
 PUBLIC int gobj_delete_node(
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,  // WARNING only 'id' and topic_pkey2s fields are used to find the node to delete
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     json_t *jn_options, // "force"
     hgobj src
 );
@@ -580,7 +580,7 @@ PUBLIC int gobj_link_nodes(
     hgobj gobj,
     const char *hook,
     json_t *parent_record,  // owned
-    json_t *child_record,  // owned
+    json_t *child_record,   // owned
     hgobj src
 );
 
@@ -588,7 +588,7 @@ PUBLIC int gobj_unlink_nodes(
     hgobj gobj,
     const char *hook,
     json_t *parent_record,  // owned
-    json_t *child_record,  // owned
+    json_t *child_record,   // owned
     hgobj src
 );
 
@@ -639,7 +639,7 @@ PUBLIC int gobj_unlink_nodes(
 PUBLIC json_t *gobj_get_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,         // WARNING only 'id' field is used to find the node to delete
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     json_t *jn_options, // fkey,hook options
     hgobj src
 );
