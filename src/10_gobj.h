@@ -648,7 +648,7 @@ PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
     json_t *jn_filter,
-    json_t *jn_options, // fkey,hook options
+    json_t *jn_options, // "include-instances" fkey,hook options
     hgobj src
 );
 
