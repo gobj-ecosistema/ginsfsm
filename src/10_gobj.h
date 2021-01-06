@@ -172,7 +172,7 @@ typedef json_t *(*mt_node_parents_fn)(
 typedef json_t *(*mt_node_childs_fn)(
     hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options, hgobj src
 );
-typedef json_t *(*mt_node_instances_fn)(
+typedef json_t *(*mt_list_instances_fn)(
     hgobj gobj,
     const char *topic_name,
     const char *pkey2_field,
@@ -276,7 +276,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_topic_hooks_fn mt_topic_hooks;
     mt_node_parents_fn mt_node_parents;
     mt_node_childs_fn mt_node_childs;
-    mt_node_instances_fn mt_node_instances;
+    mt_list_instances_fn mt_list_instances;
     future_method_fn mt_future60;
     mt_topic_size_fn mt_topic_size;
     future_method_fn mt_future62;
@@ -652,7 +652,7 @@ PUBLIC json_t *gobj_list_nodes( // Return MUST be decref
     hgobj src
 );
 
-PUBLIC json_t *gobj_node_instances(
+PUBLIC json_t *gobj_list_instances(
     hgobj gobj,
     const char *topic_name,
     const char *pkey2_field,

@@ -3505,7 +3505,7 @@ PUBLIC json_t *gobj_list_nodes(
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_node_instances(
+PUBLIC json_t *gobj_list_instances(
     hgobj gobj_,
     const char *topic_name,
     const char *pkey2_field,
@@ -3527,12 +3527,12 @@ PUBLIC json_t *gobj_node_instances(
         JSON_DECREF(jn_options);
         return 0;
     }
-    if(!gobj->gclass->gmt.mt_node_instances) {
+    if(!gobj->gclass->gmt.mt_list_instances) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_node_instances not defined",
+            "msg",          "%s", "mt_list_instances not defined",
             NULL
         );
 
@@ -3541,7 +3541,7 @@ PUBLIC json_t *gobj_node_instances(
         return 0;
     }
 
-    return gobj->gclass->gmt.mt_node_instances(
+    return gobj->gclass->gmt.mt_list_instances(
         gobj, topic_name, pkey2_field, jn_filter, jn_options, src
     );
 }
@@ -8553,8 +8553,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_node_parents"));
     if(gmt->mt_node_childs)
         json_array_append_new(jn_methods, json_string("mt_node_childs"));
-    if(gmt->mt_node_instances)
-        json_array_append_new(jn_methods, json_string("mt_node_instances"));
+    if(gmt->mt_list_instances)
+        json_array_append_new(jn_methods, json_string("mt_list_instances"));
     if(gmt->mt_future60)
         json_array_append_new(jn_methods, json_string("mt_future60"));
     if(gmt->mt_topic_size)
