@@ -9516,6 +9516,7 @@ PUBLIC int append_yuno_metadata(hgobj gobj, json_t *kw, const char *source)
     json_object_set_new(jn_metadatos, "__t__", json_integer(t));
     json_object_set_new(jn_metadatos, "__origin__", json_string(source));
     json_object_set_new(jn_metadatos, "hostname", json_string(hostname));
+    json_object_set_new(jn_metadatos, "realm_id", json_string(__realm_id__));
     json_object_set_new(jn_metadatos, "realm_owner", json_string(__realm_owner__));
     json_object_set_new(jn_metadatos, "realm_role", json_string(__realm_role__));
     json_object_set_new(jn_metadatos, "realm_name", json_string(__realm_name__));
