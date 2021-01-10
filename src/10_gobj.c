@@ -772,10 +772,11 @@ PUBLIC hgobj gobj_yuno_factory(
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_STARTUP,
                 "msg",          "%s", "Create yuno",
+                "realm_owner",  "%s", realm_owner,
                 "realm_id",     "%s", realm_id,
                 "yuno_role",    "%s", gclass_reg->role,
                 "yuno_name",    "%s", yuno_name,
-                "yuno_tag",   "%s", yuno_tag,
+                "yuno_tag",     "%s", yuno_tag,
                 "gclass",       "%s", gclass_reg->gclass->gclass_name,
                 NULL
             );
@@ -2704,11 +2705,15 @@ PRIVATE int register_unique_gobj(GObj_t * gobj)
         __jn_unique_named_dict__ = json_object();
     }
     if(json_object_get(__jn_unique_named_dict__, unique_name)) {
+        hgobj prev_gobj = (hgobj)(size_t)json_integer_value(
+            json_object_get(__jn_unique_named_dict__, unique_name)
+        );
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", "__yuno__",
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj unique ALREADY REGISTERED. Will be UPDATED",
+            "prev gclass",  "%s", gobj_gclass_name(prev_gobj),
             "gclass",       "%s", gobj_gclass_name(gobj),
             "name",         "%s", gobj_name(gobj),
             NULL
