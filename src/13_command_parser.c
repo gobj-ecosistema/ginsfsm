@@ -258,23 +258,22 @@ PRIVATE json_t *expand_command(
 /***************************************************************************
  *  Parameters of command are described as sdata_desc_t
  ***************************************************************************/
-PRIVATE json_t *parameter2json(hgobj gobj, int type, const char *name, const char *s, int *result)
+PRIVATE json_t *parameter2json(
+    hgobj gobj,
+    int type,
+    const char *name,
+    const char *s,
+    int *result
+)
 {
+    *result = 0;
+
     if(ASN_IS_STRING(type)) {
         if(!s) {
             s = "";
         }
-        json_t *jn_param = json_string(s);
-        if(!jn_param) {
-            *result = -1;
-            json_t *jn_data = json_local_sprintf(
-                "%s: STRING type of parameter '%s' has failed",
-                gobj_short_name(gobj),
-                name
-            );
-            return jn_data;
-        }
-        return jn_param;
+        return json_string(s);
+
     } else if(ASN_IS_BOOLEAN(type)) {
         BOOL value;
         if(strcasecmp(s, "true")==0) {
@@ -289,42 +288,15 @@ PRIVATE json_t *parameter2json(hgobj gobj, int type, const char *name, const cha
         } else {
             return json_false();
         }
+
     } else if(ASN_IS_NATURAL_NUMBER(type)) {
-        json_t *jn_param = json_integer(atoll(s));
-        if(!jn_param) {
-            *result = -1;
-            json_t *jn_data = json_local_sprintf(
-                "%s: NATURAL type of parameter '%s' has failed",
-                gobj_short_name(gobj),
-                name
-            );
-            return jn_data;
-        }
-        return jn_param;
+        return json_integer(atoll(s));
+
     } else if(ASN_IS_REAL_NUMBER(type)) {
-        json_t *jn_param = json_real(atof(s));
-        if(!jn_param) {
-            *result = -1;
-            json_t *jn_data = json_local_sprintf(
-                "%s: REAL typeof parameter '%s' has failed",
-                gobj_short_name(gobj),
-                name
-            );
-            return jn_data;
-        }
-        return jn_param;
+        return json_real(atof(s));
+
     } else if(ASN_IS_JSON(type)) {
-        json_t *jn_param = nonlegalstring2json(s, TRUE);
-        if(!jn_param) {
-            *result = -1;
-            json_t *jn_data = json_local_sprintf(
-                "%s: JSON typeof parameter '%s' has failed",
-                gobj_short_name(gobj),
-                name
-            );
-            return jn_data;
-        }
-        return jn_param;
+        return nonlegalstring2json(s, TRUE);
     } else {
         *result = -1;
         json_t *jn_data = json_local_sprintf(
@@ -457,6 +429,8 @@ PRIVATE json_t *build_cmd_kw(
         pxxx = bftemp;
     }
 
+    *result = 0;
+
     if(!input_parameters) {
         return kw_cmd;
     }
@@ -479,7 +453,9 @@ PRIVATE json_t *build_cmd_kw(
 
         char *param = get_parameter(pxxx, &pxxx);
         if(!param) {
-            // Si no está en pxxx buscalo en kw
+            /*
+             *  Required: si no está en pxxx buscalo en kw
+             */
             json_t *jn_param = kw_get_dict_value(kw, ip->name, 0, 0);
             if(jn_param) {
                 json_object_set(kw_cmd, ip->name, jn_param);
@@ -535,22 +511,20 @@ PRIVATE json_t *build_cmd_kw(
             continue;
         }
 
-        json_t *jn_param = kw_get_dict_value(kw, ip->name, 0, 0);
-        if(jn_param) {
-            const char *param = json_string_value(jn_param);
-            jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
-            if(*result < 0) {
-                JSON_DECREF(kw_cmd);
-                return jn_param;
-            }
-            json_object_set_new(kw_cmd, ip->name, jn_param);
+        if(kw_has_key(kw, ip->name)) {
+            json_object_set(kw_cmd, ip->name, kw_get_dict_value(kw, ip->name, 0, 0));
             ip++;
             continue;
         }
 
         if(ip->default_value) {
-            char *param = (char *)ip->default_value;
-            jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
+            json_t *jn_param = parameter2json(
+                gobj,
+                ip->type,
+                ip->name,
+                (char *)ip->default_value,
+                result
+            );
             if(*result < 0) {
                 JSON_DECREF(kw_cmd);
                 return jn_param;
