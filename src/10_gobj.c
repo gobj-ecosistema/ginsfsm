@@ -7145,37 +7145,44 @@ PRIVATE int gobj_write_json_parameters(
     );
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("⛃> %s:%s => global_mine",
+        trace_machine("⛃> %s^%s => global_mine",
             gobj->gclass->gclass_name,
             gobj->name
         );
+        log_debug_json(0, jn_global, "global all");
         log_debug_json(0, jn_global_mine, "global_mine");
     }
 
-    json_t *__json_config_variables__ = json_object_get(jn_global_mine, "__json_config_variables__");
+    json_t *__json_config_variables__ = kw_get_dict(
+        jn_global_mine,
+        "__json_config_variables__",
+        json_object(),
+        KW_CREATE
+    );
+
+    json_object_update_new(
+        __json_config_variables__,
+        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+            "__realm_id__", __realm_id__,
+            "__realm_owner__", __realm_owner__,
+            "__realm_role__", __realm_role__,
+            "__realm_name__", __realm_name__,
+            "__realm_env__", __realm_env__,
+            "__yuno_role__", __yuno_role__,
+            "__yuno_name__", __yuno_name__,
+            "__yuno_tag__", __yuno_tag__,
+            "__yuno_role_plus_name__", __yuno_role_plus_name__,
+            "__hostname__", get_host_name()
+        )
+    );
     if(gobj_yuno()) {
-        if(!__json_config_variables__) {
-            __json_config_variables__ = json_object();
-            json_object_set_new(jn_global_mine, "__json_config_variables__", __json_config_variables__);
-        }
-        if(gobj_has_attr(gobj_yuno(), "bind_ip")) {
-            if(!kw_has_key(__json_config_variables__, "__bind_ip__")) {
-                json_object_set_new(
-                    __json_config_variables__,
-                    "__bind_ip__",
-                    json_string(gobj_read_str_attr(gobj_yuno(), "bind_ip"))
-                );
-            }
-        }
-        if(gobj_has_attr(gobj_yuno(), "multiple")) {
-            if(!kw_has_key(__json_config_variables__, "__multiple__")) {
-                json_object_set_new(
-                    __json_config_variables__,
-                    "__multiple__",
-                    gobj_read_bool_attr(gobj_yuno(), "multiple")?json_true():json_false()
-                );
-            }
-        }
+        json_object_update_new(
+            __json_config_variables__,
+            json_pack("{s:s, s:b}",
+                "__bind_ip__", gobj_read_str_attr(gobj_yuno(), "bind_ip"),
+                "__multiple__", gobj_read_bool_attr(gobj_yuno(), "multiple")
+            )
+        );
     }
 
     if(__trace_gobj_create_delete2__(gobj)) {
