@@ -1147,11 +1147,7 @@ PUBLIC hgobj gobj_service_factory(
             gclass_name,
             gobj_name
         );
-        char *rpr = json2str(jn_global);
-        if(rpr) {
-            trace_machine(rpr);
-            gbmem_free(rpr);
-        }
+        log_debug_json(0, jn_global, "service global");
     }
 
     json_t *kw_service_config = kw_apply_json_config_variables(
@@ -1165,11 +1161,7 @@ PUBLIC hgobj gobj_service_factory(
             gclass_name,
             gobj_name
         );
-        char *rpr = json2str(kw_service_config);
-        if(rpr) {
-            trace_machine(rpr);
-            gbmem_free(rpr);
-        }
+        log_debug_json(0, kw_service_config, "service final");
     }
 
     hgobj gobj = _create_tree(
@@ -5716,12 +5708,7 @@ PRIVATE int _delete_subscription(hsdata subs, BOOL force, BOOL not_inform)
             if(jn_filter) {
                 json_object_set(kww, "__filter__", jn_filter);
             }
-            char *rpr = 0;
-            rpr = json2str(kww);
-            if(rpr) {
-                trace_machine(rpr);
-                gbmem_free(rpr);
-            }
+            log_debug_json(0, kww, "kww");
             json_decref(kww);
         }
     }
@@ -5963,13 +5950,8 @@ PUBLIC hsdata gobj_subscribe_event(
             gobj_full_name(publisher)
         );
         if(kw) {
-            char *rpr = 0;
             if(1 || __trace_gobj_ev_kw__(subscriber) || __trace_gobj_ev_kw__(publisher)) {
-                rpr = json2str(kw);
-                if(rpr) {
-                    trace_machine(rpr);
-                    gbmem_free(rpr);
-                }
+                log_debug_json(0, kw, "kw");
             }
         }
     }
@@ -6293,13 +6275,8 @@ PUBLIC int gobj_publish_event(
             publisher->mach->fsm->state_names[publisher->mach->current_state]
         );
         if(kw) {
-            char *rpr = 0;
             if(__trace_gobj_ev_kw__(publisher)) {
-                rpr = json2str(kw);
-                if(rpr) {
-                    trace_machine(rpr);
-                    gbmem_free(rpr);
-                }
+                log_debug_json(0, kw, "kw");
             }
         }
     }
@@ -6471,13 +6448,8 @@ PUBLIC int gobj_publish_event(
                 "event",        "%s", event,
                 NULL
             );
-            char *rpr = 0;
             if(__trace_gobj_ev_kw__(publisher)) {
-                rpr = json2str(kw);
-                if(rpr) {
-                    trace_machine(rpr);
-                    gbmem_free(rpr);
-                }
+                log_debug_json(0, kw, "kw");
             }
         }
     }
@@ -6568,13 +6540,8 @@ PUBLIC int gobj_send_event(
                     gobj_gclass_name(src), gobj_name(src)
                 );
                 if(kw) {
-                    char *rpr = 0;
                     if(__trace_gobj_ev_kw__(dst)) {
-                        rpr = json2str(kw);
-                        if(rpr) {
-                            trace_machine(rpr);
-                            gbmem_free(rpr);
-                        }
+                        log_debug_json(0, kw, "kw");
                     }
                 }
             }
@@ -6654,13 +6621,8 @@ PUBLIC int gobj_send_event(
                     gobj_gclass_name(src), gobj_name(src)
                 );
                 if(kw) {
-                    char *rpr = 0;
                     if(__trace_gobj_ev_kw__(dst)) {
-                        rpr = json2str(kw);
-                        if(rpr) {
-                            trace_machine(rpr);
-                            gbmem_free(rpr);
-                        }
+                        log_debug_json(0, kw, "kw");
                     }
                 }
             }
@@ -7187,11 +7149,7 @@ PRIVATE int gobj_write_json_parameters(
             gobj->gclass->gclass_name,
             gobj->name
         );
-        char *rpr = json2str(jn_global_mine);
-        if(rpr) {
-            trace_machine(rpr);
-            gbmem_free(rpr);
-        }
+        log_debug_json(0, jn_global_mine, "global_mine");
     }
 
     json_t *__json_config_variables__ = json_object_get(jn_global_mine, "__json_config_variables__");
@@ -7225,11 +7183,7 @@ PRIVATE int gobj_write_json_parameters(
             gobj->gclass->gclass_name,
             gobj->name
         );
-        char *rpr = json2str(__json_config_variables__);
-        if(rpr) {
-            trace_machine(rpr);
-            gbmem_free(rpr);
-        }
+        log_debug_json(0, __json_config_variables__, "__json_config_variables__");
     }
 
     json_t * new_kw = kw_apply_json_config_variables(kw, jn_global_mine);
@@ -7243,11 +7197,7 @@ PRIVATE int gobj_write_json_parameters(
             gobj->gclass->gclass_name,
             gobj->name
         );
-        char *rpr = json2str(new_kw);
-        if(rpr) {
-            trace_machine(rpr);
-            gbmem_free(rpr);
-        }
+        log_debug_json(0, new_kw, "final kw");
     }
 
     json_t *__user_data__ = kw_get_dict(new_kw, "__user_data__", 0, KW_EXTRACT);
@@ -9650,9 +9600,7 @@ PUBLIC json_t *gobj_command( // With AUTHZ
             command
         );
         if(gobj_trace_level(gobj) & (TRACE_EV_KW)) {
-            char *rpr = json2str(kw);
-            trace_machine(rpr);
-            gbmem_free(rpr);
+            log_debug_json(0, kw, "kw");
         }
     }
 
