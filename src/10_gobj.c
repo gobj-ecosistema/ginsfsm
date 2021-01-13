@@ -11510,7 +11510,7 @@ PUBLIC json_t *gobj_authenticate(hgobj gobj_, json_t *kw, hgobj src)
 
         KW_DECREF(kw);
         return json_pack("{s:i, s:s, s:s}",
-            "result", 0,
+            "result", -1,
             "comment", "Working without authentication",
             "username", pw->pw_name
         );
