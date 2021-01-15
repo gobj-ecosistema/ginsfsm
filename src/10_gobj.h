@@ -607,7 +607,7 @@ PUBLIC int gobj_unlink_nodes(
 
     fkey,hook options
     -----------------
-    ""
+    "refs" (WARNING default)
         Return 'fkey ref'
             ["topic_name^id^hook_name"]
         Return 'hook ref'
