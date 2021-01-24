@@ -6267,6 +6267,7 @@ PUBLIC int gobj_publish_event(
     }
 
     BOOL tracea = is_machine_tracing(publisher);
+    tracea |= __trace_gobj_subscriptions__(publisher);
     if(tracea) {
         trace_machine("**> mach(%s%s:%s), ev: %s, st: %s",
             (!publisher->running)?"!!":"",
@@ -6275,7 +6276,9 @@ PUBLIC int gobj_publish_event(
             publisher->mach->fsm->state_names[publisher->mach->current_state]
         );
         if(kw) {
-            if(__trace_gobj_ev_kw__(publisher)) {
+            if(__trace_gobj_ev_kw__(publisher) ||
+                __trace_gobj_subscriptions__(publisher)
+            ) {
                 log_debug_json(0, kw, "kw");
             }
         }
