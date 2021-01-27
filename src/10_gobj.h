@@ -153,8 +153,24 @@ typedef hsdata (*mt_get_resource_fn)(hgobj gobj, const char *resource, json_int_
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef int   (*mt_delete_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
-typedef int   (*mt_link_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, hgobj src);
-typedef int   (*mt_unlink_nodes_fn)(hgobj gobj, const char *hook, json_t *parent, json_t *child, hgobj src);
+typedef int   (*mt_link_nodes_fn)(
+    hgobj gobj,
+    const char *hook,
+    const char *parent_topic_name,
+    json_t *parent,
+    const char *child_topic_name,
+    json_t *child,
+    hgobj src
+);
+typedef int   (*mt_unlink_nodes_fn)(
+    hgobj gobj,
+    const char *hook,
+    const char *parent_topic_name,
+    json_t *parent,
+    const char *child_topic_name,
+    json_t *child,
+    hgobj src
+);
 typedef json_t *(*mt_get_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *options, hgobj src);
 typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options, hgobj src);
 typedef int   (*mt_shoot_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hgobj src);
@@ -579,16 +595,20 @@ PUBLIC int gobj_delete_node(
 PUBLIC int gobj_link_nodes(
     hgobj gobj,
     const char *hook,
+    const char *parent_topic_name,
     json_t *parent_record,  // owned
-    json_t *child_record,   // owned
+    const char *child_topic_name,
+    json_t *child_record,  // owned
     hgobj src
 );
 
 PUBLIC int gobj_unlink_nodes(
     hgobj gobj,
     const char *hook,
+    const char *parent_topic_name,
     json_t *parent_record,  // owned
-    json_t *child_record,   // owned
+    const char *child_topic_name,
+    json_t *child_record,  // owned
     hgobj src
 );
 

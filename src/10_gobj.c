@@ -3348,8 +3348,10 @@ PUBLIC int gobj_delete_node(
 PUBLIC int gobj_link_nodes(
     hgobj gobj_,
     const char *hook,
+    const char *parent_topic_name,
     json_t *parent_record,  // owned
-    json_t *child_record,   // owned
+    const char *child_topic_name,
+    json_t *child_record,  // owned
     hgobj src
 )
 {
@@ -3378,7 +3380,15 @@ PUBLIC int gobj_link_nodes(
         JSON_DECREF(child_record);
         return -1;
     }
-    return gobj->gclass->gmt.mt_link_nodes(gobj, hook, parent_record, child_record, src);
+    return gobj->gclass->gmt.mt_link_nodes(
+        gobj,
+        hook,
+        parent_topic_name,
+        parent_record,
+        child_topic_name,
+        child_record,
+        src
+    );
 }
 
 /***************************************************************************
@@ -3387,7 +3397,9 @@ PUBLIC int gobj_link_nodes(
 PUBLIC int gobj_unlink_nodes(
     hgobj gobj_,
     const char *hook,
+    const char *parent_topic_name,
     json_t *parent_record,  // owned
+    const char *child_topic_name,
     json_t *child_record,  // owned
     hgobj src
 )
@@ -3417,7 +3429,15 @@ PUBLIC int gobj_unlink_nodes(
         JSON_DECREF(child_record);
         return -1;
     }
-    return gobj->gclass->gmt.mt_unlink_nodes(gobj, hook, parent_record, child_record, src);
+    return gobj->gclass->gmt.mt_unlink_nodes(
+        gobj,
+        hook,
+        parent_topic_name,
+        parent_record,
+        child_topic_name,
+        child_record,
+        src
+    );
 }
 
 /***************************************************************************
