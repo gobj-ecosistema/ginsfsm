@@ -627,29 +627,37 @@ PUBLIC int gobj_unlink_nodes(
 
     fkey,hook options
     -----------------
-    "refs" (WARNING default)
+    "refs" (default) "hook_refs"
         Return 'fkey ref'
-            ["topic_name^id^hook_name"]
-        Return 'hook ref'
-            ["topic_name^id"]
+            ["topic_name^id^hook_name", ...]
 
-    "only_id"
-        Return the 'fkey ref' with only the 'id' field
-            ["$id",...]
+    "refs" (default) "fkey_refs"
+        Return 'hook ref'
+            ["topic_name^id", ...]
+
+
+    "only_id" "hook_only_id"
         Return the 'hook ref' with only the 'id' field
             ["$id",...]
 
-    "list_dict"
+    "only_id" "fkey_only_id"
+        Return the 'fkey ref' with only the 'id' field
+            ["$id",...]
+
+
+    "list_dict" "hook_list_dict"
         Return the kwid style:
             [{"id": "$id", "topic_name":"$topic_name", "hook_name":"$hook_name"}, ...]
+
+    "list_dict" "fkey_list_dict"
         Return the kwid style:
             [{"id": "$id", "topic_name":"$topic_name"}, ...]
 
-    "size"
+
+    "size" "hook_size"
         Return the kwid style:
-            [{"topic_name":"$topic_name", "hook_name":"$hook_name", "size": $size}, ...]
-        Return the kwid style:
-            [{"topic_name":"$topic_name", "size": $size}, ...]
+            [{"topic_name":"$topic_name", "hook_name":"$hook_name", "size": $size}]
+
 
     "with-metadata"
         Return with metadata
