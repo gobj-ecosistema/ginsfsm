@@ -671,7 +671,7 @@ PUBLIC int gobj_unlink_nodes(
     Other options
     -------------
 
-    "with-metadata"
+    "with_metadata"
         Return with metadata
 
 
