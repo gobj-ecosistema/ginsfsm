@@ -414,7 +414,7 @@ PUBLIC int gobj_walk_gclass_list(
  *
  */
 PUBLIC json_t * gobj_repr_gclass_register(void);
-PUBLIC json_t * gobj_repr_service_register(void);
+PUBLIC json_t * gobj_repr_service_register(const char *gclass_name);
 PUBLIC json_t * gobj_repr_unique_register(void);
 
 /*

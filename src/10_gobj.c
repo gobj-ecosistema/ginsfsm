@@ -1024,32 +1024,33 @@ PUBLIC json_t * gobj_repr_gclass_register(void)
 /***************************************************************************
  *  Debug print service register in json
  ***************************************************************************/
-PUBLIC json_t * gobj_repr_service_register(void)
+PUBLIC json_t * gobj_repr_service_register(const char *gclass_name)
 {
     json_t *jn_register = json_array();
 
     service_register_t *srv_reg = dl_first(&dl_service);
     while(srv_reg) {
-        {
-             json_t *jn_srv = json_object();
-             if(srv_reg->service) {
-                json_object_set_new(
-                    jn_srv,
-                    "service",
-                    json_string(srv_reg->service)
-                );
-             }
-             hgobj gobj_service = srv_reg->gobj;
-             json_object_set_new(
-                 jn_srv,
-                 "opt",
-                 opt2json(gobj_service)
-             );
-             json_object_set_new(
-                 jn_srv,
-                 "gobj",
-                 json_string(gobj_full_name(gobj_service))
-             );
+        hgobj gobj_service = srv_reg->gobj;
+        GCLASS *gclass = gobj_gclass(gobj_service);
+        if(empty_string(gclass_name) || strcmp(gclass->gclass_name, gclass_name)==0) {
+            json_t *jn_srv = json_object();
+            if(srv_reg->service) {
+            json_object_set_new(
+                jn_srv,
+                "service",
+                json_string(srv_reg->service)
+            );
+            }
+            json_object_set_new(
+                jn_srv,
+                "opt",
+                opt2json(gobj_service)
+            );
+            json_object_set_new(
+                jn_srv,
+                "gobj",
+                json_string(gobj_full_name(gobj_service))
+            );
 
             json_array_append_new(jn_register, jn_srv);
         }
