@@ -1573,6 +1573,7 @@ PRIVATE json_t *itdesc2json0(const sdata_desc_t *it)
         }
         gbuf_decref(gbuf);
     }
+    json_object_set_new(jn_it, "authpth", json_string(it->authpth?it->authpth:""));
     return jn_it;
 }
 

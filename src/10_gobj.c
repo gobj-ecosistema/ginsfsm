@@ -10849,6 +10849,7 @@ PUBLIC int gobj_set_gobj_trace(hgobj gobj_, const char *level, BOOL set, json_t 
     }
 
     if(_set_gobj_trace_level(gobj, level, set)<0) {
+        KW_DECREF(kw);
         return -1;
     }
     if(set) {

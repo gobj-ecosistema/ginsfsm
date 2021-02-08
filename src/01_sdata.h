@@ -115,7 +115,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=0,                                          \
     .schema=0,                                          \
     .free_fn=0,                                         \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -137,7 +137,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=0,                                          \
     .schema=0,                                          \
     .free_fn=0,                                         \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -159,7 +159,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=0,                                          \
     .schema=schema_,                                    \
     .free_fn=free_fn_,                                  \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -181,7 +181,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=fillsp_,                                    \
     .schema=0,                                          \
     .free_fn=0,                                         \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -203,7 +203,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=fillsp_,                                    \
     .schema=0,                                          \
     .free_fn=free_fn_,                                  \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -222,7 +222,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=0,                                          \
     .schema=items_,                                     \
     .free_fn=0,                                         \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -241,7 +241,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=0,                                          \
     .schema=items_,                                     \
     .free_fn=0,                                         \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -260,7 +260,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=0,                                          \
     .schema=0,                                          \
     .free_fn=0,                                         \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -279,12 +279,12 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=0,                                          \
     .schema=items_,                                     \
     .free_fn=0,                                         \
-    .__acl__=0,                                         \
+    .authpth=0,                                         \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
-/*-PM----type-----------name------------flag------------description---------- */
-#define SDATAPM0(type_, name_, flag_, description_)     \
+/*-PM-----type--------------name----------------flag--------authpath--------description-- */
+#define SDATAPM0(type_, name_, flag_, authpth_, description_)     \
 {                                                       \
     .type=type_,                                        \
     .name=name_,                                        \
@@ -298,7 +298,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     .fillsp=0,                                          \
     .schema=0,                                          \
     .free_fn=0,                                         \
-    .__acl__=0,                                         \
+    .authpth=authpth_,                                  \
     ._offset=0, ._ln=0, ._suboid=0                      \
 }
 
@@ -362,7 +362,7 @@ typedef struct sdata_desc_s {
     struct sdata_desc_s *schema;
     const char *resource;
     void (*free_fn)(void *);
-    void ** __acl__; // not used
+    const char *authpth; // not used
 
     /*
      *  Internal use
