@@ -25,19 +25,57 @@
  ***************************************************************/
 
 /***************************************************************************
- *  Return list authzs of gobj
+ *  Return list authzs of gobj if authz is empty
+ *  else return authz dict
  ***************************************************************************/
 PUBLIC json_t *authzs_list(
     hgobj gobj,
-    const char *auth
+    const char *authz
 )
 {
+    json_t *jn_list = 0;
     if(!gobj) { // Can be null
-        return sdataauth2json(gobj_get_global_authz_table());
+        jn_list = sdataauth2json(gobj_get_global_authz_table());
+    } else {
+        if(!gobj_gclass(gobj)->authz_table) {
+            log_error(0,
+                "gobj",         "%s", gobj_full_name(gobj),
+                "function",     "%s", __FUNCTION__,
+                "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+                "msg",          "%s", "gclass without authzs acl",
+                "gclass_name",  "%s", gobj_gclass_name(gobj),
+                NULL
+            );
+            return 0;
+        }
+        jn_list = sdataauth2json(gobj_gclass(gobj)->authz_table);
     }
-    json_t *jn_list = sdataauth2json(gobj_gclass(gobj)->authz_table);
 
-    return jn_list;
+    if(empty_string(authz)) {
+        return jn_list;
+    }
+
+    int idx; json_t *jn_authz;
+    json_array_foreach(jn_list, idx, jn_authz) {
+        const char *id = kw_get_str(jn_authz, "id", "", KW_REQUIRED);
+        if(strcmp(authz, id)==0) {
+            json_incref(jn_authz);
+            json_decref(jn_list);
+            return jn_authz;
+        }
+    }
+
+    log_error(0,
+        "gobj",         "%s", gobj_full_name(gobj),
+        "function",     "%s", __FUNCTION__,
+        "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+        "msg",          "%s", "authz not found",
+        "authz",        "%s", authz,
+        NULL
+    );
+
+    json_decref(jn_list);
+    return 0;
 }
 
 /***************************************************************************

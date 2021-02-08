@@ -183,10 +183,21 @@ typedef json_t *(*mt_topic_desc_fn)(hgobj gobj, const char *topic_name);
 typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *treedb_name, const char *topic_name, json_t *kw, hgobj src);
 typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *treedb_name, const char *topic_name, json_t *kw, hgobj src);
 typedef json_t *(*mt_node_parents_fn)(
-    hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options, hgobj src
+    hgobj gobj,
+    const char *topic_name,
+    json_t *kw,
+    const char *link,
+    json_t *options,
+    hgobj src
 );
 typedef json_t *(*mt_node_childs_fn)(
-    hgobj gobj, const char *topic_name, const char *id, const char *link, json_t *options, hgobj src
+    hgobj gobj,
+    const char *topic_name,
+    json_t *kw,
+    const char *hook,
+    json_t *filter,
+    json_t *options,
+    hgobj src
 );
 typedef json_t *(*mt_list_instances_fn)(
     hgobj gobj,
@@ -674,7 +685,6 @@ PUBLIC int gobj_unlink_nodes(
     "with_metadata"
         Return with metadata
 
-
     HACK id is converted in ids (using kwid_get_ids())
     HACK if __filter__ exists in jn_filter it will be used as filter
 
@@ -712,22 +722,23 @@ PUBLIC json_t *gobj_list_instances(
 PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
-    const char *id,
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     const char *link,
     json_t *jn_options, // fkey options
     hgobj src
 );
 
 /*
- *  Return a list of child **references** of the hook
+ *  Return a list of child nodes of the hook
  *  If no hook return all hooks
  */
 PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
-    const char *id,
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     const char *hook,
-    json_t *jn_options, // hook options
+    json_t *jn_filter,  // filter to childs tree
+    json_t *jn_options, // hook options, "recursive"
     hgobj src
 );
 
@@ -1585,8 +1596,11 @@ PUBLIC json_t *gobj_authenticate(
 );
 
 PUBLIC json_t *gobj_authzs( // list authzs of gobj
+    hgobj gobj  // If null return global authzs
+);
+PUBLIC json_t *gobj_authz( // return authz of gobj
     hgobj gobj,
-    const char *authz
+    const char *authz // return all list if empty string, else return authz desc
 );
 
 /*

@@ -3571,7 +3571,7 @@ PUBLIC json_t *gobj_list_instances(
 PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     hgobj gobj_,
     const char *topic_name,
-    const char *id,
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     const char *link,
     json_t *jn_options, // fkey options
     hgobj src
@@ -3587,6 +3587,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
             NULL
         );
         JSON_DECREF(jn_options);
+        JSON_DECREF(kw);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_node_parents) {
@@ -3598,20 +3599,22 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
             NULL
         );
         JSON_DECREF(jn_options);
+        JSON_DECREF(kw);
         return 0;
     }
-    return gobj->gclass->gmt.mt_node_parents(gobj, topic_name, id, link, jn_options, src);
+    return gobj->gclass->gmt.mt_node_parents(gobj, topic_name, kw, link, jn_options, src);
 }
 
 /***************************************************************************
- *  Return a list of child **references** of the hook
+ *  Return a list of child nodes of the hook
  *  If no hook return all hooks
  ***************************************************************************/
 PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     hgobj gobj_,
     const char *topic_name,
-    const char *id,
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     const char *hook,
+    json_t *jn_filter,  // filter to childs tree
     json_t *jn_options, // hook options
     hgobj src
 )
@@ -3626,6 +3629,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
             NULL
         );
         JSON_DECREF(jn_options);
+        JSON_DECREF(kw);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_node_childs) {
@@ -3637,9 +3641,10 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
             NULL
         );
         JSON_DECREF(jn_options);
+        JSON_DECREF(kw);
         return 0;
     }
-    return gobj->gclass->gmt.mt_node_childs(gobj, topic_name, id, hook, jn_options, src);
+    return gobj->gclass->gmt.mt_node_childs(gobj, topic_name, kw, hook, jn_filter, jn_options, src);
 }
 
 /***************************************************************************
@@ -11547,10 +11552,31 @@ PUBLIC json_t *gobj_authenticate(hgobj gobj_, json_t *kw, hgobj src)
  *  list authzs of gobj
  ****************************************************************************/
 PUBLIC json_t *gobj_authzs(
-    hgobj gobj,
-    const char *authz
+    hgobj gobj  // If null return global authzs
 )
 {
+    return authzs_list(gobj, "");
+}
+
+/****************************************************************************
+ *  list authzs of gobj
+ ****************************************************************************/
+PUBLIC json_t *gobj_authz(
+    hgobj gobj_,
+    const char *authz // return all list if empty string, else return authz desc
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
     return authzs_list(gobj, authz);
 }
 
