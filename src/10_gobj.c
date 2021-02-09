@@ -3058,7 +3058,7 @@ PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
 PUBLIC json_t *gobj_treedb_topics(
     hgobj gobj_,
     const char *treedb_name,
-    json_t *kw, // "dict" return list of dicts, otherwise return list of strings
+    json_t *options, // "dict" return list of dicts, otherwise return list of strings
     hgobj src
 )
 {
@@ -3071,7 +3071,7 @@ PUBLIC json_t *gobj_treedb_topics(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_treedb_topics) {
@@ -3082,10 +3082,10 @@ PUBLIC json_t *gobj_treedb_topics(
             "msg",          "%s", "mt_treedb_topics not defined",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_treedb_topics(gobj, treedb_name, kw, src);
+    return gobj->gclass->gmt.mt_treedb_topics(gobj, treedb_name, options, src);
 }
 
 /***************************************************************************

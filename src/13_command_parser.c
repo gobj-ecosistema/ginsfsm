@@ -512,7 +512,14 @@ PRIVATE json_t *build_cmd_kw(
         }
 
         if(kw_has_key(kw, ip->name)) {
-            json_object_set(kw_cmd, ip->name, kw_get_dict_value(kw, ip->name, 0, 0));
+            json_t *value = kw_get_dict_value(kw, ip->name, 0, 0);
+            if(!ASN_IS_STRING(ip->type) && json_is_string(value)) {
+                const char *s = json_string_value(value);
+                json_t *new_value = legalstring2json(s, TRUE);
+                json_object_set_new(kw_cmd, ip->name, new_value);
+            } else {
+                json_object_set(kw_cmd, ip->name, value);
+            }
             ip++;
             continue;
         }

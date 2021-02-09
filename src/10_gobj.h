@@ -178,7 +178,7 @@ typedef int   (*mt_activate_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hg
 typedef json_t *(*mt_list_snaps_fn)(hgobj gobj, json_t *filter, hgobj src);
 
 typedef json_t *(*mt_treedbs_fn)(hgobj gobj, json_t *kw, hgobj src);
-typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *treedb_name, json_t *kw, hgobj src);
+typedef json_t *(*mt_treedb_topics_fn)(hgobj gobj, const char *treedb_name, json_t *options, hgobj src);
 typedef json_t *(*mt_topic_desc_fn)(hgobj gobj, const char *topic_name);
 typedef json_t *(*mt_topic_links_fn)(hgobj gobj, const char *treedb_name, const char *topic_name, json_t *kw, hgobj src);
 typedef json_t *(*mt_topic_hooks_fn)(hgobj gobj, const char *treedb_name, const char *topic_name, json_t *kw, hgobj src);
@@ -549,7 +549,7 @@ PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
 PUBLIC json_t *gobj_treedb_topics(
     hgobj gobj,
     const char *treedb_name,
-    json_t *kw, // "dict" return list of dicts, otherwise return list of strings
+    json_t *options, // "dict" return list of dicts, otherwise return list of strings
     hgobj src
 );
 
