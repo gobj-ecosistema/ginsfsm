@@ -2331,9 +2331,7 @@ PRIVATE hgobj _create_tree(
         }
     }
     if(json_array_size(jn_childs) == 1) {
-        if(!gobj_is_service(last_child)) { // WARNING changed in v 4.9.3 (efecto colateral?)
-            gobj_set_bottom_gobj(first_child, last_child);
-        }
+        gobj_set_bottom_gobj(first_child, last_child);
     }
 
     if(!empty_string(ev_on_setup_complete)) {
