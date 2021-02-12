@@ -1112,7 +1112,7 @@ PUBLIC GBUFFER *get_sdata_flag_desc(sdata_flag_t flag)
 /***************************************************************************
  *  CHECK - return TRUE if the required attribute has a value
  ***************************************************************************/
-PRIVATE BOOL attr_with_value(const sdata_desc_t *it, SData_Value_t value)
+PUBLIC BOOL sdata_attr_with_value(const sdata_desc_t *it, SData_Value_t value)
 {
     if(ASN_IS_STRING(it->type)) {
         if(!value.s) {
@@ -1186,7 +1186,7 @@ PUBLIC BOOL sdata_check_required_attrs(
         if(it->flag & SDF_REQUIRED) {
             void *ptr = item_pointer(hs, it);
             SData_Value_t value = sdata_read_by_type(hs, it, ptr);
-            if(!attr_with_value(it, value)) {
+            if(!sdata_attr_with_value(it, value)) {
                 if(not_found_cb) {
                     not_found_cb(user_data, it->name);
                 }

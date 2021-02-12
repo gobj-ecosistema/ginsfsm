@@ -2331,7 +2331,9 @@ PRIVATE hgobj _create_tree(
         }
     }
     if(json_array_size(jn_childs) == 1) {
-        gobj_set_bottom_gobj(first_child, last_child);
+        if(!gobj_is_service(last_child)) { // WARNING changed in v 4.9.3 (efecto colateral?)
+            gobj_set_bottom_gobj(first_child, last_child);
+        }
     }
 
     if(!empty_string(ev_on_setup_complete)) {
@@ -3795,6 +3797,49 @@ PUBLIC void * gobj_exec_internal_method(hgobj gobj_, const char *lmethod, void *
 }
 
 /***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC BOOL gobj_check_required_attrs(
+    GObj_t *gobj,
+    not_found_cb_t not_found_cb // Called when the key not exist in hsdata
+)
+{
+    const char **keys = sdata_keys(gobj_hsdata(gobj), SDF_REQUIRED, 0);
+    if(keys) {
+        while(*keys) {
+            const char *name = *keys;
+            hsdata hs = gobj_hsdata2(gobj, name, FALSE);
+            if(!gobj_has_attr(gobj, *keys)) {
+                if(not_found_cb) {
+                    not_found_cb(gobj, *keys);
+                }
+                gbmem_free(keys);
+                return FALSE;
+            }
+
+            const sdata_desc_t *it;
+            void *ptr = sdata_it_pointer(hs, name, &it);
+
+            SData_Value_t value = sdata_read_by_type(hs, it, ptr);
+            if(!sdata_attr_with_value(it, value)) {
+                if(not_found_cb) {
+                    not_found_cb(gobj, *keys);
+                }
+                gbmem_free(keys);
+                return FALSE;
+            }
+
+            keys++;
+        };
+        gbmem_free(keys);
+
+        return TRUE;
+    }
+
+    return TRUE;
+}
+
+/***************************************************************************
  *  Execute global method "start" of the gobj
  ***************************************************************************/
 PUBLIC int gobj_start(hgobj gobj_)
@@ -3831,10 +3876,21 @@ PUBLIC int gobj_start(hgobj gobj_)
         );
         return -1;
     }
+
+    // WARNING changed in v 4.9.3 (efecto colateral?)
+    hgobj gobj_bottom = gobj_bottom_gobj(gobj);
+    if(gobj_bottom) {
+        if(!gobj_is_running(gobj_bottom) && !gobj_is_disabled(gobj_bottom)) {
+            if(!((gobj_gclass(gobj_bottom))->gcflag & gcflag_manual_start)) {
+                gobj_start(gobj_bottom);
+            }
+        }
+    }
+
     /*
      *  Check required attributes.
      */
-    if(!sdata_check_required_attrs(gobj_hsdata(gobj), print_required_attr_not_found, gobj)) {
+    if(!gobj_check_required_attrs(gobj, print_required_attr_not_found)) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
@@ -4005,6 +4061,7 @@ PUBLIC int gobj_stop(hgobj gobj_)
     if(gobj->gclass->gmt.mt_stop) {
         ret = gobj->gclass->gmt.mt_stop(gobj);
     }
+
     return ret;
 }
 
@@ -7345,7 +7402,7 @@ PUBLIC hsdata gobj_hsdata(hgobj gobj_)
     GObj_t *gobj = gobj_;
     if(!gobj) {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_full_name(gobj),
+            "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj NULL",
@@ -7365,7 +7422,7 @@ PUBLIC const sdata_desc_t * gobj_tattr_desc(hgobj gobj_)
 
     if(!gobj) {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_full_name(gobj),
+            "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj NULL",
@@ -7386,7 +7443,7 @@ PUBLIC const sdata_desc_t * gobj_attr_desc(hgobj gobj_, const char *name)
 
     if(!gobj) {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_full_name(gobj),
+            "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj NULL",
@@ -7433,7 +7490,7 @@ PUBLIC BOOL gobj_has_attr(hgobj gobj, const char *name)
 {
     if(!gobj) {
         log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", gobj_full_name(gobj),
+            "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "gobj NULL",
@@ -7539,6 +7596,17 @@ PRIVATE SData_Value_t on_post_read_it_cb(void *user_data, const char *name, int 
 PUBLIC hsdata gobj_hsdata2(hgobj gobj_, const char *name, BOOL verbose)
 {
     GObj_t *gobj = gobj_;
+
+    if(!gobj) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "gobj NULL",
+            NULL
+        );
+        return 0;
+    }
 
     if(gobj_has_attr(gobj, name)) {
         return gobj_hsdata(gobj);

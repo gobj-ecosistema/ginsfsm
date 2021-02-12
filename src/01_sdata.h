@@ -452,6 +452,7 @@ PUBLIC uint32_t sdata_get_stats_metadata(hsdata hs, const char *name);
 PUBLIC int sdata_lives(hsdata hs); // WARNING call before any decref()!!!
 
 PUBLIC GBUFFER *get_sdata_flag_desc(sdata_flag_t flag);
+PUBLIC BOOL sdata_attr_with_value(const sdata_desc_t *it, SData_Value_t value);
 PUBLIC BOOL sdata_check_required_attrs(
     hsdata hs,
     not_found_cb_t not_found_cb, // Called when the key not exist in hsdata
