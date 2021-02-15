@@ -7054,19 +7054,16 @@ PUBLIC hgobj gobj_set_bottom_gobj(hgobj gobj_, hgobj bottom_gobj)
          *      porque está definido con tree, y no tiene en cuenta la creación de un bottom interno.
          *
          */
-        if(bottom_gobj) {// Tracea solo si no es un reset
-            if(1 || gobj_trace_level(gobj)) {
-                // Que sólo salga el error si se está traceando algo.
-                log_error(0,
-                    "gobj",         "%s", gobj_full_name(gobj),
-                    "function",     "%s", __FUNCTION__,
-                    "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-                    "msg",          "%s", "bottom_gobj already set",
-                    "prev_gobj",    "%s", gobj_full_name(gobj->bottom_gobj),
-                    "new_gobj",     "%s", gobj_full_name(bottom_gobj),
-                    NULL
-                );
-            }
+        if(bottom_gobj) {
+            log_warning(0,
+                "gobj",         "%s", gobj_full_name(gobj),
+                "function",     "%s", __FUNCTION__,
+                "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+                "msg",          "%s", "bottom_gobj already set",
+                "prev_gobj",    "%s", gobj_full_name(gobj->bottom_gobj),
+                "new_gobj",     "%s", gobj_full_name(bottom_gobj),
+                NULL
+            );
         }
         // anyway set -> NO! -> the already set has preference. New 8-10-2016
         // anyway set -> YES! -> the new set has preference. New 27-Jan-2017
