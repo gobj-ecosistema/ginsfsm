@@ -3648,6 +3648,63 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 }
 
 /***************************************************************************
+ *  Return a hierarchical tree of the self-link topic
+ ***************************************************************************/
+PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
+    hgobj gobj_,
+    const char *topic_name,
+    const char *hook,   // hook to build the hierarchical tree
+    const char *rename_hook, // change the hook name in the tree response
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
+    json_t *jn_fields,  // fields of topic_name to include
+    json_t *jn_filter,  // filter to match records
+    json_t *jn_options, // fkey,hook options
+    hgobj src
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        JSON_DECREF(jn_fields);
+        JSON_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
+        KW_DECREF(kw);
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_topic_jtree) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_topic_jtree not defined",
+            NULL
+        );
+        JSON_DECREF(jn_fields);
+        JSON_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
+        KW_DECREF(kw);
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_topic_jtree(
+        gobj,
+        topic_name,
+        hook,   // hook to build the hierarchical tree
+        rename_hook,// change the hook name in the tree response
+        kw,         // 'id' and topic_pkey2s fields are used to find the node
+        jn_fields,  // fields of topic_name to include
+        jn_filter,  // filter to match records
+        jn_options, // fkey,hook options
+        src
+    );
+}
+
+/***************************************************************************
  *
  ***************************************************************************/
 PUBLIC int gobj_shoot_snap(
@@ -8581,8 +8638,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_future44"));
     if(gmt->mt_unlink_nodes)
         json_array_append_new(jn_methods, json_string("mt_unlink_nodes"));
-    if(gmt->mt_future46)
-        json_array_append_new(jn_methods, json_string("mt_future46"));
+    if(gmt->mt_topic_jtree)
+        json_array_append_new(jn_methods, json_string("mt_topic_jtree"));
     if(gmt->mt_get_node)
         json_array_append_new(jn_methods, json_string("mt_get_node"));
     if(gmt->mt_list_nodes)
