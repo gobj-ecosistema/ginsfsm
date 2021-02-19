@@ -3649,7 +3649,9 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 
 /***************************************************************************
  *  Return a hierarchical tree of the self-link topic
- *  If "webix" option is true return webix style, else list-dict with __path__ field
+ *  If "webix" option is true return webix style (dict-list),
+ *      else list of dict's
+ *  __path__ field in all records (id`id`... style)
  *  If root node is not specified then the first with no parent is used
  ***************************************************************************/
 PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
