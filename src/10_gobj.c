@@ -3614,8 +3614,8 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     const char *topic_name,
     json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     const char *hook,
-    json_t *jn_filter,  // filter to childs tree
-    json_t *jn_options, // hook options
+    json_t *jn_filter,  // filter to childs
+    json_t *jn_options, // fkey,hook options
     hgobj src
 )
 {
@@ -3649,6 +3649,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 
 /***************************************************************************
  *  Return a hierarchical tree of the self-link topic
+ *  If "webix" option is true return webix style, else list-dict with __path__ field
  ***************************************************************************/
 PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
     hgobj gobj_,
@@ -3658,7 +3659,7 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
     json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     json_t *jn_fields,  // fields of topic_name to include
     json_t *jn_filter,  // filter to match records
-    json_t *jn_options, // fkey,hook options
+    json_t *jn_options, // fkey,hook options, "webix"
     hgobj src
 )
 {
