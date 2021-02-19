@@ -751,7 +751,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
     const char *hook,
     json_t *jn_filter,  // filter to childs
-    json_t *jn_options, // fkey,hook options
+    json_t *jn_options, // fkey,hook options, "recursive"
     hgobj src
 );
 
