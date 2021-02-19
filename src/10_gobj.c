@@ -3650,14 +3650,14 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
 /***************************************************************************
  *  Return a hierarchical tree of the self-link topic
  *  If "webix" option is true return webix style, else list-dict with __path__ field
+ *  If root node is not specified then the first with no parent is used
  ***************************************************************************/
 PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
     hgobj gobj_,
     const char *topic_name,
     const char *hook,   // hook to build the hierarchical tree
     const char *rename_hook, // change the hook name in the tree response
-    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
-    json_t *jn_fields,  // fields of topic_name to include
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
     json_t *jn_filter,  // filter to match records
     json_t *jn_options, // fkey,hook options, "webix"
     hgobj src
@@ -3672,7 +3672,6 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        JSON_DECREF(jn_fields);
         JSON_DECREF(jn_filter);
         JSON_DECREF(jn_options);
         KW_DECREF(kw);
@@ -3686,7 +3685,6 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
             "msg",          "%s", "mt_topic_jtree not defined",
             NULL
         );
-        JSON_DECREF(jn_fields);
         JSON_DECREF(jn_filter);
         JSON_DECREF(jn_options);
         KW_DECREF(kw);
@@ -3698,7 +3696,6 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
         hook,   // hook to build the hierarchical tree
         rename_hook,// change the hook name in the tree response
         kw,         // 'id' and topic_pkey2s fields are used to find the node
-        jn_fields,  // fields of topic_name to include
         jn_filter,  // filter to match records
         jn_options, // fkey,hook options
         src
