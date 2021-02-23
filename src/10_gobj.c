@@ -3661,7 +3661,7 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
     const char *rename_hook, // change the hook name in the tree response
     json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
     json_t *jn_filter,  // filter to match records
-    json_t *jn_options, // fkey,hook options, "webix"
+    json_t *jn_options, // fkey,hook options, "webix", "expand_childs"
     hgobj src
 )
 {
