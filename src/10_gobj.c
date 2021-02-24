@@ -1243,6 +1243,7 @@ PRIVATE int register_service(const char *name, hgobj gobj)
         "msgset",       "%s", MSGSET_STARTUP,
         "msg",          "%s", "Register service",
         "service",      "%s", name?name:"",
+        "gclass",       "%s", gobj_gclass_name(gobj),
         NULL
     );
 
