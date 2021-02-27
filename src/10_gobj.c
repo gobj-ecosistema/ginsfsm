@@ -4276,7 +4276,11 @@ PUBLIC int gobj_play(hgobj gobj_)
     gobj->playing = TRUE;
 
     if(gobj->gclass->gmt.mt_play) {
-        return gobj->gclass->gmt.mt_play(gobj);
+        int ret = gobj->gclass->gmt.mt_play(gobj);
+        if(ret < 0) {
+            gobj->playing = FALSE;
+        }
+        return ret;
     } else {
         return 0;
     }
