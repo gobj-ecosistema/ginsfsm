@@ -3712,6 +3712,7 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
     hgobj gobj_,
     const char *topic_name,
     json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
+    json_t *jn_options, // ""with_metatada"
     hgobj src
 )
 {
@@ -3724,6 +3725,7 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        JSON_DECREF(jn_options);
         KW_DECREF(kw);
         return 0;
     }
@@ -3735,6 +3737,7 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
             "msg",          "%s", "mt_future60 not defined",
             NULL
         );
+        JSON_DECREF(jn_options);
         KW_DECREF(kw);
         return 0;
     }
@@ -3742,6 +3745,7 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
         gobj,
         topic_name,
         kw,         // 'id' and topic_pkey2s fields are used to find the node
+        jn_options,
         src
     );
 }

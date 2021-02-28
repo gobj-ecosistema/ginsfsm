@@ -188,6 +188,7 @@ typedef json_t *(*mt_node_tree_fn)(
     hgobj gobj,
     const char *topic_name,
     json_t *kw,
+    json_t *jn_options,
     hgobj src
 );
 
@@ -786,6 +787,7 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
     json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
+    json_t *jn_options, // ""with_metatada"
     hgobj src
 );
 
