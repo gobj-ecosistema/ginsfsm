@@ -184,6 +184,13 @@ typedef json_t *(*mt_topic_jtree_fn)(
     hgobj src
 );
 
+typedef json_t *(*mt_node_tree_fn)(
+    hgobj gobj,
+    const char *topic_name,
+    json_t *kw,
+    hgobj src
+);
+
 typedef json_t *(*mt_list_nodes_fn)(hgobj gobj, const char *topic_name, json_t *jn_filter, json_t *options, hgobj src);
 typedef int   (*mt_shoot_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hgobj src);
 typedef int   (*mt_activate_snap_fn)(hgobj gobj, const char *tag, json_t *kw, hgobj src);
@@ -316,7 +323,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_node_parents_fn mt_node_parents;
     mt_node_childs_fn mt_node_childs;
     mt_list_instances_fn mt_list_instances;
-    future_method_fn mt_future60;
+    mt_node_tree_fn mt_future60;
     mt_topic_size_fn mt_topic_size;
     future_method_fn mt_future62;
     future_method_fn mt_future63;
@@ -769,6 +776,16 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
     json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
     json_t *jn_filter,  // filter to match records
     json_t *jn_options, // fkey,hook options, "webix", "expand_childs"
+    hgobj src
+);
+
+/*
+ *  Return the full tree of a node (duplicated)
+ */
+PUBLIC json_t *gobj_node_tree( // Return MUST be decref
+    hgobj gobj,
+    const char *topic_name,
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
     hgobj src
 );
 

@@ -3706,6 +3706,47 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
 }
 
 /***************************************************************************
+ *  Return the full tree of a node (duplicated)
+ ***************************************************************************/
+PUBLIC json_t *gobj_node_tree( // Return MUST be decref
+    hgobj gobj_,
+    const char *topic_name,
+    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
+    hgobj src
+)
+{
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        KW_DECREF(kw);
+        return 0;
+    }
+    if(!gobj->gclass->gmt.mt_future60) {
+        log_error(0,
+            "gobj",         "%s", gobj_full_name(gobj),
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "mt_future60 not defined",
+            NULL
+        );
+        KW_DECREF(kw);
+        return 0;
+    }
+    return gobj->gclass->gmt.mt_future60(
+        gobj,
+        topic_name,
+        kw,         // 'id' and topic_pkey2s fields are used to find the node
+        src
+    );
+}
+
+/***************************************************************************
  *
  ***************************************************************************/
 PUBLIC int gobj_shoot_snap(
