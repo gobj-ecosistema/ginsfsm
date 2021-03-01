@@ -610,7 +610,7 @@ PUBLIC json_t *gobj_create_node( // Return is YOURS
 PUBLIC json_t *gobj_update_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
+    json_t *kw,         // 'id' and pkey2s fields are used to find the node
     json_t *jn_options, // "create" "autolink" "volatil" fkey,hook options
     hgobj src
 );
@@ -618,7 +618,7 @@ PUBLIC json_t *gobj_update_node( // Return is YOURS
 PUBLIC int gobj_delete_node(
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
+    json_t *kw,         // 'id' and pkey2s fields are used to find the node
     json_t *jn_options, // "force"
     hgobj src
 );
@@ -713,7 +713,7 @@ PUBLIC int gobj_unlink_nodes(
 PUBLIC json_t *gobj_get_node( // Return is YOURS
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
+    json_t *kw,         // 'id' and pkey2s fields are used to find the node
     json_t *jn_options, // fkey,hook options
     hgobj src
 );
@@ -742,7 +742,7 @@ PUBLIC json_t *gobj_list_instances(
 PUBLIC json_t *gobj_node_parents( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
+    json_t *kw,         // 'id' and pkey2s fields are used to find the node
     const char *link,
     json_t *jn_options, // fkey options
     hgobj src
@@ -755,7 +755,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
 PUBLIC json_t *gobj_node_childs( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the node
+    json_t *kw,         // 'id' and pkey2s fields are used to find the node
     const char *hook,
     json_t *jn_filter,  // filter to childs
     json_t *jn_options, // fkey,hook options, "recursive"
@@ -774,7 +774,7 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
     const char *topic_name,
     const char *hook,   // hook to build the hierarchical tree
     const char *rename_hook, // change the hook name in the tree response
-    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
+    json_t *kw,         // 'id' and pkey2s fields are used to find the root node
     json_t *jn_filter,  // filter to match records
     json_t *jn_options, // fkey,hook options, "webix", "expand_childs"
     hgobj src
@@ -786,7 +786,7 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
 PUBLIC json_t *gobj_node_tree( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
-    json_t *kw,         // 'id' and topic_pkey2s fields are used to find the root node
+    json_t *kw,         // 'id' and pkey2s fields are used to find the root node
     json_t *jn_options, // ""with_metatada"
     hgobj src
 );
