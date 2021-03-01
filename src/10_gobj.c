@@ -3729,19 +3729,19 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
         KW_DECREF(kw);
         return 0;
     }
-    if(!gobj->gclass->gmt.mt_future60) {
+    if(!gobj->gclass->gmt.mt_node_tree) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "mt_future60 not defined",
+            "msg",          "%s", "mt_node_tree not defined",
             NULL
         );
         JSON_DECREF(jn_options);
         KW_DECREF(kw);
         return 0;
     }
-    return gobj->gclass->gmt.mt_future60(
+    return gobj->gclass->gmt.mt_node_tree(
         gobj,
         topic_name,
         kw,         // 'id' and pkey2s fields are used to find the node
@@ -8716,8 +8716,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_node_childs"));
     if(gmt->mt_list_instances)
         json_array_append_new(jn_methods, json_string("mt_list_instances"));
-    if(gmt->mt_future60)
-        json_array_append_new(jn_methods, json_string("mt_future60"));
+    if(gmt->mt_node_tree)
+        json_array_append_new(jn_methods, json_string("mt_node_tree"));
     if(gmt->mt_topic_size)
         json_array_append_new(jn_methods, json_string("mt_topic_size"));
     if(gmt->mt_future62)

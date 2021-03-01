@@ -324,7 +324,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_node_parents_fn mt_node_parents;
     mt_node_childs_fn mt_node_childs;
     mt_list_instances_fn mt_list_instances;
-    mt_node_tree_fn mt_future60;
+    mt_node_tree_fn mt_node_tree;
     mt_topic_size_fn mt_topic_size;
     future_method_fn mt_future62;
     future_method_fn mt_future63;
