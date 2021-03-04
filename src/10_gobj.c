@@ -7368,7 +7368,7 @@ PRIVATE int gobj_write_json_parameters(
             __json_config_variables__,
             json_pack("{s:s, s:b}",
                 "__bind_ip__", gobj_read_str_attr(gobj_yuno(), "bind_ip"),
-                "__multiple__", gobj_read_bool_attr(gobj_yuno(), "multiple")
+                "__multiple__", gobj_read_bool_attr(gobj_yuno(), "yuno_multiple")
             )
         );
     }
