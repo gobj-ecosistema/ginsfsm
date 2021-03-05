@@ -38,6 +38,12 @@ PUBLIC json_t *iev_create(
     json_t *kw // owned
 );
 
+PUBLIC json_t *iev_create2(
+    const char *event,
+    json_t *webix_msg, // owned
+    json_t *kw // owned
+);
+
 /*
  *  Trace inter-events with metadata of kw
  */

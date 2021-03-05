@@ -76,6 +76,26 @@ PUBLIC json_t* iev_create(
 /***************************************************************************
  *
  ***************************************************************************/
+PUBLIC json_t *iev_create2(
+    const char *event,
+    json_t *webix_msg, // owned
+    json_t *kw // owned
+)
+{
+    json_t* iev = iev_create(
+        event,
+        webix_msg // owned
+    );
+    json_t *__temp__ = kw_get_dict_value(kw, "__temp__", 0, KW_REQUIRED);
+    json_object_set(iev, "__temp__", __temp__);  // Set the channel
+    KW_DECREF(kw);
+
+    return iev;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
 PUBLIC void trace_inter_event(const char *prefix, const char *event, json_t *kw)
 {
     json_t * kw_compact = json_object();
