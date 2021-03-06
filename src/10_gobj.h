@@ -708,9 +708,6 @@ PUBLIC int gobj_unlink_nodes(
     "without_rowid"
         Don't "id" when is "rowid", by default it's returned
 
-    "expand_childs"
-        list with hooks to expand
-
     HACK id is converted in ids (using kwid_get_ids())
     HACK if __filter__ exists in jn_filter it will be used as filter
 
@@ -782,7 +779,7 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
     const char *rename_hook, // change the hook name in the tree response
     json_t *kw,         // 'id' and pkey2s fields are used to find the root node
     json_t *jn_filter,  // filter to match records
-    json_t *jn_options, // fkey,hook options, "webix", "expand_childs"
+    json_t *jn_options, // fkey,hook options
     hgobj src
 );
 
@@ -793,7 +790,7 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
     hgobj gobj,
     const char *topic_name,
     json_t *kw,         // 'id' and pkey2s fields are used to find the root node
-    json_t *jn_options, // ""with_metatada"
+    json_t *jn_options, // "with_metatada"
     hgobj src
 );
 
