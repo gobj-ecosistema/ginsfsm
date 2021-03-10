@@ -241,7 +241,7 @@ PRIVATE void (*__global_end_persistent_attrs_fn__)(void) = 0;
 PRIVATE int (*__global_load_persistent_attrs_fn__)(hgobj gobj) = 0;
 PRIVATE int (*__global_save_persistent_attrs_fn__)(hgobj gobj) = 0;
 PRIVATE int (*__global_remove_persistent_attrs_fn__)(hgobj gobj) = 0;
-PRIVATE json_t * (*__global_list_persistent_attrs_fn__)(void) = 0;
+PRIVATE json_t * (*__global_list_persistent_attrs_fn__)(hgobj gobj) = 0;
 
 PRIVATE char __initialized__ = 0;
 PRIVATE int atexit_registered = 0; /* Register atexit just 1 time. */
@@ -534,7 +534,7 @@ PUBLIC int gobj_start_up(
     int (*load_persistent_attrs)(hgobj gobj),
     int (*save_persistent_attrs)(hgobj gobj),
     int (*remove_persistent_attrs)(hgobj gobj),
-    json_t * (*list_persistent_attrs)(void),
+    json_t * (*list_persistent_attrs)(hgobj gobj),
     json_function_t global_command_parser,
     json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
@@ -7463,37 +7463,25 @@ PUBLIC int gobj_save_persistent_attrs(hgobj gobj_)
  *  remove file of persistent and writable attrs
  *  ``recursive`` true: remove all chids attrs too.
  ***************************************************************************/
-PUBLIC int gobj_remove_persistent_attrs(hgobj gobj_, BOOL recursive)
+PUBLIC int gobj_remove_persistent_attrs(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
 
     if(!__global_remove_persistent_attrs_fn__) {
         return -1;
     }
-    __global_remove_persistent_attrs_fn__(gobj);
-
-    if(recursive)  {
-        GObj_t * child; rc_instance_t *i_child;
-        i_child = gobj_first_child(gobj, (hgobj *)&child);
-
-        while(i_child) {
-            gobj_remove_persistent_attrs(child, recursive);
-            i_child = gobj_next_child(i_child, (hgobj *)&child);
-        }
-    }
-
-    return 0;
+    return __global_remove_persistent_attrs_fn__(gobj);
 }
 
 /***************************************************************************
  *  List persistent attributes
  ***************************************************************************/
-PUBLIC json_t * gobj_list_persistent_attrs(void)
+PUBLIC json_t * gobj_list_persistent_attrs(hgobj gobj)
 {
     if(!__global_list_persistent_attrs_fn__) {
         return 0;
     }
-    return __global_list_persistent_attrs_fn__();
+    return __global_list_persistent_attrs_fn__(gobj);
 }
 
 /***************************************************************************

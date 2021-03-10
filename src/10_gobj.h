@@ -398,7 +398,7 @@ PUBLIC int gobj_start_up(
     int (*load_persistent_attrs)(hgobj gobj),
     int (*save_persistent_attrs)(hgobj gobj),
     int (*remove_persistent_attrs)(hgobj gobj),
-    json_t * (*list_persistent_attrs)(void),
+    json_t * (*list_persistent_attrs)(hgobj gobj),
     json_function_t global_command_parser,
     json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
@@ -1214,8 +1214,8 @@ PUBLIC hgobj gobj_bottom_gobj(hgobj gobj);
  */
 PUBLIC int gobj_load_persistent_attrs(hgobj gobj);
 PUBLIC int gobj_save_persistent_attrs(hgobj gobj);
-PUBLIC int gobj_remove_persistent_attrs(hgobj gobj, BOOL recursive);
-PUBLIC json_t * gobj_list_persistent_attrs(void);
+PUBLIC int gobj_remove_persistent_attrs(hgobj gobj);
+PUBLIC json_t * gobj_list_persistent_attrs(hgobj gobj);
 
 /*
  *  Attribute functions WITHOUT bottom inheritance
