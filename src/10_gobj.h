@@ -850,7 +850,7 @@ PUBLIC hgobj gobj_find_service(const char *service, BOOL verbose);
 PUBLIC hgobj gobj_find_gclass_service(const char *gclass_name, BOOL verbose);
 PUBLIC hgobj gobj_nearest_top_service(hgobj gobj); // Return nearest top service of gobj (service or __yuno__)
 
-PUBLIC hgobj gobj_find_gobj(const char *gobj_path); // find gobj by path (name or oid)
+PUBLIC hgobj gobj_find_gobj(const char *gobj_path); // find gobj by path (full path or oid)
 /*
  *  WARNING: don't use gobj_find_unique_gobj() for find services.
  *  Better use always gobj_find_service(), and don't save locally the service's gobj.

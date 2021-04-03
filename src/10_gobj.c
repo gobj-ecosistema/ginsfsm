@@ -3875,6 +3875,17 @@ PUBLIC void * gobj_exec_internal_method(hgobj gobj_, const char *lmethod, void *
     GObj_t * gobj = gobj_;
     register const LMETHOD *lmt;
 
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+
     lmt = gobj->gclass->lmt;
     while(lmt && lmt->lname != 0) {
         if(strncasecmp(lmt->lname, lmethod, strlen(lmt->lname))==0) {
