@@ -232,7 +232,7 @@ typedef size_t (*mt_topic_size_fn)(
     const char *topic_name
 );
 
-typedef void *(*internal_method_fn)(hgobj gobj, void *data);
+typedef json_t *(*internal_method_fn)(hgobj gobj, const char *lmethod, json_t *kw, hgobj src);
 typedef json_t *(*mt_authenticate_fn)(hgobj gobj, json_t *kw, hgobj src);
 typedef json_t *(*mt_list_childs_fn)(hgobj gobj, const char *child_gclass, const char **attributes);
 typedef int (*mt_stats_updated_fn)(
@@ -816,7 +816,12 @@ PUBLIC json_t *gobj_list_snaps( // Return MUST be decref, list of snaps
 /*--------------------------------------------*
  *  Operational functions
  *--------------------------------------------*/
-PUBLIC void *gobj_exec_internal_method(hgobj gobj, const char *lmethod, void *data);
+PUBLIC json_t *gobj_exec_internal_method(
+    hgobj gobj,
+    const char *lmethod,
+    json_t *kw,
+    hgobj src
+);
 
 PUBLIC int gobj_start(hgobj gobj);
 PUBLIC int gobj_start_childs(hgobj gobj);   // only direct childs
@@ -1344,6 +1349,7 @@ PUBLIC const char * gobj_short_name(hgobj gobj);    // (gclass^name)
 PUBLIC const char * gobj_escaped_short_name(hgobj gobj);    // (gclass^name)
 PUBLIC const char * gobj_snmp_name(hgobj gobj);
 PUBLIC BOOL gobj_is_volatil(hgobj gobj);
+PUBLIC int gobj_set_volatil(hgobj gobj, BOOL set);
 
 PUBLIC BOOL gobj_typeof_gclass(hgobj gobj, const char *gclass_name);            /* strict same gclass */
 PUBLIC BOOL gobj_typeof_subgclass(hgobj gobj, const char *gclass_name);         /* check base gclass */

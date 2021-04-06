@@ -3870,7 +3870,12 @@ PUBLIC json_t *gobj_list_snaps(
 /***************************************************************************
  *  Execute internal method
  ***************************************************************************/
-PUBLIC void * gobj_exec_internal_method(hgobj gobj_, const char *lmethod, void *data)
+PUBLIC json_t *gobj_exec_internal_method(
+    hgobj gobj_,
+    const char *lmethod,
+    json_t *kw,
+    hgobj src
+)
 {
     GObj_t * gobj = gobj_;
     register const LMETHOD *lmt;
@@ -3890,7 +3895,7 @@ PUBLIC void * gobj_exec_internal_method(hgobj gobj_, const char *lmethod, void *
     while(lmt && lmt->lname != 0) {
         if(strncasecmp(lmt->lname, lmethod, strlen(lmt->lname))==0) {
             if(lmt->lm) {
-                return (*lmt->lm)(gobj, data);
+                return (*lmt->lm)(gobj, lmethod, kw, src);
             }
         }
         lmt++;
@@ -9279,6 +9284,21 @@ PUBLIC BOOL gobj_is_volatil(hgobj gobj_)
         return TRUE;
     }
     return FALSE;
+}
+
+/***************************************************************************
+ *  Set as volatil
+ ***************************************************************************/
+PUBLIC int gobj_set_volatil(hgobj gobj_, BOOL set)
+{
+    GObj_t *gobj = gobj_;
+    if(set) {
+        gobj->obflag |= obflag_volatil;
+    } else {
+        gobj->obflag &= ~obflag_volatil;
+    }
+
+    return 0;
 }
 
 /***************************************************************************
