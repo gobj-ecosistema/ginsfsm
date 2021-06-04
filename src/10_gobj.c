@@ -6889,8 +6889,7 @@ PUBLIC int gobj_send_event(
             );
         } else {
             log_warning(LOG_OPT_TRACE_STACK,
-                "gobj",         "%s", __FILE__,
-                "function",     "%s", __FUNCTION__,
+                "gobj",         "%s", gobj_short_name(dst),
                 "msgset",       "%s", MSGSET_SMACHINE_ERROR,
                 "msg",          "%s", "Event REFUSED",
                 "orig-gclass",  "%s", gobj_full_name(src),
