@@ -351,7 +351,7 @@ typedef struct {
 } authz_level_t;
 
 typedef enum { // HACK strict ascendent value!, strings in s_gcflag
-    gcflag_manual_start             = 0x0001,   // gobj_start_tree() don't start gobjs of this /gclass.
+    gcflag_manual_start             = 0x0001,   // gobj_start_tree()/gobj_stop_tree() don't start/stop
     gcflag_no_check_ouput_events    = 0x0002,   // When publishing don't check events in output_event_list.
     gcflag_ignore_unkwnow_attrs     = 0x0004,   // When creating a gobj, ignore not existing attrs
     gcflag_required_start_to_play   = 0x0008,   // Don't to play if no start done.
