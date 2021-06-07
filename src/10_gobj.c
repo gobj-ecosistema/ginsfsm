@@ -4139,9 +4139,6 @@ PUBLIC int gobj_stop(hgobj gobj_)
         );
         return -1;
     }
-    if((gobj->gclass->gcflag & gcflag_manual_start)) {
-        return 0;
-    }
     if(!gobj->running) {
         if(!gobj_is_shutdowning()) {
             log_error(LOG_OPT_TRACE_STACK,
