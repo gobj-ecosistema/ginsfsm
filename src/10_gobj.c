@@ -40,6 +40,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/utsname.h>
 #include "10_gobj.h"
 #include "12_msg_ievent.h"
 
@@ -197,6 +198,8 @@ typedef struct _GObj_t {
 /****************************************************************
  *         Data
  ****************************************************************/
+PRIVATE struct utsname sys;
+
 PRIVATE json_t *jn_treedb_schema_gobjs = 0;
 PRIVATE volatile int  __shutdowning__ = 0;
 PRIVATE volatile BOOL __yuno_must_die__ = FALSE;
@@ -583,6 +586,9 @@ PUBLIC int gobj_start_up(
     }
 
     __2key__ = json_object();
+
+    uname(&sys);
+    change_char(sys.machine, '_', '-');
 
     __initialized__ = TRUE;
     return 0;
@@ -1078,6 +1084,30 @@ PUBLIC json_t * gobj_repr_unique_register(void)
 }
 
 /***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC json_t * get_global_variables(void)
+{
+    return json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+        "__realm_id__", __realm_id__,
+        "__realm_owner__", __realm_owner__,
+        "__realm_role__", __realm_role__,
+        "__realm_name__", __realm_name__,
+        "__realm_env__", __realm_env__,
+        "__yuno_role__", __yuno_role__,
+        "__yuno_name__", __yuno_name__,
+        "__yuno_tag__", __yuno_tag__,
+        "__yuno_role_plus_name__", __yuno_role_plus_name__,
+        "__hostname__", get_host_name(),
+        "__sys_system_name__", sys.sysname,
+        "__sys_node_name__", sys.nodename,
+        "__sys_version__", sys.version,
+        "__sys_release__", sys.release,
+        "__sys_machine__", sys.machine
+    );
+}
+
+/***************************************************************************
  *  Factory to create service gobj
  *  Used in entry_point, to run services
  *  Internally it uses gobj_create_tree()
@@ -1130,17 +1160,7 @@ PUBLIC hgobj gobj_service_factory(
     );
     json_object_update_new(
         __json_config_variables__,
-        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
-            "__realm_id__", __realm_id__,
-            "__realm_owner__", __realm_owner__,
-            "__realm_role__", __realm_role__,
-            "__realm_name__", __realm_name__,
-            "__realm_env__", __realm_env__,
-            "__yuno_role__", __yuno_role__,
-            "__yuno_name__", __yuno_name__,
-            "__yuno_tag__", __yuno_tag__,
-            "__yuno_role_plus_name__", __yuno_role_plus_name__
-        )
+        get_global_variables()
     );
 
     if(__trace_gobj_create_delete2__(__yuno__)) {
@@ -7365,18 +7385,7 @@ PRIVATE int gobj_write_json_parameters(
 
     json_object_update_new(
         __json_config_variables__,
-        json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
-            "__realm_id__", __realm_id__,
-            "__realm_owner__", __realm_owner__,
-            "__realm_role__", __realm_role__,
-            "__realm_name__", __realm_name__,
-            "__realm_env__", __realm_env__,
-            "__yuno_role__", __yuno_role__,
-            "__yuno_name__", __yuno_name__,
-            "__yuno_tag__", __yuno_tag__,
-            "__yuno_role_plus_name__", __yuno_role_plus_name__,
-            "__hostname__", get_host_name()
-        )
+        get_global_variables()
     );
     if(gobj_yuno()) {
         json_object_update_new(
