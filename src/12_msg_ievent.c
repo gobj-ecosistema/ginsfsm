@@ -241,8 +241,8 @@ PUBLIC json_t *msg_iev_build_webix2_without_answer_filter(
  ***************************************************************************/
 PUBLIC json_t *msg_iev_answer(
     hgobj gobj,
-    json_t *kw_request,         // kw request, owned
-    json_t *kw_answer,          // like owned, is returned!, created if null, body of answer message.
+    json_t *kw_request,     // owned, kw request, used to extract ONLY __md_iev__.
+    json_t *kw_answer,      // like owned, is returned!, created if null, body of answer message.
     const char *msg_type
 )
 {
