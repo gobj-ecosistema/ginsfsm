@@ -57,7 +57,7 @@ PUBLIC json_t * command_parser(hgobj gobj,
             gobj,
             -15,
             json_local_sprintf(
-                "%s: command '%s' not available. Try 'help' command.\n",
+                "%s: command '%s' not available. Try 'help' command.",
                 gobj_short_name(gobj),
                 command
             ),
