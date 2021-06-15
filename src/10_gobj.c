@@ -9827,10 +9827,11 @@ PUBLIC json_t *gobj_command( // With AUTHZ
      *-----------------------------------------------*/
     BOOL tracea = is_machine_tracing(gobj) && !is_machine_not_tracing(src);
     if(tracea) {
-        trace_machine("#!> mach(%s%s:%s), cmd: %s",
+        trace_machine("#!> mach(%s%s), cmd: %s, src: %s",
             (!gobj->running)?"!!":"",
-            gobj_gclass_name(gobj), gobj_name(gobj),
-            command
+            gobj_short_name(gobj),
+            command,
+            gobj_short_name(src)
         );
         if(gobj_trace_level(gobj) & (TRACE_EV_KW)) {
             log_debug_json(0, kw, "kw");
