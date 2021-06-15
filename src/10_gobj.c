@@ -227,6 +227,8 @@ PRIVATE int (*__audit_command_cb__)(
 PRIVATE void *__audit_command_user_data__ = 0;
 PRIVATE GObj_t * __yuno__ = 0;
 PRIVATE GObj_t * __default_service__ = 0;
+
+PRIVATE char __node_owner__[NAME_MAX];
 PRIVATE char __realm_id__[NAME_MAX];
 PRIVATE char __realm_owner__[NAME_MAX];
 PRIVATE char __realm_role__[NAME_MAX];
@@ -746,6 +748,24 @@ PRIVATE void free_trans_filter(trans_filter_t *trans_reg)
 }
 
 /***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_register_node_owner(
+    const char *node_owner,
+    BOOL overwrite
+)
+{
+    if(empty_string(__node_owner__) || overwrite) {
+        snprintf(
+            __node_owner__, sizeof(__node_owner__),
+            "%s", node_owner?node_owner:""
+        );
+        return 0;
+    }
+    return -1;
+}
+
+/***************************************************************************
  *  Factory to create yuno gobj
  ***************************************************************************/
 PUBLIC hgobj gobj_yuno_factory(
@@ -770,6 +790,9 @@ PUBLIC hgobj gobj_yuno_factory(
         return 0;
     }
 
+    /*
+     *  Search the first gclass with role
+     */
     gclass_register_t *gclass_reg = dl_first(&dl_gclass);
     while(gclass_reg) {
         if(!empty_string(gclass_reg->role)) {
@@ -1086,9 +1109,10 @@ PUBLIC json_t * gobj_repr_unique_register(void)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t * get_global_variables(void)
+PUBLIC json_t * gobj_global_variables(void)
 {
-    return json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+    return json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+        "__node_owner__", __node_owner__,
         "__realm_id__", __realm_id__,
         "__realm_owner__", __realm_owner__,
         "__realm_role__", __realm_role__,
@@ -1160,7 +1184,7 @@ PUBLIC hgobj gobj_service_factory(
     );
     json_object_update_new(
         __json_config_variables__,
-        get_global_variables()
+        gobj_global_variables()
     );
 
     if(__trace_gobj_create_delete2__(__yuno__)) {
@@ -7385,7 +7409,7 @@ PRIVATE int gobj_write_json_parameters(
 
     json_object_update_new(
         __json_config_variables__,
-        get_global_variables()
+        gobj_global_variables()
     );
     if(gobj_yuno()) {
         json_object_update_new(
@@ -8907,6 +8931,14 @@ PRIVATE json_t *fsm2json(FSM *fsm)
 /***************************************************************************
  *
  ***************************************************************************/
+PUBLIC const char *gobj_node_owner(void)
+{
+    return __node_owner__;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
 PUBLIC const char *gobj_yuno_realm_id(void)
 {
     return __realm_id__;
@@ -9704,6 +9736,7 @@ PUBLIC int append_yuno_metadata(hgobj gobj, json_t *kw, const char *source)
     json_object_set_new(jn_metadatos, "__t__", json_integer(t));
     json_object_set_new(jn_metadatos, "__origin__", json_string(source));
     json_object_set_new(jn_metadatos, "hostname", json_string(hostname));
+    json_object_set_new(jn_metadatos, "node_owner", json_string(__node_owner__));
     json_object_set_new(jn_metadatos, "realm_id", json_string(__realm_id__));
     json_object_set_new(jn_metadatos, "realm_owner", json_string(__realm_owner__));
     json_object_set_new(jn_metadatos, "realm_role", json_string(__realm_role__));

@@ -27,6 +27,29 @@ extern "C"{
 /*********************************************************************
  *      Constants
  *********************************************************************/
+/*
+ *  Global variables
+ */
+
+#define __NODE_OWNER__          "__node_owner__"
+#define __REALM_ID__            "__realm_id__"
+#define __REALM_OWNER__         "__realm_owner__"
+#define __REALM_ROLE__          "__realm_role__"
+#define __REALM_NAME__          "__realm_name__"
+#define __REALM_ENV__           "__realm_env__"
+#define __YUNO_ROLE__           "__yuno_role__"
+#define __YUNO_NAME__           "__yuno_name__"
+#define __YUNO_TAG__            "__yuno_tag__"
+#define __YUNO_ROLE_PLUS_NAME__ "__yuno_role_plus_name__"
+#define __HOSTNAME__            "__hostname__"
+#define __SYS_SYSTEM_NAME__     "__sys_system_name__"
+#define __SYS_NODE_NAME__       "__sys_node_name__"
+#define __SYS_VERSION__         "__sys_version__"
+#define __SYS_RELEASE__         "__sys_release__"
+#define __SYS_MACHINE__         "__sys_machine__"
+
+PUBLIC json_t * gobj_global_variables(void);
+
 #define ATTR_WRITABLE (SDF_WR|SDF_PERSIST)
 #define ATTR_READABLE (SDF_RD|SDF_WR|SDF_PERSIST|SDF_STATS|SDF_VOLATIL|SDF_RSTATS|SDF_PSTATS)
 /*
@@ -411,6 +434,10 @@ PUBLIC void gobj_end(void);
 /*--------------------------------------------*
  *  Register functions
  *--------------------------------------------*/
+PUBLIC int gobj_register_node_owner(
+    const char *node_owner,
+    BOOL overwrite
+);
 PUBLIC int gobj_register_yuno(
     const char *yuno_role,
     GCLASS *gclass,
@@ -1327,6 +1354,7 @@ PUBLIC int gobj_update_writable_attrs( // with authz
 /*--------------------------------------------*
  *  Info functions
  *--------------------------------------------*/
+PUBLIC const char *gobj_node_owner(void);
 PUBLIC const char *gobj_yuno_realm_id(void);
 PUBLIC const char *gobj_yuno_realm_owner(void);
 PUBLIC const char *gobj_yuno_realm_role(void);
