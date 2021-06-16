@@ -748,27 +748,10 @@ PRIVATE void free_trans_filter(trans_filter_t *trans_reg)
 }
 
 /***************************************************************************
- *
- ***************************************************************************/
-PUBLIC int gobj_register_node_owner(
-    const char *node_owner,
-    BOOL overwrite
-)
-{
-    if(empty_string(__node_owner__) || overwrite) {
-        snprintf(
-            __node_owner__, sizeof(__node_owner__),
-            "%s", node_owner?node_owner:""
-        );
-        return 0;
-    }
-    return -1;
-}
-
-/***************************************************************************
  *  Factory to create yuno gobj
  ***************************************************************************/
 PUBLIC hgobj gobj_yuno_factory(
+    const char *node_owner,
     const char *realm_id,
     const char *realm_owner,
     const char *realm_role,
@@ -808,6 +791,10 @@ PUBLIC hgobj gobj_yuno_factory(
                 "yuno_tag",     "%s", yuno_tag,
                 "gclass",       "%s", gclass_reg->gclass->gclass_name,
                 NULL
+            );
+            snprintf(
+                __node_owner__, sizeof(__node_owner__),
+                "%s", node_owner?node_owner:""
             );
             snprintf(
                 __realm_id__, sizeof(__realm_id__),

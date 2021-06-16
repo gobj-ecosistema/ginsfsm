@@ -434,16 +434,13 @@ PUBLIC void gobj_end(void);
 /*--------------------------------------------*
  *  Register functions
  *--------------------------------------------*/
-PUBLIC int gobj_register_node_owner(
-    const char *node_owner,
-    BOOL overwrite
-);
 PUBLIC int gobj_register_yuno(
     const char *yuno_role,
     GCLASS *gclass,
     BOOL to_free
 );
 PUBLIC hgobj gobj_yuno_factory(
+    const char *node_owner,
     const char *realm_id,
     const char *realm_owner,
     const char *realm_role,
