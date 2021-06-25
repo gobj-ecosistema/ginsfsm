@@ -418,10 +418,10 @@ PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
     void *(*startup_persistent_attrs)(void),
     void (*end_persistent_attrs)(void),
-    int (*load_persistent_attrs)(hgobj gobj),
-    int (*save_persistent_attrs)(hgobj gobj),
-    int (*remove_persistent_attrs)(hgobj gobj),
-    json_t * (*list_persistent_attrs)(hgobj gobj),
+    int (*load_persistent_attrs)(hgobj gobj, json_t *attrs),
+    int (*save_persistent_attrs)(hgobj gobj, json_t *attrs),
+    int (*remove_persistent_attrs)(hgobj gobj, json_t *attrs),
+    json_t * (*list_persistent_attrs)(hgobj gobj, json_t *attrs),
     json_function_t global_command_parser,
     json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
@@ -1240,11 +1240,15 @@ PUBLIC hgobj gobj_bottom_gobj(hgobj gobj);
  *  The persistent attributes saved have the more prevalence over other json configuration
  *  ONLY unique gobjs can load/save persistent attributes.
  *  gobj_save_persistent_attrs() must be manually executed.
+ *
+ *  Persistent attrs now can be save/remove individually
+ *  attrs can be a string, a list of keys, or a dict with the keys to save/delete
+ *  if attrs is empty list/save/remove all attrs
  */
-PUBLIC int gobj_load_persistent_attrs(hgobj gobj);
-PUBLIC int gobj_save_persistent_attrs(hgobj gobj);
-PUBLIC int gobj_remove_persistent_attrs(hgobj gobj);
-PUBLIC json_t * gobj_list_persistent_attrs(hgobj gobj);
+PUBLIC int gobj_load_persistent_attrs(hgobj gobj, json_t *jn_attrs); // str, list or dict
+PUBLIC int gobj_save_persistent_attrs(hgobj gobj, json_t *jn_attrs); // str, list or dict
+PUBLIC int gobj_remove_persistent_attrs(hgobj gobj, json_t *jn_attrs); // str, list or dict
+PUBLIC json_t * gobj_list_persistent_attrs(hgobj gobj, json_t *jn_attrs); // str, list or dict
 
 /*
  *  Attribute functions WITHOUT bottom inheritance

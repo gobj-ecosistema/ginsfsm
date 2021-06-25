@@ -243,10 +243,10 @@ PRIVATE char __yuno_role_plus_name__[NAME_MAX];
 PRIVATE json_t *__jn_global_settings__ = 0;
 PRIVATE void *(*__global_startup_persistent_attrs_fn__)(void) = 0;
 PRIVATE void (*__global_end_persistent_attrs_fn__)(void) = 0;
-PRIVATE int (*__global_load_persistent_attrs_fn__)(hgobj gobj) = 0;
-PRIVATE int (*__global_save_persistent_attrs_fn__)(hgobj gobj) = 0;
-PRIVATE int (*__global_remove_persistent_attrs_fn__)(hgobj gobj) = 0;
-PRIVATE json_t * (*__global_list_persistent_attrs_fn__)(hgobj gobj) = 0;
+PRIVATE int (*__global_load_persistent_attrs_fn__)(hgobj gobj, json_t *attrs) = 0;
+PRIVATE int (*__global_save_persistent_attrs_fn__)(hgobj gobj, json_t *attrs) = 0;
+PRIVATE int (*__global_remove_persistent_attrs_fn__)(hgobj gobj, json_t *attrs) = 0;
+PRIVATE json_t * (*__global_list_persistent_attrs_fn__)(hgobj gobj, json_t *attrs) = 0;
 
 PRIVATE char __initialized__ = 0;
 PRIVATE int atexit_registered = 0; /* Register atexit just 1 time. */
@@ -536,10 +536,10 @@ PUBLIC int gobj_start_up(
     json_t *jn_global_settings,
     void * (*startup_persistent_attrs)(void),
     void (*end_persistent_attrs)(void),
-    int (*load_persistent_attrs)(hgobj gobj),
-    int (*save_persistent_attrs)(hgobj gobj),
-    int (*remove_persistent_attrs)(hgobj gobj),
-    json_t * (*list_persistent_attrs)(hgobj gobj),
+    int (*load_persistent_attrs)(hgobj gobj, json_t *attrs),
+    int (*save_persistent_attrs)(hgobj gobj, json_t *attrs),
+    int (*remove_persistent_attrs)(hgobj gobj, json_t *attrs),
+    json_t * (*list_persistent_attrs)(hgobj gobj, json_t *attrs),
     json_function_t global_command_parser,
     json_function_t global_stats_parser,
     authz_checker_fn global_authz_checker,
@@ -1909,7 +1909,7 @@ PRIVATE hgobj _gobj_create(
      *  of named-gobjs and __root__
      *--------------------------------------*/
     if(gobj->obflag & (obflag_unique_name)) {
-        gobj_load_persistent_attrs(gobj);
+        gobj_load_persistent_attrs(gobj, 0);
     }
 
     /*--------------------------------------*
@@ -7451,7 +7451,7 @@ PRIVATE int gobj_write_json_parameters(
 /***************************************************************************
  *  load or re-load persistent and writable attrs
  ***************************************************************************/
-PUBLIC int gobj_load_persistent_attrs(hgobj gobj_)
+PUBLIC int gobj_load_persistent_attrs(hgobj gobj_, json_t *jn_attrs) // str, list or dict
 {
     GObj_t *gobj = gobj_;
 
@@ -7463,18 +7463,21 @@ PUBLIC int gobj_load_persistent_attrs(hgobj gobj_)
             "msg",          "%s", "Cannot load writable-persistent attrs in no named-gobjs",
             NULL
         );
+        JSON_DECREF(jn_attrs);
         return -1;
     }
     if(__global_load_persistent_attrs_fn__) {
-        return __global_load_persistent_attrs_fn__(gobj);
+        return __global_load_persistent_attrs_fn__(gobj, jn_attrs);
     }
+    JSON_DECREF(jn_attrs);
     return -1;
 }
 
 /***************************************************************************
  *  save now persistent and writable attrs
+    attrs can be a string, a list of keys, or a dict with the keys to save/delete
  ***************************************************************************/
-PUBLIC int gobj_save_persistent_attrs(hgobj gobj_)
+PUBLIC int gobj_save_persistent_attrs(hgobj gobj_, json_t *jn_attrs)
 {
     GObj_t *gobj = gobj_;
 
@@ -7486,37 +7489,42 @@ PUBLIC int gobj_save_persistent_attrs(hgobj gobj_)
             "msg",          "%s", "Cannot save writable-persistent attrs in no named-gobjs",
             NULL
         );
+        JSON_DECREF(jn_attrs);
         return -1;
     }
     if(__global_save_persistent_attrs_fn__) {
-        return __global_save_persistent_attrs_fn__(gobj);
+        return __global_save_persistent_attrs_fn__(gobj, jn_attrs);
     }
+    JSON_DECREF(jn_attrs);
     return -1;
 }
 
 /***************************************************************************
  *  remove file of persistent and writable attrs
- *  ``recursive`` true: remove all chids attrs too.
+ *  attrs can be a string, a list of keys, or a dict with the keys to save/delete
+ *  if attrs is empty save/remove all attrs
  ***************************************************************************/
-PUBLIC int gobj_remove_persistent_attrs(hgobj gobj_)
+PUBLIC int gobj_remove_persistent_attrs(hgobj gobj_, json_t *jn_attrs)
 {
     GObj_t *gobj = gobj_;
 
     if(!__global_remove_persistent_attrs_fn__) {
+        JSON_DECREF(jn_attrs);
         return -1;
     }
-    return __global_remove_persistent_attrs_fn__(gobj);
+    return __global_remove_persistent_attrs_fn__(gobj, jn_attrs);
 }
 
 /***************************************************************************
  *  List persistent attributes
  ***************************************************************************/
-PUBLIC json_t * gobj_list_persistent_attrs(hgobj gobj)
+PUBLIC json_t * gobj_list_persistent_attrs(hgobj gobj, json_t *jn_attrs)
 {
     if(!__global_list_persistent_attrs_fn__) {
+        JSON_DECREF(jn_attrs);
         return 0;
     }
-    return __global_list_persistent_attrs_fn__(gobj);
+    return __global_list_persistent_attrs_fn__(gobj, jn_attrs);
 }
 
 /***************************************************************************
