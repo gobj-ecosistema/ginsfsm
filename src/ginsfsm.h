@@ -3,10 +3,7 @@
  *              Copyright (c) 1996-2015 Niyamaka.
  *              All Rights Reserved.
  ****************************************************************************/
-
-
-#ifndef __GINSFSM_H
-#define __GINSFSM_H 1
+#pragma once
 
 #include <ghelpers.h>
 
@@ -38,6 +35,4 @@ PUBLIC void end_ginsfsm_library(void);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif
