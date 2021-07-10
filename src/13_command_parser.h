@@ -6,9 +6,7 @@
  *          Copyright (c) 2017 Niyamaka.
  *          All Rights Reserved.
  ****************************************************************************/
-
-#ifndef _C_COMMAND_PARSER_H
-#define _C_COMMAND_PARSER_H 1
+#pragma once
 
 #include "ginsfsm.h"
 
@@ -38,6 +36,4 @@ PUBLIC const sdata_desc_t *command_get_cmd_desc(
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

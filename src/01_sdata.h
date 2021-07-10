@@ -35,9 +35,7 @@
  *              Copyright (c) 2013-2016 Niyamaka.
  *              All Rights Reserved.
  ****************************************************************************/
-
-#ifndef _SDATA_H
-#define _SDATA_H 1
+#pragma once
 
 #include <stdint.h>
 #include <ghelpers.h>
@@ -729,7 +727,3 @@ PUBLIC int sdata_write_struct(hsdata hs, const char *name, void *value, int size
 #ifdef __cplusplus
 }
 #endif
-
-
-#endif
-

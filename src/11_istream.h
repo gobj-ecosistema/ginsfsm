@@ -8,9 +8,7 @@
  *          Copyright (c) 2013 Niyamaka.
  *          All Rights Reserved.
  ****************************************************************************/
-
-#ifndef _istream_H
-#define _istream_H 1
+#pragma once
 
 #include <ghelpers.h>
 #include "10_gobj.h"
@@ -80,7 +78,3 @@ PUBLIC BOOL istream_is_completed(istream istream);
 #ifdef __cplusplus
 }
 #endif
-
-
-#endif
-

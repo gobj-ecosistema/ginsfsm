@@ -19,9 +19,7 @@
  *          Copyright (c) 2016 Niyamaka.
  *          All Rights Reserved.
  ****************************************************************************/
-
-#ifndef _MSG_IEVENT_H
-#define _MSG_IEVENT_H 1
+#pragma once
 
 #include "ginsfsm.h"
 
@@ -202,6 +200,4 @@ PUBLIC const char *msg_get_msg_type(
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

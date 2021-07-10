@@ -10,9 +10,7 @@
  *  Copyright (c) 1996-2017 Niyamaka.
  *  All Rights Reserved.
  ****************************************************************************/
-
-#ifndef _GOBJ_H
-#define _GOBJ_H 1
+#pragma once
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -1746,7 +1744,3 @@ PUBLIC json_t *gobj_2key_get_value(const char *key1, const char *key2); // WARNI
 #ifdef __cplusplus
 }
 #endif
-
-
-#endif
-

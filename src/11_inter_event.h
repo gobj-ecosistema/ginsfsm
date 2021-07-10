@@ -4,9 +4,7 @@
  *          Copyright (c) 2013-2016 Niyamaka.
  *          All Rights Reserved.
  ****************************************************************************/
-
-#ifndef _INTER_EVENT_H
-#define _INTER_EVENT_H 1
+#pragma once
 
 #include <ghelpers.h>
 #include "10_gobj.h"
@@ -75,7 +73,3 @@ PUBLIC GBUFFER *iev2gbuffer(
 #ifdef __cplusplus
 }
 #endif
-
-
-#endif
-

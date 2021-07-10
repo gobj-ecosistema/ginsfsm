@@ -6,9 +6,7 @@
  *          Copyright (c) 2017 Niyamaka.
  *          All Rights Reserved.
  ****************************************************************************/
-
-#ifndef _C_STATS_PARSER_H
-#define _C_STATS_PARSER_H 1
+#pragma once
 
 #include "ginsfsm.h"
 #include "12_msg_ievent.h"
@@ -37,6 +35,4 @@ PUBLIC json_t *build_stats( // Build stats from gobj's attributes with SFD_STATS
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif
