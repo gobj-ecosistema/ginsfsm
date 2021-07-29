@@ -589,8 +589,9 @@ PUBLIC int gobj_start_up(
 
     __2key__ = json_object();
 
-    uname(&sys);
-    change_char(sys.machine, '_', '-');
+    if(uname(&sys)==0) {
+        change_char(sys.machine, '_', '-');
+    }
 
     __initialized__ = TRUE;
     return 0;
