@@ -1354,6 +1354,7 @@ PUBLIC int gobj_update_writable_attrs( // with authz
  *  Info functions
  *--------------------------------------------*/
 PUBLIC const char *gobj_node_owner(void);
+PUBLIC int gobj_set_node_owner(const char *node_owner);
 PUBLIC const char *gobj_yuno_realm_id(void);
 PUBLIC const char *gobj_yuno_realm_owner(void);
 PUBLIC const char *gobj_yuno_realm_role(void);

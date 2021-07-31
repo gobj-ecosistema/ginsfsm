@@ -8935,6 +8935,21 @@ PUBLIC const char *gobj_node_owner(void)
 /***************************************************************************
  *
  ***************************************************************************/
+PUBLIC int gobj_set_node_owner(const char *node_owner)
+{
+    if(empty_string(__node_owner__)) {
+        snprintf(
+            __node_owner__, sizeof(__node_owner__),
+            "%s", node_owner?node_owner:""
+        );
+        return 0;
+    }
+    return -1;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
 PUBLIC const char *gobj_yuno_realm_id(void)
 {
     return __realm_id__;
