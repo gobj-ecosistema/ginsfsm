@@ -335,7 +335,7 @@ PRIVATE void build_default_values(SData_t *sdata)
     suboid = 1;
     sdata->_numb = 0;
     while(it->name != 0) {
-        set_default(sdata, it, (void *)(size_t)it->default_value);
+        set_default(sdata, it, it->default_value);
         ((sdata_desc_t *)it)->_suboid = suboid;
         suboid++;
         sdata->_max_suboid = suboid;
@@ -910,7 +910,7 @@ PUBLIC int sdata_write_by_type(
         *pl = value.i64;
 
     } else if(it->type == ASN_FLOAT) {
-        float *pf = ptr;
+        double *pf = ptr;
         old_value.f = *pf;
         *pf = value.f;
 
