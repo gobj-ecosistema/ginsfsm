@@ -991,7 +991,7 @@ PUBLIC SData_Value_t sdata_read_by_type(hsdata hs, const sdata_desc_t *it, void 
         uint64_t *pl = ptr;
         value.u64 = *pl;
     } else if(type == ASN_FLOAT) {
-        float *pf = ptr;
+        double *pf = ptr;
         value.f = *pf;
     } else if(type == ASN_DOUBLE) {
         double *pd = ptr;
