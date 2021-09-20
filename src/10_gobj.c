@@ -4652,7 +4652,7 @@ PRIVATE service_register_t * _find_service(const char *service)
 PUBLIC hgobj gobj_find_service(const char *service, BOOL verbose)
 {
     if(empty_string(service)) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
