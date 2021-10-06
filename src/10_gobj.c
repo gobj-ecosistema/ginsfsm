@@ -6751,7 +6751,7 @@ PUBLIC int gobj_send_event(
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj DESTROYED or DESTROYING",
+            "msg",          "%s", (dst->obflag & obflag_destroyed)? "gobj DESTROYED":"gobj DESTROYING",
             NULL
         );
         KW_DECREF(kw);
