@@ -6746,12 +6746,12 @@ PUBLIC int gobj_send_event(
         KW_DECREF(kw);
         return RETEVENT_NO_GOBJ;
     }
-    if(dst->obflag & obflag_destroyed) {
+    if(dst->obflag & (obflag_destroyed|obflag_destroying)) {
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj DESTROYED",
+            "msg",          "%s", "gobj DESTROYED or DESTROYING",
             NULL
         );
         KW_DECREF(kw);
