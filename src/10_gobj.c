@@ -1176,7 +1176,7 @@ PUBLIC hgobj gobj_service_factory(
     );
 
     if(__trace_gobj_create_delete2__(__yuno__)) {
-        trace_machine("⛿> %s:%s => service global",
+        trace_machine("🌞 %s:%s => service global",
             gclass_name,
             gobj_name
         );
@@ -1190,7 +1190,7 @@ PUBLIC hgobj gobj_service_factory(
     json_decref(jn_global);
 
     if(__trace_gobj_create_delete2__(__yuno__)) {
-        trace_machine("⛿⛿> %s:%s => service final",
+        trace_machine("🌞🌞 %s:%s => service final",
             gclass_name,
             gobj_name
         );
@@ -1806,7 +1806,7 @@ PRIVATE hgobj _gobj_create(
     }
 
     if(__trace_gobj_create_delete__(gobj)) {
-        trace_machine("♥♥> creating: %s:%s",
+        trace_machine("💙💙⏩ creating: %s:%s",
             gclass->gclass_name,
             gobj->name
         );
@@ -1958,7 +1958,7 @@ PRIVATE hgobj _gobj_create(
     }
 
     if(__trace_gobj_create_delete__(gobj)) {
-        trace_machine("<♥♥ created: %s, p: %p",
+        trace_machine("💙💙⏪ created: %s, p: %p",
             gobj_full_name(gobj),
             gobj
         );
@@ -2467,7 +2467,7 @@ PUBLIC void gobj_destroy(hgobj gobj_)
     gobj->obflag |= obflag_destroying;
 
     if(__trace_gobj_create_delete__(gobj)) {
-        trace_machine("❌❌> destroying: %s, p: %p",
+        trace_machine("💔💔⏩ destroying: %s, p: %p",
             gobj_full_name(gobj),
             gobj
         );
@@ -2573,7 +2573,7 @@ PUBLIC void gobj_destroy(hgobj gobj_)
         monitor_gobj(MTOR_GOBJ_DESTROYED, gobj);
     }
     if(__trace_gobj_create_delete__(gobj)) {
-        trace_machine("<❌❌ destroyed: p: %p",
+        trace_machine("💔💔⏪ destroyed: p: %p",
             gobj
         );
     }
@@ -4051,7 +4051,7 @@ PUBLIC int gobj_start(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("●● start: %s",
+        trace_machine("⏺⏺ start: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4127,7 +4127,7 @@ PUBLIC int gobj_start_tree(hgobj gobj_)
         return -1;
     }
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("●●●● start_tree: %s",
+        trace_machine("⏺⏺⏺⏺ start_tree: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4196,7 +4196,7 @@ PUBLIC int gobj_stop(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("■■ stop: %s",
+        trace_machine("⏹⏹ stop: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4277,7 +4277,7 @@ PUBLIC int gobj_stop_tree(hgobj gobj_)
         return -1;
     }
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("■■■■ stop_tree: %s",
+        trace_machine("⏹⏹⏹⏹ stop_tree: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4359,7 +4359,7 @@ PUBLIC int gobj_play(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("▶▶ play: %s",
+        trace_machine("⏯⏯ play: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4418,7 +4418,7 @@ PUBLIC int gobj_pause(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("❚❚ pause: %s",
+        trace_machine("⏸⏸ pause: %s",
             gobj_full_name(gobj)
         );
     }
@@ -5920,7 +5920,7 @@ PRIVATE int _delete_subscription(hsdata subs, BOOL force, BOOL not_inform)
      *  Trace
      *-----------------------------*/
     if(__trace_gobj_subscriptions__(subscriber) || __trace_gobj_subscriptions__(publisher)) {
-        trace_machine("▼▼< %s unsubscribing event '%s' of %s",
+        trace_machine("💜💜⏪ %s unsubscribing event '%s' of %s",
             gobj_full_name(subscriber),
             event,
             gobj_full_name(publisher)
@@ -6180,7 +6180,7 @@ PUBLIC hsdata gobj_subscribe_event(
      *  Trace
      *-----------------------------*/
     if(__trace_gobj_subscriptions__(subscriber) || __trace_gobj_subscriptions__(publisher)) {
-        trace_machine("▲▲> %s subscribing event '%s' of %s",
+        trace_machine("💜💜⏩ %s subscribing event '%s' of %s",
             gobj_full_name(subscriber),
             event?event:"*",
             gobj_full_name(publisher)
@@ -6505,7 +6505,7 @@ PUBLIC int gobj_publish_event(
     BOOL tracea = is_machine_tracing(publisher);
     tracea |= __trace_gobj_subscriptions__(publisher);
     if(tracea) {
-        trace_machine("**> mach(%s%s:%s), ev: %s, st: %s",
+        trace_machine("📢📢> mach(%s%s:%s), ev: %s, st: %s",
             (!publisher->running)?"!!":"",
             gobj_gclass_name(publisher), gobj_name(publisher),
             event,
@@ -6787,7 +6787,7 @@ PUBLIC int gobj_send_event(
             return dst->gclass->gmt.mt_inject_event(dst, event, kw, src);
         }
         if(tracea) {
-            trace_machine("<> mach(%s%s:%s), st: %s, ev: %s, ⛔⛔⛔⛔EVENT NOT DEFINED⛔⛔⛔⛔",
+            trace_machine("<> mach(%s%s:%s), st: %s, ev: %s, 📛📛📛📛EVENT NOT DEFINED📛📛📛📛",
                         (!dst->running)?"!!":"",
                 gobj_gclass_name(dst), gobj_name(dst),
                 mach->fsm->state_names[mach->current_state],
@@ -6912,7 +6912,7 @@ PUBLIC int gobj_send_event(
 
     if(!(dst->obflag & obflag_destroyed)) {
         if(tracea) {
-            trace_machine("<> mach(%s%s:%s), st: %s, ev: %s, ⛔⛔⛔⛔EVENT REFUSED⛔⛔⛔⛔ from %s",
+            trace_machine("<> mach(%s%s:%s), st: %s, ev: %s, 📛📛📛📛EVENT REFUSED📛📛📛📛 from %s",
                         (!dst->running)?"!!":"",
                 gobj_gclass_name(dst), gobj_name(dst),
                 mach->fsm->state_names[mach->current_state],
@@ -7194,7 +7194,7 @@ PUBLIC hgobj gobj_set_bottom_gobj(hgobj gobj_, hgobj bottom_gobj)
     GObj_t * gobj = gobj_;
 
     if(is_machine_tracing(gobj)) {
-        trace_machine("⚉⚉> set_bottom_gobj('%s') = '%s'",
+        trace_machine("🔽🔽 set_bottom_gobj('%s') = '%s'",
             gobj_short_name(gobj),
             bottom_gobj?gobj_short_name(bottom_gobj):""
         );
@@ -7380,7 +7380,7 @@ PRIVATE int gobj_write_json_parameters(
     );
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("⛃> %s^%s => global_mine",
+        trace_machine("🔰⏩ %s^%s => global_mine",
             gobj->gclass->gclass_name,
             gobj->name
         );
@@ -7410,7 +7410,7 @@ PRIVATE int gobj_write_json_parameters(
     }
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("⛃⛃> %s:%s => __json_config_variables__",
+        trace_machine("🔰🔰⏩ %s:%s => __json_config_variables__",
             gobj->gclass->gclass_name,
             gobj->name
         );
@@ -7424,7 +7424,7 @@ PRIVATE int gobj_write_json_parameters(
     }
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("⛃⛃⛃> %s:%s => final kw",
+        trace_machine("🔰🔰🔰⏩ %s:%s => final kw",
             gobj->gclass->gclass_name,
             gobj->name
         );
