@@ -6505,7 +6505,7 @@ PUBLIC int gobj_publish_event(
     BOOL tracea = is_machine_tracing(publisher);
     tracea |= __trace_gobj_subscriptions__(publisher);
     if(tracea) {
-        trace_machine("📢📢> mach(%s%s:%s), ev: %s, st: %s",
+        trace_machine("🔝 mach(%s%s:%s), ev: %s, st: %s",
             (!publisher->running)?"!!":"",
             gobj_gclass_name(publisher), gobj_name(publisher),
             event,
@@ -6769,7 +6769,7 @@ PUBLIC int gobj_send_event(
         if(dst->gclass->gmt.mt_inject_event) {
             __inside__ --;
             if(tracea) {
-                trace_machine("I-> mach(%s%s:%s), ev: %s, st(%d:%s), from(%s%s:%s)",
+                trace_machine("🔃 mach(%s%s:%s), ev: %s, st(%d:%s), from(%s%s:%s)",
                     (!dst->running)?"!!":"",
                     gobj_gclass_name(dst), gobj_name(dst),
                     event,
@@ -6787,7 +6787,7 @@ PUBLIC int gobj_send_event(
             return dst->gclass->gmt.mt_inject_event(dst, event, kw, src);
         }
         if(tracea) {
-            trace_machine("<> mach(%s%s:%s), st: %s, ev: %s, 📛📛📛📛EVENT NOT DEFINED📛📛📛📛",
+            trace_machine("📛 mach(%s%s:%s), st: %s, ev: %s, 📛📛EVENT NOT DEFINED📛📛",
                         (!dst->running)?"!!":"",
                 gobj_gclass_name(dst), gobj_name(dst),
                 mach->fsm->state_names[mach->current_state],
@@ -6850,7 +6850,7 @@ PUBLIC int gobj_send_event(
     while(actions->event) {
         if(strcasecmp(actions->event, event)==0) {
             if(tracea) {
-                trace_machine("-> mach(%s%s:%s), ev: %s, st(%d:%s), from(%s%s:%s)",
+                trace_machine("🔄 mach(%s%s:%s), ev: %s, st(%d:%s), from(%s%s:%s)",
                     (!dst->running)?"!!":"",
                     gobj_gclass_name(dst), gobj_name(dst),
                     event,
@@ -6912,7 +6912,7 @@ PUBLIC int gobj_send_event(
 
     if(!(dst->obflag & obflag_destroyed)) {
         if(tracea) {
-            trace_machine("<> mach(%s%s:%s), st: %s, ev: %s, 📛📛📛📛EVENT REFUSED📛📛📛📛 from %s",
+            trace_machine("📛 mach(%s%s:%s), st: %s, ev: %s, 📛📛EVENT REFUSED📛📛 from %s",
                         (!dst->running)?"!!":"",
                 gobj_gclass_name(dst), gobj_name(dst),
                 mach->fsm->state_names[mach->current_state],
@@ -7194,7 +7194,7 @@ PUBLIC hgobj gobj_set_bottom_gobj(hgobj gobj_, hgobj bottom_gobj)
     GObj_t * gobj = gobj_;
 
     if(is_machine_tracing(gobj)) {
-        trace_machine("🔽🔽 set_bottom_gobj('%s') = '%s'",
+        trace_machine("🔽 set_bottom_gobj('%s') = '%s'",
             gobj_short_name(gobj),
             bottom_gobj?gobj_short_name(bottom_gobj):""
         );
@@ -7380,7 +7380,7 @@ PRIVATE int gobj_write_json_parameters(
     );
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("🔰⏩ %s^%s => global_mine",
+        trace_machine("🔰 %s^%s => global_mine",
             gobj->gclass->gclass_name,
             gobj->name
         );
@@ -7410,7 +7410,7 @@ PRIVATE int gobj_write_json_parameters(
     }
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("🔰🔰⏩ %s:%s => __json_config_variables__",
+        trace_machine("🔰🔰 %s:%s => __json_config_variables__",
             gobj->gclass->gclass_name,
             gobj->name
         );
@@ -7424,7 +7424,7 @@ PRIVATE int gobj_write_json_parameters(
     }
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("🔰🔰🔰⏩ %s:%s => final kw",
+        trace_machine("🔰🔰🔰 %s:%s => final kw",
             gobj->gclass->gclass_name,
             gobj->name
         );
@@ -9442,7 +9442,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
                 }
                 BOOL tracea = is_machine_tracing(gobj) && !is_machine_not_tracing(gobj);
                 if(tracea) {
-                    trace_machine(" - mach(%s%s:%s), new_st: %s",
+                    trace_machine(" 🔷 mach(%s%s:%s), new_st: %s",
                         (!gobj->running)?"!!":"",
                         gobj_gclass_name(gobj), gobj_name(gobj),
                         new_state
@@ -9871,7 +9871,7 @@ PUBLIC json_t *gobj_command( // With AUTHZ
      *-----------------------------------------------*/
     BOOL tracea = is_machine_tracing(gobj) && !is_machine_not_tracing(src);
     if(tracea) {
-        trace_machine("#!> mach(%s%s), cmd: %s, src: %s",
+        trace_machine("🌀🌀 mach(%s%s), cmd: %s, src: %s",
             (!gobj->running)?"!!":"",
             gobj_short_name(gobj),
             command,
