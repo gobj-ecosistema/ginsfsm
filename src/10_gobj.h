@@ -1403,6 +1403,7 @@ PUBLIC BOOL gobj_event_in_output_event_list(
 
 PUBLIC void * gobj_priv_data(hgobj gobj);
 PUBLIC hgobj gobj_parent(hgobj gobj);
+PUBLIC BOOL gobj_is_destroying(hgobj gobj);
 PUBLIC BOOL gobj_is_running(hgobj gobj);
 PUBLIC BOOL gobj_is_playing(hgobj gobj);
 PUBLIC BOOL gobj_is_service(hgobj gobj);

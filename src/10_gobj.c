@@ -2699,7 +2699,9 @@ PUBLIC void gobj_destroy_childs(hgobj gobj_)
 
     GObj_t * child; rc_instance_t *i_child;
     while((i_child = gobj_first_child(gobj, (hgobj *)&child))) {
-        gobj_destroy(child);
+        if(!(child->obflag & (obflag_destroyed|obflag_destroying))) {
+            gobj_destroy(child);
+        }
     }
 }
 
@@ -9635,17 +9637,38 @@ PUBLIC hgobj gobj_parent(hgobj gobj)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC BOOL gobj_is_running(hgobj gobj)
+PUBLIC BOOL gobj_is_destroying(hgobj gobj_)
 {
-    return ((GObj_t *)gobj)->running;
+    GObj_t *gobj = gobj_;
+    if(!gobj_ || gobj->obflag & (obflag_destroyed|obflag_destroying)) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC BOOL gobj_is_playing(hgobj gobj)
+PUBLIC BOOL gobj_is_running(hgobj gobj_)
 {
-    return ((GObj_t *)gobj)->playing;
+    GObj_t *gobj = gobj_;
+    if(!gobj_ || gobj->obflag & (obflag_destroyed|obflag_destroying)) {
+        return FALSE;
+    }
+    return gobj->running;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC BOOL gobj_is_playing(hgobj gobj_)
+{
+    GObj_t *gobj = gobj_;
+
+    if(!gobj_ || gobj->obflag & (obflag_destroyed|obflag_destroying)) {
+        return FALSE;
+    }
+    return gobj->playing;
 }
 
 /***************************************************************************
@@ -9654,7 +9677,8 @@ PUBLIC BOOL gobj_is_playing(hgobj gobj)
 PUBLIC BOOL gobj_is_service(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
-    if(gobj->obflag & (obflag_yuno|obflag_default_service|obflag_service)) {
+
+    if(gobj && (gobj->obflag & (obflag_yuno|obflag_default_service|obflag_service))) {
         return TRUE;
     } else {
         return FALSE;
