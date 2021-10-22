@@ -4726,7 +4726,7 @@ PUBLIC hgobj gobj_find_gclass_service(const char *gclass_name, BOOL verbose)
 }
 
 /***************************************************************************
- *  Return nearest top service of gobj (service or __yuno__)
+ *  Return nearest (parent) top service (service or __yuno__) gobj
  ***************************************************************************/
 PUBLIC hgobj gobj_nearest_top_service(hgobj gobj_)
 {
@@ -4745,6 +4745,33 @@ PUBLIC hgobj gobj_nearest_top_service(hgobj gobj_)
     gobj = gobj->__parent__;
     while(gobj) {
         if(gobj->obflag & (obflag_service|obflag_yuno)) {
+            break;
+        }
+        gobj = gobj->__parent__;
+    }
+    return gobj;
+}
+
+/***************************************************************************
+ *  Return nearest (parent) top unique (or service) gobj
+ ***************************************************************************/
+PUBLIC hgobj gobj_nearest_top_unique(hgobj gobj_)
+{
+    GObj_t *gobj = gobj_;
+
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        return 0;
+    }
+    gobj = gobj->__parent__;
+    while(gobj) {
+        if(gobj->obflag & (obflag_unique_name|obflag_service|obflag_yuno)) {
             break;
         }
         gobj = gobj->__parent__;
