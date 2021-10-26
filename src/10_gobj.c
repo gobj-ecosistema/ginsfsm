@@ -1176,7 +1176,7 @@ PUBLIC hgobj gobj_service_factory(
     );
 
     if(__trace_gobj_create_delete2__(__yuno__)) {
-        trace_machine("🌞 %s:%s => service global",
+        trace_machine("🌞 %s^%s => service global",
             gclass_name,
             gobj_name
         );
@@ -1190,7 +1190,7 @@ PUBLIC hgobj gobj_service_factory(
     json_decref(jn_global);
 
     if(__trace_gobj_create_delete2__(__yuno__)) {
-        trace_machine("🌞🌞 %s:%s => service final",
+        trace_machine("🌞🌞 %s^%s => service final",
             gclass_name,
             gobj_name
         );
@@ -1806,7 +1806,7 @@ PRIVATE hgobj _gobj_create(
     }
 
     if(__trace_gobj_create_delete__(gobj)) {
-        trace_machine("💙💙⏩ creating: %s:%s",
+        trace_machine("💙💙⏩ creating: %s^%s",
             gclass->gclass_name,
             gobj->name
         );
@@ -1954,6 +1954,12 @@ PRIVATE hgobj _gobj_create(
      *  when the child is full operative
      *-------------------------------------*/
     if(parent && parent->gclass->gmt.mt_child_added) {
+        if(__trace_gobj_create_delete__(gobj)) {
+            trace_machine("👦👦🔵 child_added(%s): %s",
+                gobj_full_name(parent),
+                gobj_short_name(gobj)
+            );
+        }
         parent->gclass->gmt.mt_child_added(parent, gobj);
     }
 
@@ -2479,6 +2485,12 @@ PUBLIC void gobj_destroy(hgobj gobj_)
      *------------------------------------------*/
     parent = gobj->__parent__;
     if(parent && parent->gclass->gmt.mt_child_removed) {
+        if(__trace_gobj_create_delete__(gobj)) {
+            trace_machine("👦👦🔴 child_removed(%s): %s",
+                gobj_full_name(parent),
+                gobj_short_name(gobj)
+            );
+        }
         parent->gclass->gmt.mt_child_removed(parent, gobj);
     }
 
@@ -6534,7 +6546,7 @@ PUBLIC int gobj_publish_event(
     BOOL tracea = is_machine_tracing(publisher);
     tracea |= __trace_gobj_subscriptions__(publisher);
     if(tracea) {
-        trace_machine("🔝 mach(%s%s:%s), ev: %s, st: %s",
+        trace_machine("🔝 mach(%s%s^%s), ev: %s, st: %s",
             (!publisher->running)?"!!":"",
             gobj_gclass_name(publisher), gobj_name(publisher),
             event,
@@ -6798,7 +6810,7 @@ PUBLIC int gobj_send_event(
         if(dst->gclass->gmt.mt_inject_event) {
             __inside__ --;
             if(tracea) {
-                trace_machine("🔃 mach(%s%s:%s), ev: %s, st(%d:%s), from(%s%s:%s)",
+                trace_machine("🔃 mach(%s%s^%s), ev: %s, st(%d:%s), from(%s%s^%s)",
                     (!dst->running)?"!!":"",
                     gobj_gclass_name(dst), gobj_name(dst),
                     event,
@@ -6816,7 +6828,7 @@ PUBLIC int gobj_send_event(
             return dst->gclass->gmt.mt_inject_event(dst, event, kw, src);
         }
         if(tracea) {
-            trace_machine("📛 mach(%s%s:%s), st: %s, ev: %s, 📛📛EVENT NOT DEFINED📛📛",
+            trace_machine("📛 mach(%s%s^%s), st: %s, ev: %s, 📛📛EVENT NOT DEFINED📛📛",
                         (!dst->running)?"!!":"",
                 gobj_gclass_name(dst), gobj_name(dst),
                 mach->fsm->state_names[mach->current_state],
@@ -6879,7 +6891,7 @@ PUBLIC int gobj_send_event(
     while(actions->event) {
         if(strcasecmp(actions->event, event)==0) {
             if(tracea) {
-                trace_machine("🔄 mach(%s%s:%s), ev: %s, st(%d:%s), from(%s%s:%s)",
+                trace_machine("🔄 mach(%s%s^%s), ev: %s, st(%d:%s), from(%s%s^%s)",
                     (!dst->running)?"!!":"",
                     gobj_gclass_name(dst), gobj_name(dst),
                     event,
@@ -6922,7 +6934,7 @@ PUBLIC int gobj_send_event(
             }
 
             if(tracea && !(dst->obflag & obflag_destroyed)) {
-                trace_machine("<- mach(%s%s:%s), ev: %s, st(%d:%s), ret: %d",
+                trace_machine("<- mach(%s%s^%s), ev: %s, st(%d:%s), ret: %d",
                     (!dst->running)?"!!":"",
                     gobj_gclass_name(dst), gobj_name(dst),
                     event,
@@ -6941,7 +6953,7 @@ PUBLIC int gobj_send_event(
 
     if(!(dst->obflag & obflag_destroyed)) {
         if(tracea) {
-            trace_machine("📛 mach(%s%s:%s), st: %s, ev: %s, 📛📛EVENT REFUSED📛📛 from %s",
+            trace_machine("📛 mach(%s%s^%s), st: %s, ev: %s, 📛📛EVENT REFUSED📛📛 from %s",
                         (!dst->running)?"!!":"",
                 gobj_gclass_name(dst), gobj_name(dst),
                 mach->fsm->state_names[mach->current_state],
@@ -7439,7 +7451,7 @@ PRIVATE int gobj_write_json_parameters(
     }
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("🔰🔰 %s:%s => __json_config_variables__",
+        trace_machine("🔰🔰 %s^%s => __json_config_variables__",
             gobj->gclass->gclass_name,
             gobj->name
         );
@@ -7453,7 +7465,7 @@ PRIVATE int gobj_write_json_parameters(
     }
 
     if(__trace_gobj_create_delete2__(gobj)) {
-        trace_machine("🔰🔰🔰 %s:%s => final kw",
+        trace_machine("🔰🔰🔰 %s^%s => final kw",
             gobj->gclass->gclass_name,
             gobj->name
         );
@@ -9471,7 +9483,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
                 }
                 BOOL tracea = is_machine_tracing(gobj) && !is_machine_not_tracing(gobj);
                 if(tracea) {
-                    trace_machine(" 🔷 mach(%s%s:%s), new_st: %s",
+                    trace_machine(" 🔷 mach(%s%s^%s), new_st: %s",
                         (!gobj->running)?"!!":"",
                         gobj_gclass_name(gobj), gobj_name(gobj),
                         new_state
