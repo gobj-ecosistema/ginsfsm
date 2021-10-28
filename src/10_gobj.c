@@ -4065,7 +4065,7 @@ PUBLIC int gobj_start(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("⏺⏺ start: %s",
+        trace_machine("⏺ ⏺ start: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4141,7 +4141,7 @@ PUBLIC int gobj_start_tree(hgobj gobj_)
         return -1;
     }
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("⏺⏺⏺⏺ start_tree: %s",
+        trace_machine("⏺ ⏺ ⏺ ⏺ start_tree: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4210,7 +4210,7 @@ PUBLIC int gobj_stop(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("⏹⏹ stop: %s",
+        trace_machine("⏹ ⏹ stop: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4291,7 +4291,7 @@ PUBLIC int gobj_stop_tree(hgobj gobj_)
         return -1;
     }
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("⏹⏹⏹⏹ stop_tree: %s",
+        trace_machine("⏹ ⏹ ⏹ ⏹ stop_tree: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4373,7 +4373,7 @@ PUBLIC int gobj_play(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("⏯⏯ play: %s",
+        trace_machine("⏯ ⏯ play: %s",
             gobj_full_name(gobj)
         );
     }
@@ -4432,7 +4432,7 @@ PUBLIC int gobj_pause(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("⏸⏸ pause: %s",
+        trace_machine("⏸ ⏸ pause: %s",
             gobj_full_name(gobj)
         );
     }
