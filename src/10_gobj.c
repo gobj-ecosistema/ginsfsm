@@ -2676,6 +2676,11 @@ PRIVATE int cb_imminentdestroy_named_childs(
     const char *name = user_data;
     const char *name_ = gobj_name(child);
     if(name_ && strcmp(name_, name)==0) {
+        if(__trace_gobj_create_delete__(child)) {
+            trace_machine("❎❎📍 gobj_set_imminent_destroy: %s",
+                gobj_short_name(child)
+            );
+        }
         gobj_set_imminent_destroy(child, TRUE);
     }
     return 0;
@@ -2687,6 +2692,11 @@ PRIVATE int cb_destroy_named_childs(
     const char *name = user_data;
     const char *name_ = gobj_name(child);
     if(name_ && strcmp(name_, name)==0) {
+        if(__trace_gobj_create_delete__(child)) {
+            trace_machine("❎❎❌ gobj_destroy with previous pause/stop: %s",
+                gobj_short_name(child)
+            );
+        }
         if(gobj_is_playing(child))
             gobj_pause(child);
         if(gobj_is_running(child))
@@ -2707,6 +2717,12 @@ PUBLIC int gobj_destroy_named_childs(hgobj gobj_, const char *name)
             NULL
         );
         return -1;
+    }
+
+    if(__trace_gobj_create_delete__(gobj)) {
+        trace_machine("❎❎ gobj_destroy_named_childs: %s",
+            name
+        );
     }
 
     gobj_walk_gobj_childs(
@@ -2732,10 +2748,16 @@ PUBLIC int gobj_destroy_named_tree(hgobj gobj_, const char *name)
         return -1;
     }
 
-    gobj_walk_gobj_childs(
+    if(__trace_gobj_create_delete__(gobj)) {
+        trace_machine("❎❎✝ gobj_destroy_named_tree: %s",
+            name
+        );
+    }
+
+    gobj_walk_gobj_childs_tree(
         gobj, WALK_BOTTOM2TOP, cb_imminentdestroy_named_childs, (void *)name, 0, 0
     );
-    gobj_walk_gobj_childs(
+    gobj_walk_gobj_childs_tree(
         gobj, WALK_BOTTOM2TOP, cb_destroy_named_childs, (void *)name, 0, 0
     );
     return 0;
@@ -4225,8 +4247,8 @@ PUBLIC int gobj_stop(hgobj gobj_)
         return -1;
     }
     if(gobj->obflag & obflag_destroying) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", gobj_short_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "hgobj destroying",
@@ -4237,7 +4259,7 @@ PUBLIC int gobj_stop(hgobj gobj_)
     if(!gobj->running) {
         if(!gobj_is_shutdowning()) {
             log_error(LOG_OPT_TRACE_STACK,
-                "gobj",         "%s", gobj_name(gobj),
+                "gobj",         "%s", gobj_full_name(gobj),
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_OPERATIONAL_ERROR,
                 "msg",          "%s", "GObj NOT RUNNING",
