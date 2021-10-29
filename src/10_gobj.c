@@ -49,13 +49,14 @@
 /****************************************************************
  *         Constants
  ****************************************************************/
-typedef enum {
+typedef enum { // WARNING add new values to opt2json()
     obflag_destroying       = 0x0001,
     obflag_destroyed        = 0x0002,
     obflag_created          = 0x0004,
     obflag_unique_name      = 0x0008,
     obflag_autoplay         = 0x0010,
     obflag_autostart        = 0x0020,
+    obflag_imminent_destroy = 0x0040,
     obflag_yuno             = 0x1000,
     obflag_default_service  = 0x2000,
     obflag_service          = 0x4000,
@@ -960,7 +961,7 @@ PUBLIC int gobj_walk_gclass_list(
 PRIVATE json_t * opt2json(GObj_t *gobj)
 {
     int len;
-    char temp[256];
+    char temp[1024];
 
     temp[0] = 0;
 
@@ -998,6 +999,12 @@ PRIVATE json_t * opt2json(GObj_t *gobj)
         len = strlen(temp);
         if(sizeof(temp) > len) {
             snprintf(temp+len, sizeof(temp) - len, "%s", "Service ");
+        }
+    }
+    if(gobj->obflag & obflag_volatil) {
+        len = strlen(temp);
+        if(sizeof(temp) > len) {
+            snprintf(temp+len, sizeof(temp) - len, "%s", "Volatil ");
         }
     }
 
@@ -2662,7 +2669,20 @@ PRIVATE void gobj_free(hgobj gobj_)
 /***************************************************************************
  *  Destroy named childs, with auto pause/stop
  ***************************************************************************/
-PRIVATE int cb_destroy_named_childs(rc_instance_t *i_child, hgobj child, void *user_data, void *user_data2, void *user_data3)
+PRIVATE int cb_imminentdestroy_named_childs(
+    rc_instance_t *i_child, hgobj child, void *user_data, void *user_data2, void *user_data3
+)
+{
+    const char *name = user_data;
+    const char *name_ = gobj_name(child);
+    if(name_ && strcmp(name_, name)==0) {
+        gobj_set_imminent_destroy(child, TRUE);
+    }
+    return 0;
+}
+PRIVATE int cb_destroy_named_childs(
+    rc_instance_t *i_child, hgobj child, void *user_data, void *user_data2, void *user_data3
+)
 {
     const char *name = user_data;
     const char *name_ = gobj_name(child);
@@ -2689,7 +2709,36 @@ PUBLIC int gobj_destroy_named_childs(hgobj gobj_, const char *name)
         return -1;
     }
 
-    return gobj_walk_gobj_childs(gobj, WALK_FIRST2LAST, cb_destroy_named_childs, (void *)name, 0, 0);
+    gobj_walk_gobj_childs(
+        gobj, WALK_FIRST2LAST, cb_imminentdestroy_named_childs, (void *)name, 0, 0
+    );
+    gobj_walk_gobj_childs(
+        gobj, WALK_FIRST2LAST, cb_destroy_named_childs, (void *)name, 0, 0
+    );
+    return 0;
+}
+
+PUBLIC int gobj_destroy_named_tree(hgobj gobj_, const char *name)
+{
+    GObj_t * gobj = gobj_;
+    if(!gobj) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "gobj NULL",
+            NULL
+        );
+        return -1;
+    }
+
+    gobj_walk_gobj_childs(
+        gobj, WALK_BOTTOM2TOP, cb_imminentdestroy_named_childs, (void *)name, 0, 0
+    );
+    gobj_walk_gobj_childs(
+        gobj, WALK_BOTTOM2TOP, cb_destroy_named_childs, (void *)name, 0, 0
+    );
+    return 0;
 }
 
 /***************************************************************************
@@ -9388,6 +9437,33 @@ PUBLIC int gobj_set_volatil(hgobj gobj_, BOOL set)
         gobj->obflag |= obflag_volatil;
     } else {
         gobj->obflag &= ~obflag_volatil;
+    }
+
+    return 0;
+}
+
+/***************************************************************************
+ *  True if gobj is imminent_destroy
+ ***************************************************************************/
+PUBLIC BOOL gobj_is_imminent_destroy(hgobj gobj_)
+{
+    GObj_t *gobj = gobj_;
+    if(gobj->obflag & obflag_imminent_destroy) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/***************************************************************************
+ *  Set as imminent_destroy
+ ***************************************************************************/
+PUBLIC int gobj_set_imminent_destroy(hgobj gobj_, BOOL set)
+{
+    GObj_t *gobj = gobj_;
+    if(set) {
+        gobj->obflag |= obflag_imminent_destroy;
+    } else {
+        gobj->obflag &= ~obflag_imminent_destroy;
     }
 
     return 0;

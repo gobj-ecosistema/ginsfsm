@@ -546,7 +546,9 @@ PUBLIC hgobj gobj_create_tree( // TOO implicit: if no subscriber key is given, t
 //FUTURE implement incref/decref
 PUBLIC void gobj_destroy(hgobj gobj);  // must be compatible free()
 
+PUBLIC int gobj_destroy_named_tree(hgobj gobj, const char *name); // with auto pause/stop BOTTOM2TOP
 PUBLIC int gobj_destroy_named_childs(hgobj gobj, const char *name); // with auto pause/stop
+
 PUBLIC void gobj_destroy_childs(hgobj gobj);
 PUBLIC GCLASS *gobj_subclass_gclass(GCLASS *base, const char *gclass_name);
 
@@ -1379,6 +1381,8 @@ PUBLIC const char * gobj_escaped_short_name(hgobj gobj);    // (gclass^name)
 PUBLIC const char * gobj_snmp_name(hgobj gobj);
 PUBLIC BOOL gobj_is_volatil(hgobj gobj);
 PUBLIC int gobj_set_volatil(hgobj gobj, BOOL set);
+PUBLIC BOOL gobj_is_imminent_destroy(hgobj gobj);
+PUBLIC int gobj_set_imminent_destroy(hgobj gobj, BOOL set);
 
 PUBLIC BOOL gobj_typeof_gclass(hgobj gobj, const char *gclass_name);            /* strict same gclass */
 PUBLIC BOOL gobj_typeof_subgclass(hgobj gobj, const char *gclass_name);         /* check base gclass */
