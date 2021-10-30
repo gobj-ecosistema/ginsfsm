@@ -10025,7 +10025,18 @@ PUBLIC json_t *gobj_command( // With AUTHZ
     hgobj src
 )
 {
-    GObj_t * gobj = gobj_;
+    GObj_t *gobj = gobj_;
+    if(!gobj || gobj->obflag & obflag_destroyed) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
+        KW_DECREF(kw);
+        return 0;
+    }
 
     /*-----------------------------------------------*
      *  Trace
@@ -10038,9 +10049,7 @@ PUBLIC json_t *gobj_command( // With AUTHZ
             command,
             gobj_short_name(src)
         );
-        if(gobj_trace_level(gobj) & (TRACE_EV_KW)) {
-            log_debug_json(0, kw, "kw");
-        }
+        log_debug_json(0, kw, "command kw");
     }
 
     /*-----------------------------------------------*
