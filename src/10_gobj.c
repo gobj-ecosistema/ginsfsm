@@ -291,6 +291,7 @@ PRIVATE const trace_level_t s_global_trace_level[16] = {
 
 PRIVATE uint32_t __global_trace_level__ = 0;
 PRIVATE volatile uint32_t __panic_trace__ = 0;
+PRIVATE uint32_t __deep_trace__ = 0;
 
 /*
  *  Strings of enum gcflag_t gcflag
@@ -11329,7 +11330,17 @@ PUBLIC int gobj_set_gclass_trace(GCLASS *gclass, const char *level, BOOL set)
  ****************************************************************************/
 PUBLIC int gobj_set_panic_trace(BOOL panic_trace)
 {
-    __panic_trace__ = panic_trace;
+    __panic_trace__ = panic_trace?TRUE:FALSE;
+
+    return 0;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC int gobj_set_deep_tracing(BOOL set)
+{
+    __deep_trace__ = set?TRUE:FALSE;
 
     return 0;
 }
@@ -11545,7 +11556,7 @@ PUBLIC uint32_t gobj_trace_level(hgobj gobj_)
 {
     GObj_t * gobj = gobj_;
 
-    if(__panic_trace__) {
+    if(__panic_trace__ || __deep_trace__) {
         return -1;
     }
     uint32_t bitmask = __global_trace_level__;
