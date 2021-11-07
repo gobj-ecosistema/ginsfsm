@@ -1584,7 +1584,7 @@ PUBLIC int log_debug_sdata(const char *prefix, hsdata hs)
 {
     json_t *jn = sdata2json(hs, -1, 0);
     if(jn) {
-        log_debug_json(0, jn, prefix);
+        log_debug_json(0, jn, "%s", prefix);
         JSON_DECREF(jn);
     }
     return 0;
@@ -1597,7 +1597,7 @@ PUBLIC int log_debug_sdata(const char *prefix, hsdata hs)
 PRIVATE int cb_debug_walking(rc_instance_t *instance, rc_resource_t *resource_, void *user_data, void *user_data2, void *user_data3)
 {
 
-    log_debug_printf(0, "resource '%s', instance %d", sdata_resource(resource_), instance->__id__);
+    log_debug_printf(0, "resource '%s', instance %d", sdata_resource(resource_), (int)instance->__id__);
     log_debug_sdata(0, resource_);
     return 0;
 }

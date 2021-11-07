@@ -501,7 +501,8 @@ PUBLIC int log_debug_sdata_iter(
     walk_type_t walk_type,
     const char *fmt,
     ...
-);
+) JANSSON_ATTRS((format(printf, 4, 5)));
+
 
 
 /*----------------------------------*

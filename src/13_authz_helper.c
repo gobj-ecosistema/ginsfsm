@@ -134,33 +134,58 @@ PUBLIC json_t *gobj_build_authzs_doc(
     const char *authz = kw_get_str(kw, "authz", "", 0);
     const char *service = kw_get_str(kw, "service", "", 0);
 
-    hgobj service_gobj = 0;
-
     if(!empty_string(service)) {
-        service_gobj = gobj_find_service(service, FALSE);
+        hgobj service_gobj = gobj_find_service(service, FALSE);
         if(!service_gobj) {
+            return msg_iev_build_webix(gobj,
+                -1,
+                json_sprintf("Service not found: '%s'", service),
+                0,
+                0,
+                kw  // owned
+            );
+        }
+
+        json_t *jn_authzs = authzs_list(service_gobj, authz);
+        if(!jn_authzs) {
             return msg_iev_build_webix(
                 gobj,
                 -1,
-                json_sprintf("Service not found: '%s'", service),
+                json_sprintf("Authz not found: '%s'", authz),
                 0,
                 0,
                 kw // owned
             );
         }
-    }
 
-    json_t *jn_authzs = authzs_list(service_gobj, authz);
-    if(!jn_authzs) {
         return msg_iev_build_webix(
             gobj,
-            -1,
-            json_sprintf("Authz not found: '%s'", authz),
             0,
             0,
+            0,
+            jn_authzs,
             kw // owned
         );
     }
+
+    json_t *jn_authzs = json_object();
+    json_t *jn_global_list = sdataauth2json(gobj_get_global_authz_table());
+    json_object_set_new(jn_authzs, "global authzs", jn_global_list);
+
+    json_t *jn_services = gobj_services();
+    int idx; json_t *jn_service;
+    json_array_foreach(jn_services, idx, jn_service) {
+        const char *service = json_string_value(jn_service);
+        hgobj gobj_service = gobj_find_service(service, TRUE);
+        if(gobj_service) {
+            if(gobj_gclass(gobj_service)->authz_table) {
+                json_t *l = authzs_list(gobj_service, authz);
+                json_object_set_new(jn_authzs, service, l);
+            }
+        }
+    }
+
+    json_decref(jn_services);
 
     return msg_iev_build_webix(
         gobj,

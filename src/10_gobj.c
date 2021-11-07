@@ -30,6 +30,9 @@
  *  tienen prisa por terminar, y me tienen aquí exprimiéndome.
  *
  ***********************************************************************/
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
 #include <dirent.h>
@@ -274,15 +277,17 @@ PRIVATE const trace_level_t s_global_trace_level[16] = {
 {"event_monitor",   "Monitor events of gobjs"},
 {"libuv",           "Trace libuv mixins"},
 {"ev_kw",           "Trace event keywords"},
+{"authzs",          "Trace authorizations"},
 {0, 0},
 };
 #define __trace_gobj_create_delete__(gobj)  (gobj_trace_level(gobj) & TRACE_CREATE_DELETE)
-#define __trace_gobj_create_delete2__(gobj)  (gobj_trace_level(gobj) & TRACE_CREATE_DELETE2)
+#define __trace_gobj_create_delete2__(gobj) (gobj_trace_level(gobj) & TRACE_CREATE_DELETE2)
 #define __trace_gobj_subscriptions__(gobj)  (gobj_trace_level(gobj) & TRACE_SUBSCRIPTIONS)
 #define __trace_gobj_start_stop__(gobj)     (gobj_trace_level(gobj) & TRACE_START_STOP)
 #define __trace_gobj_oids__(gobj)           (gobj_trace_level(gobj) & TRACE_OIDS)
 #define __trace_gobj_uv__(gobj)             (gobj_trace_level(gobj) & TRACE_UV)
 #define __trace_gobj_ev_kw__(gobj)          (gobj_trace_level(gobj) & TRACE_EV_KW)
+#define __trace_gobj_authzs__(gobj)         (gobj_trace_level(gobj) & TRACE_AUTHZS)
 
 //#define __trace_gobj_monitor__(gobj)        (gobj_trace_level(gobj) & TRACE_MONITOR)
 //#define __trace_gobj_event_monitor__(gobj)  (gobj_trace_level(gobj) & TRACE_EVENT_MONITOR)
@@ -418,7 +423,9 @@ PRIVATE hgobj _create_yuno(
 PRIVATE service_register_t * _find_service(const char *service);
 
 PRIVATE char *tab(char *bf, int bflen);
-PRIVATE void trace_machine(const char *fmt, ...);
+PRIVATE void trace_machine(const char *fmt, ...)
+    JANSSON_ATTRS((format(printf, 1, 2)));
+
 PRIVATE inline BOOL is_machine_tracing(GObj_t * gobj);
 PRIVATE inline BOOL is_machine_not_tracing(GObj_t * gobj);
 
@@ -1060,11 +1067,11 @@ PUBLIC json_t * gobj_repr_service_register(const char *gclass_name)
         if(empty_string(gclass_name) || strcmp(gclass->gclass_name, gclass_name)==0) {
             json_t *jn_srv = json_object();
             if(srv_reg->service) {
-            json_object_set_new(
-                jn_srv,
-                "service",
-                json_string(srv_reg->service)
-            );
+                json_object_set_new(
+                    jn_srv,
+                    "service",
+                    json_string(srv_reg->service)
+                );
             }
             json_object_set_new(
                 jn_srv,
@@ -9147,6 +9154,28 @@ PRIVATE int _gobj_level(hgobj gobj_)
 }
 
 /***************************************************************************
+ *  Debug print service register in json
+ ***************************************************************************/
+PUBLIC json_t *gobj_services(void)
+{
+    json_t *jn_register = json_array();
+
+    service_register_t *srv_reg = dl_first(&dl_service);
+    while(srv_reg) {
+        if(srv_reg->service) {
+            json_array_append_new(
+                jn_register,
+                json_string(srv_reg->service)
+            );
+        }
+
+        srv_reg = dl_next(srv_reg);
+    }
+
+    return jn_register;
+}
+
+/***************************************************************************
  *  Return yuno, the grandfather
  ***************************************************************************/
 PUBLIC hgobj gobj_yuno(void)
@@ -10089,7 +10118,7 @@ PUBLIC json_t *gobj_command( // With AUTHZ
         return msg_iev_build_webix(
             gobj,
             -1,
-            json_local_sprintf(
+            json_sprintf(
                 "Command table not available in '%s' gobj",
                 gobj_short_name(gobj)
             ),
@@ -11906,7 +11935,7 @@ PRIVATE void trace_machine(const char *fmt, ...)
     vsnprintf(bf+len, sizeof(bf)-len, fmt, ap);
     va_end(ap);
 
-    trace_msg(bf);
+    trace_msg("%s", bf);
 }
 
 
@@ -12033,14 +12062,28 @@ PUBLIC BOOL gobj_user_has_authz(
      *  The local mt_authz_checker has preference
      *----------------------------------------------------*/
     if(gobj->gclass->gmt.mt_authz_checker) {
-        return gobj->gclass->gmt.mt_authz_checker(gobj, authz, kw, src);
+        BOOL has_permission = gobj->gclass->gmt.mt_authz_checker(gobj, authz, kw, src);
+        if(__trace_gobj_authzs__(gobj)) {
+            trace_machine("owner 🔑🔑 %s => %s",
+                gobj_short_name(gobj),
+                has_permission?"👍":"🚫"
+            );
+        }
+        return has_permission;
     }
 
     /*-----------------------------------------------*
      *  Then use the global authz checker
      *-----------------------------------------------*/
     if(__global_authz_checker_fn__) {
-        return __global_authz_checker_fn__(gobj, authz, kw, src);
+        BOOL has_permission = __global_authz_checker_fn__(gobj, authz, kw, src);
+        if(__trace_gobj_authzs__(gobj)) {
+            trace_machine("global 🔑🔑 %s => %s",
+                gobj_short_name(gobj),
+                has_permission?"👍":"🚫"
+            );
+        }
+        return has_permission;
     }
 
     KW_DECREF(kw);

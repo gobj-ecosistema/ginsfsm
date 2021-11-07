@@ -56,7 +56,7 @@ PUBLIC json_t * command_parser(hgobj gobj,
         return msg_iev_build_webix(
             gobj,
             -15,
-            json_local_sprintf(
+            json_sprintf(
                 "%s: command '%s' not available. Try 'help' command.",
                 gobj_short_name(gobj),
                 command
@@ -116,7 +116,7 @@ PUBLIC json_t * command_parser(hgobj gobj,
 //             return msg_iev_build_webix(
 //                 gobj,
 //                 -403,
-//                 json_local_sprintf(
+//                 json_sprintf(
 //                     "No permission to execute command"
 //                 ),
 //                 0,
@@ -231,12 +231,12 @@ PRIVATE json_t *expand_command(
     char *cmd = get_parameter(p, &p);
     if(empty_string(cmd)) {
         gbmem_free(str);
-        return json_local_sprintf("No command");
+        return json_sprintf("No command");
     }
     const sdata_desc_t *cnf_cmd = command_get_cmd_desc(command_table, cmd);
     if(!cnf_cmd) {
         gbmem_free(str);
-        return json_local_sprintf("No '%s' command found in '%s'", cmd, gobj_short_name(gobj));
+        return json_sprintf("No '%s' command found in '%s'", cmd, gobj_short_name(gobj));
     }
     if(cmd_desc) {
         *cmd_desc = cnf_cmd;
@@ -299,10 +299,10 @@ PRIVATE json_t *parameter2json(
         return nonlegalstring2json(s, TRUE);
     } else {
         *result = -1;
-        json_t *jn_data = json_local_sprintf(
-            "s: type %d of parameter '%s' is unknown",
+        json_t *jn_data = json_sprintf(
+            "%s: type %d of parameter '%s' is unknown",
             gobj_short_name(gobj),
-            type,
+            (int)type,
             name
         );
         return jn_data;
@@ -464,7 +464,7 @@ PRIVATE json_t *build_cmd_kw(
             } else {
                 *result = -1;
                 JSON_DECREF(kw_cmd);
-                return json_local_sprintf(
+                return json_sprintf(
                     "%s: command '%s', parameter '%s' is required",
                     gobj_short_name(gobj),
                     command,
@@ -476,7 +476,7 @@ PRIVATE json_t *build_cmd_kw(
             // es ya un key=value, falta el required
             *result = -1;
             JSON_DECREF(kw_cmd);
-            return json_local_sprintf(
+            return json_sprintf(
                 "%s: required parameter '%s' not found",
                 gobj_short_name(gobj),
                 ip->name
@@ -490,7 +490,7 @@ PRIVATE json_t *build_cmd_kw(
         if(!jn_param) {
             *result = -1;
             JSON_DECREF(kw_cmd);
-            return json_local_sprintf(
+            return json_sprintf(
                 "%s: internal error, command '%s', parameter '%s'",
                 gobj_short_name(gobj),
                 command,
@@ -559,7 +559,7 @@ PRIVATE json_t *build_cmd_kw(
             // Non-required parameter must be key=value format
             *result = -1;
             JSON_DECREF(kw_cmd);
-            return json_local_sprintf(
+            return json_sprintf(
                 "%s: command '%s', optional parameters must be with key=value format ('%s=?')",
                 gobj_short_name(gobj),
                 command,
@@ -576,7 +576,7 @@ PRIVATE json_t *build_cmd_kw(
             } else {
                 *result = -1;
                 JSON_DECREF(kw_cmd);
-                return json_local_sprintf(
+                return json_sprintf(
                     "%s: '%s' command has no option '%s'",
                     gobj_short_name(gobj),
                     command,
@@ -591,7 +591,7 @@ PRIVATE json_t *build_cmd_kw(
         if(!jn_param) {
             *result = -1;
             JSON_DECREF(kw_cmd);
-            jn_param = json_local_sprintf(
+            jn_param = json_sprintf(
                 "%s: internal error, command '%s', parameter '%s', value '%s'",
                 gobj_short_name(gobj),
                 command,
@@ -606,7 +606,7 @@ PRIVATE json_t *build_cmd_kw(
     if(!empty_string(pxxx)) {
         *result = -1;
         JSON_DECREF(kw_cmd);
-        return json_local_sprintf(
+        return json_sprintf(
             "%s: command '%s' with extra parameters: '%s'",
             gobj_short_name(gobj),
             command,
@@ -686,7 +686,7 @@ PUBLIC json_t *gobj_build_cmds_doc(hgobj gobj, json_t *kw)
         }
 
         KW_DECREF(kw);
-        return json_local_sprintf(
+        return json_sprintf(
             "%s: command '%s' not available.\n",
             gobj_short_name(gobj),
             cmd

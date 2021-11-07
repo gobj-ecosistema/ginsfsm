@@ -111,7 +111,7 @@ PUBLIC void trace_inter_event(const char *prefix, const char *event, json_t *kw)
         "kw", kw_compact
     );
 
-    log_debug_json(0, jn_iev, prefix);
+    log_debug_json(0, jn_iev, "%s", prefix);
     json_decref(jn_iev);
 }
 
@@ -125,7 +125,7 @@ PUBLIC void trace_inter_event2(const char *prefix, const char *event, json_t *kw
         "kw", kw
     );
 
-    log_debug_json(0, jn_iev, prefix);
+    log_debug_json(0, jn_iev, "%s", prefix);
     json_decref(jn_iev);
 }
 
