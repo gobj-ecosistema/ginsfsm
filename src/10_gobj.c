@@ -11585,7 +11585,7 @@ PUBLIC uint32_t gobj_trace_level(hgobj gobj_)
 {
     GObj_t * gobj = gobj_;
 
-    if(__panic_trace__ || __deep_trace__) {
+    if(__deep_trace__ || __panic_trace__) {
         return -1;
     }
     uint32_t bitmask = __global_trace_level__;
@@ -11875,7 +11875,7 @@ PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj_)
  ***************************************************************************/
 PRIVATE inline BOOL is_machine_tracing(GObj_t * gobj)
 {
-    if(__panic_trace__) {
+    if(__deep_trace__ || __panic_trace__) {
         return TRUE;
     }
     if(!gobj) {
@@ -12064,7 +12064,8 @@ PUBLIC BOOL gobj_user_has_authz(
     if(gobj->gclass->gmt.mt_authz_checker) {
         BOOL has_permission = gobj->gclass->gmt.mt_authz_checker(gobj, authz, kw, src);
         if(__trace_gobj_authzs__(gobj)) {
-            trace_machine("owner 🔑🔑 %s => %s",
+            log_debug_json(0, kw,
+                "local authzs 🔑🔑 %s => %s",
                 gobj_short_name(gobj),
                 has_permission?"👍":"🚫"
             );
@@ -12078,7 +12079,8 @@ PUBLIC BOOL gobj_user_has_authz(
     if(__global_authz_checker_fn__) {
         BOOL has_permission = __global_authz_checker_fn__(gobj, authz, kw, src);
         if(__trace_gobj_authzs__(gobj)) {
-            trace_machine("global 🔑🔑 %s => %s",
+            log_debug_json(0, kw,
+                "global authzs 🔑🔑 %s => %s",
                 gobj_short_name(gobj),
                 has_permission?"👍":"🚫"
             );

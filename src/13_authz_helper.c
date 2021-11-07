@@ -38,14 +38,6 @@ PUBLIC json_t *authzs_list(
         jn_list = sdataauth2json(gobj_get_global_authz_table());
     } else {
         if(!gobj_gclass(gobj)->authz_table) {
-            log_error(0,
-                "gobj",         "%s", gobj_full_name(gobj),
-                "function",     "%s", __FUNCTION__,
-                "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-                "msg",          "%s", "gclass without authzs acl",
-                "gclass_name",  "%s", gobj_gclass_name(gobj),
-                NULL
-            );
             return 0;
         }
         jn_list = sdataauth2json(gobj_gclass(gobj)->authz_table);
@@ -148,14 +140,25 @@ PUBLIC json_t *gobj_build_authzs_doc(
 
         json_t *jn_authzs = authzs_list(service_gobj, authz);
         if(!jn_authzs) {
-            return msg_iev_build_webix(
-                gobj,
-                -1,
-                json_sprintf("Authz not found: '%s'", authz),
-                0,
-                0,
-                kw // owned
-            );
+            if(empty_string(authz)) {
+                return msg_iev_build_webix(
+                    gobj,
+                    -1,
+                    json_sprintf("Service without authzs table: '%s'", service),
+                    0,
+                    0,
+                    kw // owned
+                );
+            } else {
+                return msg_iev_build_webix(
+                    gobj,
+                    -1,
+                    json_sprintf("Authz not found: '%s' in service: '%s'", authz, service),
+                    0,
+                    0,
+                    kw // owned
+                );
+            }
         }
 
         return msg_iev_build_webix(

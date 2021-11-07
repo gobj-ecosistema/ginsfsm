@@ -432,6 +432,7 @@ PRIVATE json_t *build_cmd_kw(
     *result = 0;
 
     if(!input_parameters) {
+        json_object_update_missing(kw_cmd, kw);
         return kw_cmd;
     }
     /*
