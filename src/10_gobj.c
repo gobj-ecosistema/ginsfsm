@@ -6915,12 +6915,15 @@ PUBLIC int gobj_send_event(
             );
         } else {
             log_error(0,
-                "gobj",         "%s", gobj_full_name(dst),
+                "gobj",         "%s", gobj_short_name(dst),
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_PARAMETER_ERROR,
                 "msg",          "%s", "Event NOT DEFINED in input_events array",
                 "event",        "%s", event,
-                "src",          "%s", gobj_full_name(src),
+                "src",          "%s", gobj_short_name(src),
+                "state",        "%s", gobj_current_state(dst),
+                "full_src",     "%s", gobj_full_name(src),
+                "full_dst",     "%s", gobj_full_name(dst),
                 NULL
             );
         }
@@ -9621,12 +9624,11 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
             return TRUE;
         }
     }
-    log_error(0,
-        "gobj",         "%s", __FILE__,
+    log_error(LOG_OPT_TRACE_STACK,
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "new_state UNKNOWN",
-        "full-name",    "%s", gobj_full_name(gobj),
         "new_state",    "%s", new_state,
         "cur_state",    "%s", gobj_current_state(gobj),
         NULL
@@ -9681,12 +9683,11 @@ PUBLIC int gobj_cmp_current_state(hgobj gobj_, const char *state)
                 return +1;
         }
     }
-    log_error(0,
-        "gobj",         "%s", __FILE__,
+    log_error(LOG_OPT_TRACE_STACK,
+        "gobj",         "%s", gobj_full_name(gobj),
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "state UNKNOWN",
-        "full-name",    "%s", gobj_full_name(gobj),
         "state",        "%s", state,
         NULL
     );
