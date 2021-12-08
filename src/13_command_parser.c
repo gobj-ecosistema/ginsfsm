@@ -369,7 +369,7 @@ PRIVATE void add_command_help(GBUFFER *gbuf, const sdata_desc_t *pcmds, BOOL ext
             gbuf_printf(gbuf, ", %s", *alias);
             alias++;
         }
-        gbuf_printf(gbuf, ")", pcmds->name);
+        gbuf_printf(gbuf, ")");
     } else {
         gbuf_printf(gbuf, "- %-28s", pcmds->name);
     }
@@ -379,7 +379,10 @@ PRIVATE void add_command_help(GBUFFER *gbuf, const sdata_desc_t *pcmds, BOOL ext
         if((pparam->flag & SDF_REQUIRED) && !(pparam->flag & SDF_PERSIST)) { // TODO PERSITS? why?
             gbuf_printf(gbuf, " <%s>", pparam->name);
         } else {
-            gbuf_printf(gbuf, " [%s='%s']", pparam->name, pparam->default_value?pparam->default_value:"?");
+            gbuf_printf(gbuf,
+                " [%s='%s']",
+                pparam->name, pparam->default_value?(char *)pparam->default_value:"?"
+            );
         }
         add_point = TRUE;
         pparam++;

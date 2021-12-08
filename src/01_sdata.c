@@ -1276,7 +1276,10 @@ PRIVATE json_t *cmddesc2json(const sdata_desc_t *it)
         if((pparam->flag & SDF_REQUIRED)) {
             gbuf_printf(gbuf, " <%s>", pparam->name);
         } else {
-            gbuf_printf(gbuf, " [%s='%s']", pparam->name, pparam->default_value?pparam->default_value:"?");
+            gbuf_printf(gbuf,
+                " [%s='%s']",
+                pparam->name, pparam->default_value?(char *)pparam->default_value:"?"
+            );
         }
         pparam++;
     }
