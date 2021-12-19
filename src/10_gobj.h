@@ -1625,6 +1625,7 @@ PUBLIC int gobj_set_gobj_no_trace(hgobj gobj, const char *level, BOOL set);
  */
 PUBLIC uint32_t gobj_trace_level(hgobj gobj);
 PUBLIC uint32_t gobj_no_trace_level(hgobj gobj);
+PUBLIC int gobj_get_deep_tracing(void);
 
 /*
  *  Get traces set in tree of gclass or gobj

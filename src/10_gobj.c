@@ -11374,6 +11374,10 @@ PUBLIC int gobj_set_deep_tracing(BOOL set)
 
     return 0;
 }
+PUBLIC int gobj_get_deep_tracing(void)
+{
+    return __deep_trace__;
+}
 
 /****************************************************************************
  *  Set or Reset gobj trace level
