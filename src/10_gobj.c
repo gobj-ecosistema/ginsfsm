@@ -7332,7 +7332,7 @@ PUBLIC hgobj gobj_set_bottom_gobj(hgobj gobj_, hgobj bottom_gobj)
          *
          */
         if(bottom_gobj) {
-            log_warning(0,
+            log_warning(LOG_OPT_TRACE_STACK,
                 "gobj",         "%s", gobj_full_name(gobj),
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_PARAMETER_ERROR,
