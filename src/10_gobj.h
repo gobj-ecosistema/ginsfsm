@@ -1644,6 +1644,8 @@ PUBLIC json_t *gobj_get_gclass_no_trace_level(GCLASS *gclass);
 PUBLIC json_t *gobj_get_gobj_trace_level(hgobj gobj);
 PUBLIC json_t *gobj_get_gobj_no_trace_level(hgobj gobj);
 
+PUBLIC void trace_machine(const char *fmt, ...) JANSSON_ATTRS((format(printf, 1, 2)));
+
 /*--------------------------------------------*
  *      AUTHZ Authorization functions
  *--------------------------------------------*/

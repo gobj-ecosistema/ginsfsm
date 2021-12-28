@@ -423,9 +423,6 @@ PRIVATE hgobj _create_yuno(
 PRIVATE service_register_t * _find_service(const char *service);
 
 PRIVATE char *tab(char *bf, int bflen);
-PRIVATE void trace_machine(const char *fmt, ...)
-    JANSSON_ATTRS((format(printf, 1, 2)));
-
 PRIVATE inline BOOL is_machine_tracing(GObj_t * gobj);
 PRIVATE inline BOOL is_machine_not_tracing(GObj_t * gobj);
 
@@ -11929,7 +11926,7 @@ PRIVATE char *tab(char *bf, int bflen)
 /****************************************************************************
  *  Trace machine function
  ****************************************************************************/
-PRIVATE void trace_machine(const char *fmt, ...)
+PUBLIC void trace_machine(const char *fmt, ...)
 {
     va_list ap;
     char bf[4*1024];
