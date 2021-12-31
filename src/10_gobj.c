@@ -4406,7 +4406,7 @@ PUBLIC int gobj_play(hgobj gobj_)
         return -1;
     }
     if(gobj->playing) {
-        log_warning(0,
+        log_warning(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_OPERATIONAL_ERROR,
@@ -4428,7 +4428,7 @@ PUBLIC int gobj_play(hgobj gobj_)
     if(!gobj_is_running(gobj)) {
         if(!(gobj->gclass->gcflag & gcflag_required_start_to_play)) {
             // Default: It's auto-starting but display error (magic but warn!).
-            log_error(0,
+            log_error(LOG_OPT_TRACE_STACK,
                 "gobj",         "%s", gobj_full_name(gobj),
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_OPERATIONAL_ERROR,
@@ -4437,7 +4437,7 @@ PUBLIC int gobj_play(hgobj gobj_)
             );
             gobj_start(gobj);
         } else {
-            log_error(0,
+            log_error(LOG_OPT_TRACE_STACK,
                 "gobj",         "%s", gobj_full_name(gobj),
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_OPERATIONAL_ERROR,
