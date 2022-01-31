@@ -23,20 +23,6 @@ PRIVATE BOOL command_in_gobj(
     hgobj gobj,
     const char *command
 );
-PRIVATE json_t * expand_command(
-    hgobj gobj,
-    const char *command,
-    json_t *kw,     // NOT owned
-    const sdata_desc_t **cmd_desc
-);
-PRIVATE json_t *build_cmd_kw(
-    hgobj gobj,
-    const char *command,
-    const sdata_desc_t *cnf_cmd,
-    char *parameters,
-    json_t *kw, // not owned
-    int *result
-);
 
 /***************************************************************
  *              Data
@@ -67,7 +53,8 @@ PUBLIC json_t * command_parser(hgobj gobj,
         );
     }
 
-    json_t *kw_cmd = expand_command(gobj, command, kw, &cnf_cmd);
+    const sdata_desc_t *command_table = gobj_gclass(gobj)->command_table;
+    json_t *kw_cmd = expand_command(gobj_short_name(gobj), command_table, command, kw, &cnf_cmd);
     if(gobj_trace_level(gobj) & (TRACE_EV_KW)) {
         log_debug_json(0, kw_cmd, "expanded_command: kw_cmd");
     }
@@ -213,15 +200,14 @@ PRIVATE BOOL command_in_gobj(
  *  If cmd_desc is 0 then there is a error
  *  and the return json is a json string message with the error.
  ***************************************************************************/
-PRIVATE json_t *expand_command(
-    hgobj gobj,
+PUBLIC json_t *expand_command(
+    const char *gobj_name,
+    const sdata_desc_t *command_table,
     const char *command,
     json_t *kw,     // NOT owned
     const sdata_desc_t **cmd_desc
 )
 {
-    const sdata_desc_t *command_table = gobj_gclass(gobj)->command_table;
-
     if(cmd_desc) {
         *cmd_desc = 0; // It's error
     }
@@ -236,14 +222,14 @@ PRIVATE json_t *expand_command(
     const sdata_desc_t *cnf_cmd = command_get_cmd_desc(command_table, cmd);
     if(!cnf_cmd) {
         gbmem_free(str);
-        return json_sprintf("No '%s' command found in '%s'", cmd, gobj_short_name(gobj));
+        return json_sprintf("No command found: '%s'", cmd);
     }
     if(cmd_desc) {
         *cmd_desc = cnf_cmd;
     }
 
     int ok = 0;
-    json_t *kw_cmd = build_cmd_kw(gobj, cnf_cmd->name, cnf_cmd, p, kw, &ok);
+    json_t *kw_cmd = build_cmd_kw(gobj_name, cnf_cmd->name, cnf_cmd, p, kw, &ok);
     gbmem_free(str);
     if(ok < 0) {
         if(cmd_desc) {
@@ -259,7 +245,7 @@ PRIVATE json_t *expand_command(
  *  Parameters of command are described as sdata_desc_t
  ***************************************************************************/
 PRIVATE json_t *parameter2json(
-    hgobj gobj,
+    const char *gobj_name,
     int type,
     const char *name,
     const char *s,
@@ -301,7 +287,7 @@ PRIVATE json_t *parameter2json(
         *result = -1;
         json_t *jn_data = json_sprintf(
             "%s: type %d of parameter '%s' is unknown",
-            gobj_short_name(gobj),
+            gobj_name,
             (int)type,
             name
         );
@@ -415,13 +401,14 @@ PRIVATE void add_command_help(GBUFFER *gbuf, const sdata_desc_t *pcmds, BOOL ext
  *  string parameters to json dict
  *  If error (result < 0) return a json string message
  ***************************************************************************/
-PRIVATE json_t *build_cmd_kw(
-    hgobj gobj,
+PUBLIC json_t *build_cmd_kw(
+    const char *gobj_name,
     const char *command,
     const sdata_desc_t *cnf_cmd,
     char *parameters,   // input line
     json_t *kw, // not owned
-    int *result)
+    int *result
+)
 {
     const sdata_desc_t *input_parameters = cnf_cmd->schema;
     BOOL wild_command = (cnf_cmd->flag & SDF_WILD_CMD)?1:0;
@@ -470,7 +457,7 @@ PRIVATE json_t *build_cmd_kw(
                 JSON_DECREF(kw_cmd);
                 return json_sprintf(
                     "%s: command '%s', parameter '%s' is required",
-                    gobj_short_name(gobj),
+                    gobj_name,
                     command,
                     ip->name
                 );
@@ -482,11 +469,11 @@ PRIVATE json_t *build_cmd_kw(
             JSON_DECREF(kw_cmd);
             return json_sprintf(
                 "%s: required parameter '%s' not found",
-                gobj_short_name(gobj),
+                gobj_name,
                 ip->name
             );
         }
-        json_t *jn_param = parameter2json(gobj, ip->type, ip->name, param, result);
+        json_t *jn_param = parameter2json(gobj_name, ip->type, ip->name, param, result);
         if(*result < 0) {
             JSON_DECREF(kw_cmd);
             return jn_param;
@@ -496,7 +483,7 @@ PRIVATE json_t *build_cmd_kw(
             JSON_DECREF(kw_cmd);
             return json_sprintf(
                 "%s: internal error, command '%s', parameter '%s'",
-                gobj_short_name(gobj),
+                gobj_name,
                 command,
                 ip->name
             );
@@ -530,7 +517,7 @@ PRIVATE json_t *build_cmd_kw(
 
         if(ip->default_value) {
             json_t *jn_param = parameter2json(
-                gobj,
+                gobj_name,
                 ip->type,
                 ip->name,
                 (char *)ip->default_value,
@@ -565,7 +552,7 @@ PRIVATE json_t *build_cmd_kw(
             JSON_DECREF(kw_cmd);
             return json_sprintf(
                 "%s: command '%s', optional parameters must be with key=value format ('%s=?')",
-                gobj_short_name(gobj),
+                gobj_name,
                 command,
                 key
             );
@@ -573,16 +560,16 @@ PRIVATE json_t *build_cmd_kw(
         const sdata_desc_t *ip = find_ip_parameter(input_parameters, key);
         json_t *jn_param = 0;
         if(ip) {
-            jn_param = parameter2json(gobj, ip->type, ip->name, value, result);
+            jn_param = parameter2json(gobj_name, ip->type, ip->name, value, result);
         } else {
             if(wild_command) {
-                jn_param = parameter2json(gobj, ASN_OCTET_STR, "wild-option", value, result);
+                jn_param = parameter2json(gobj_name, ASN_OCTET_STR, "wild-option", value, result);
             } else {
                 *result = -1;
                 JSON_DECREF(kw_cmd);
                 return json_sprintf(
                     "%s: '%s' command has no option '%s'",
-                    gobj_short_name(gobj),
+                    gobj_name,
                     command,
                     key?key:"?"
                 );
@@ -597,7 +584,7 @@ PRIVATE json_t *build_cmd_kw(
             JSON_DECREF(kw_cmd);
             jn_param = json_sprintf(
                 "%s: internal error, command '%s', parameter '%s', value '%s'",
-                gobj_short_name(gobj),
+                gobj_name,
                 command,
                 key,
                 value
@@ -612,7 +599,7 @@ PRIVATE json_t *build_cmd_kw(
         JSON_DECREF(kw_cmd);
         return json_sprintf(
             "%s: command '%s' with extra parameters: '%s'",
-            gobj_short_name(gobj),
+            gobj_name,
             command,
             pxxx
         );

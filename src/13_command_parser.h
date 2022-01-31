@@ -34,6 +34,23 @@ PUBLIC const sdata_desc_t *command_get_cmd_desc(
     const char *cmd
 );
 
+PUBLIC json_t *expand_command(
+    const char *gobj_name,
+    const sdata_desc_t *command_table,
+    const char *command,
+    json_t *kw,     // NOT owned
+    const sdata_desc_t **cmd_desc
+);
+
+PUBLIC json_t *build_cmd_kw(
+    const char *gobj_name,
+    const char *command,
+    const sdata_desc_t *cnf_cmd,
+    char *parameters,
+    json_t *kw, // not owned
+    int *result
+);
+
 #ifdef __cplusplus
 }
 #endif
