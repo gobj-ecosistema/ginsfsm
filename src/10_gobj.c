@@ -1066,6 +1066,11 @@ PUBLIC json_t * gobj_repr_service_register(const char *gclass_name)
             if(srv_reg->service) {
                 json_object_set_new(
                     jn_srv,
+                    "id",
+                    json_string(srv_reg->service)
+                );
+                json_object_set_new(
+                    jn_srv,
                     "service",
                     json_string(srv_reg->service)
                 );
