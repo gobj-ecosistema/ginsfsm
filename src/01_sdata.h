@@ -98,6 +98,7 @@ typedef enum {   // HACK strict ascendent value!, strings in sdata_flag_names[]
     SDF_AUTHZ_RS    = 0x00100000,   /* Need Stats '__reset_stats__' authorization */
 } sdata_flag_t;
 
+#define SDF_PUBLIC_ATTR (SDF_WR|SDF_RD|SDF_STATS|SDF_PERSIST|SDF_VOLATIL|SDF_RSTATS|SDF_PSTATS)
 
 #define SDATA_END()                                     \
 {                                                       \

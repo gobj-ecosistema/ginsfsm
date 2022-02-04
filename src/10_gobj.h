@@ -1528,6 +1528,7 @@ PUBLIC json_t *attr2json(hgobj gobj);       // Return a list with gobj's public 
 
 PUBLIC json_t *webix_gobj_tree(hgobj gobj); // Return webix style tree with gobj's tree.
 PUBLIC json_t *view_gobj_tree(hgobj gobj);  // Return tree with gobj's tree.
+PUBLIC json_t *list_gclass_gobjs(hgobj gobj, const char *gclass_name); // Return list with child gobj's with gclass_name gclass
 
 PUBLIC json_t *gobj_gobjs_treedb_schema(const char *topic_name); // Return is NOT YOURS
 PUBLIC json_t *gobj_gobjs_treedb_data(hgobj gobj);          // Return must be decref

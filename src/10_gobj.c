@@ -1061,7 +1061,7 @@ PUBLIC json_t * gobj_repr_service_register(const char *gclass_name)
     while(srv_reg) {
         hgobj gobj_service = srv_reg->gobj;
         GCLASS *gclass = gobj_gclass(gobj_service);
-        if(empty_string(gclass_name) || strcmp(gclass->gclass_name, gclass_name)==0) {
+        if(empty_string(gclass_name) || strcasecmp(gclass->gclass_name, gclass_name)==0) {
             json_t *jn_srv = json_object();
             if(srv_reg->service) {
                 json_object_set_new(
@@ -10292,7 +10292,7 @@ PUBLIC json_t *gclass_public_attrs(GCLASS *gclass)
             gclass->gclass_name,
             sdatadesc2json(
                 gclass->tattr_desc,
-                SDF_WR|SDF_RD|SDF_STATS|SDF_PERSIST|SDF_VOLATIL|SDF_RSTATS|SDF_PSTATS,
+                SDF_PUBLIC_ATTR,
                 0
             )
         );
@@ -10305,7 +10305,7 @@ PUBLIC json_t *gclass_public_attrs(GCLASS *gclass)
                     gclass_reg->gclass->gclass_name,
                     sdatadesc2json(
                         gclass_reg->gclass->tattr_desc,
-                        SDF_WR|SDF_RD|SDF_STATS|SDF_PERSIST|SDF_VOLATIL|SDF_RSTATS|SDF_PSTATS,
+                        SDF_PUBLIC_ATTR,
                         0
                     )
                 );
@@ -10473,6 +10473,11 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
         "fullname",
         json_string(gobj_full_name(gobj))
     );
+    json_object_set_new(
+        jn_dict,
+        "parent",
+        json_string(gobj_short_name(gobj_parent(gobj)))
+    );
 
     json_object_set_new(
         jn_dict,
@@ -10482,8 +10487,17 @@ PUBLIC json_t *gobj2json(hgobj gobj_)
     json_object_set_new(
         jn_dict,
         "attrs",
-        sdata2json(gobj_hsdata(gobj), -1, 0)
+        sdata2json(gobj_hsdata(gobj), SDF_PUBLIC_ATTR, 0)
     );
+
+    if(gobj->jn_user_data) {
+        json_object_set(
+            jn_dict,
+            "user_data",
+            gobj->jn_user_data
+        );
+    }
+
     json_object_set_new(
         jn_dict,
         "state",
@@ -10834,7 +10848,7 @@ PUBLIC json_t *webix_gobj_tree(hgobj gobj)
 /***************************************************************************
  *  View a gobj tree, with states of running/playing and attributes
  ***************************************************************************/
-PRIVATE int _add_gobj(json_t *jn_list, GObj_t * gobj)
+PRIVATE int _add_gobj_tree(json_t *jn_list, GObj_t * gobj)
 {
     json_t *jn_service = gobj2json(gobj);
     json_array_append_new(jn_list, jn_service);
@@ -10847,7 +10861,7 @@ PRIVATE int _add_gobj(json_t *jn_list, GObj_t * gobj)
         i_child = gobj_first_child(gobj, (hgobj *)&child);
 
         while(i_child) {
-            _add_gobj(jn_data, child);
+            _add_gobj_tree(jn_data, child);
             i_child = gobj_next_child(i_child, (hgobj *)&child);
         }
     }
@@ -10856,7 +10870,36 @@ PRIVATE int _add_gobj(json_t *jn_list, GObj_t * gobj)
 PUBLIC json_t *view_gobj_tree(hgobj gobj)
 {
     json_t *jn_tree = json_array();
-    _add_gobj(jn_tree, gobj);
+    _add_gobj_tree(jn_tree, gobj);
+    return jn_tree;
+}
+
+/***************************************************************************
+ *  Return list with child gobj's with gclass_name gclass
+ *  with states of running/playing and attributes
+ ***************************************************************************/
+PRIVATE int _add_gclass_gobjs(json_t *jn_list, GObj_t * gobj, const char *gclass_name)
+{
+    if(!empty_string(gclass_name) && strcasecmp(gobj->gclass->gclass_name, gclass_name)==0) {
+        json_t *jn_gobj = gobj2json(gobj);
+        json_array_append_new(jn_list, jn_gobj);
+    }
+
+    if(gobj_child_size(gobj)>0) {
+        GObj_t * child; rc_instance_t *i_child;
+        i_child = gobj_first_child(gobj, (hgobj *)&child);
+
+        while(i_child) {
+            _add_gclass_gobjs(jn_list, child, gclass_name);
+            i_child = gobj_next_child(i_child, (hgobj *)&child);
+        }
+    }
+    return 0;
+}
+PUBLIC json_t *list_gclass_gobjs(hgobj gobj, const char *gclass_name)
+{
+    json_t *jn_tree = json_array();
+    _add_gclass_gobjs(jn_tree, gobj, gclass_name);
     return jn_tree;
 }
 
@@ -10884,7 +10927,7 @@ PUBLIC json_t *gobj_gobjs_treedb_schema(const char *topic_name)
 /***************************************************************************
  *  To use in treedb style
  ***************************************************************************/
-PRIVATE int _add_gobj2(json_t *jn_list, json_t *parent, GObj_t *gobj)
+PRIVATE int _add_gobj_treedb_data(json_t *jn_list, json_t *parent, GObj_t *gobj)
 {
     json_t *jn_dict = json_object();
     json_array_append_new(jn_list, jn_dict);
@@ -10977,7 +11020,7 @@ PRIVATE int _add_gobj2(json_t *jn_list, json_t *parent, GObj_t *gobj)
         i_child = gobj_first_child(gobj, (hgobj *)&child);
 
         while(i_child) {
-            _add_gobj2(jn_list, jn_dict, child);
+            _add_gobj_treedb_data(jn_list, jn_dict, child);
             i_child = gobj_next_child(i_child, (hgobj *)&child);
         }
     }
@@ -10991,7 +11034,7 @@ PUBLIC json_t *gobj_gobjs_treedb_data(hgobj gobj)
         gobj = __yuno__;
     }
 
-    _add_gobj2(jn_list, 0, gobj);
+    _add_gobj_treedb_data(jn_list, 0, gobj);
 
     return jn_list;
 }
