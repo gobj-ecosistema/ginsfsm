@@ -278,11 +278,13 @@ PRIVATE const trace_level_t s_global_trace_level[16] = {
 {"libuv",           "Trace libuv mixins"},
 {"ev_kw",           "Trace event keywords"},
 {"authzs",          "Trace authorizations"},
+{"subscriptions2",  "Trace subscriptions of gobjs with every send event"},
 {0, 0},
 };
 #define __trace_gobj_create_delete__(gobj)  (gobj_trace_level(gobj) & TRACE_CREATE_DELETE)
 #define __trace_gobj_create_delete2__(gobj) (gobj_trace_level(gobj) & TRACE_CREATE_DELETE2)
 #define __trace_gobj_subscriptions__(gobj)  (gobj_trace_level(gobj) & TRACE_SUBSCRIPTIONS)
+#define __trace_gobj_subscriptions2__(gobj)  (gobj_trace_level(gobj) & TRACE_SUBSCRIPTIONS2)
 #define __trace_gobj_start_stop__(gobj)     (gobj_trace_level(gobj) & TRACE_START_STOP)
 #define __trace_gobj_oids__(gobj)           (gobj_trace_level(gobj) & TRACE_OIDS)
 #define __trace_gobj_uv__(gobj)             (gobj_trace_level(gobj) & TRACE_UV)
@@ -6041,7 +6043,9 @@ PRIVATE int _delete_subscription(hsdata subs, BOOL force, BOOL not_inform)
     /*-----------------------------*
      *  Trace
      *-----------------------------*/
-    if(__trace_gobj_subscriptions__(subscriber) || __trace_gobj_subscriptions__(publisher)) {
+    if(__trace_gobj_subscriptions__(subscriber) || __trace_gobj_subscriptions__(publisher) ||
+        __trace_gobj_subscriptions2__(subscriber) || __trace_gobj_subscriptions2__(publisher)
+    ) {
         trace_machine("💜💜⏪ %s unsubscribing event '%s' of %s",
             gobj_full_name(subscriber),
             event,
@@ -6301,7 +6305,9 @@ PUBLIC hsdata gobj_subscribe_event(
     /*-----------------------------*
      *  Trace
      *-----------------------------*/
-    if(__trace_gobj_subscriptions__(subscriber) || __trace_gobj_subscriptions__(publisher)) {
+    if(__trace_gobj_subscriptions__(subscriber) || __trace_gobj_subscriptions__(publisher) ||
+        __trace_gobj_subscriptions2__(subscriber) || __trace_gobj_subscriptions2__(publisher)
+    ) {
         trace_machine("💜💜⏩ %s subscribing event '%s' of %s",
             gobj_full_name(subscriber),
             event?event:"*",
@@ -6633,14 +6639,9 @@ PUBLIC int gobj_publish_event(
             event,
             publisher->mach->fsm->state_names[publisher->mach->current_state]
         );
-        if(kw) {
-            if(__trace_gobj_ev_kw__(publisher) ||
-                __trace_gobj_subscriptions__(publisher)
-            ) {
-                log_debug_json(0, kw, "kw");
-            }
-        }
+        log_debug_json(0, kw, "kw");
     }
+    BOOL tracea2 = __trace_gobj_subscriptions2__(publisher);
 
     /*---------------------------*
      *  Own publication method
@@ -6782,6 +6783,16 @@ PUBLIC int gobj_publish_event(
             /*
              *  Send event
              */
+            if(tracea2) {
+                trace_machine("🔝 mach(%s%s), ev: %s, from(%s%s)",
+                    (!subscriber->running)?"!!":"",
+                    gobj_short_name(subscriber),
+                    event,
+                    (publisher && !publisher->running)?"!!":"",
+                    gobj_short_name(publisher)
+                );
+                log_debug_json(0, kw2publish, "kw");
+            }
             ret_sum += gobj_send_event(subscriber, event_name, kw2publish, publisher);
 
             sent_count++;

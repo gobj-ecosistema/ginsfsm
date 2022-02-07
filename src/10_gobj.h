@@ -1557,6 +1557,7 @@ enum { /* String table in s_global_trace_level */
     TRACE_UV                = 0x00800000,
     TRACE_EV_KW             = 0x01000000,
     TRACE_AUTHZS            = 0x02000000,
+    TRACE_SUBSCRIPTIONS2    = 0x04000000,
 };
 #define TRACE_USER_LEVEL    0x0000FFFF
 #define TRACE_GLOBAL_LEVEL  0xFFFF0000
@@ -1568,6 +1569,7 @@ enum { /* String table in s_global_trace_level */
  *      "create_delete"
  *      "create_delete2"
  *      "subscriptions"
+ *      "subscriptions2"
  *      "start_stop"
  *      "monitor"
  *      "event_monitor"
