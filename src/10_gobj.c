@@ -8671,7 +8671,7 @@ PUBLIC int gobj_write_json_attr(hgobj gobj, const char *name, json_t *value)
 {
     hsdata hs = gobj_hsdata2(gobj, name, FALSE);
     if(hs) {
-        return sdata_write_json(hs, name, value);
+        return sdata_write_json(hs, name, value); // value is incref!
     }
     log_warning(LOG_OPT_TRACE_STACK,
         "gobj",         "%s", gobj_full_name(gobj),
@@ -8682,6 +8682,31 @@ PUBLIC int gobj_write_json_attr(hgobj gobj, const char *name, json_t *value)
         "attr",         "%s", name?name:"",
         NULL
     );
+    KW_INCREF(value); // although error the json is incref
+    return -1;
+}
+
+/***************************************************************************
+ *  ATTR: write.  WARNING json is NOT incref
+ ***************************************************************************/
+PUBLIC int gobj_write_new_json_attr(hgobj gobj, const char *name, json_t *value)
+{
+    hsdata hs = gobj_hsdata2(gobj, name, FALSE);
+    if(hs) {
+        int ret = sdata_write_json(hs, name, value); // value is incref!
+        KW_DECREF(value);
+        return ret;
+    }
+    log_warning(LOG_OPT_TRACE_STACK,
+        "gobj",         "%s", gobj_full_name(gobj),
+        "function",     "%s", __FUNCTION__,
+        "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+        "msg",          "%s", "GClass Attribute NOT FOUND",
+        "gclass",       "%s", gobj_gclass_name(gobj),
+        "attr",         "%s", name?name:"",
+        NULL
+    );
+    KW_DECREF(value);
     return -1;
 }
 
