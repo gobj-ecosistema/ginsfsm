@@ -30,7 +30,7 @@ PUBLIC void end_ginsfsm_library(void);
 /*********************************************************************
  *      Version
  *********************************************************************/
-#define __ginsfsm_version__  "5.3.1"  /* XX__yuneta_version__XX */
+#define __ginsfsm_version__  "5.4.0"  /* XX__yuneta_version__XX */
 
 
 #ifdef __cplusplus

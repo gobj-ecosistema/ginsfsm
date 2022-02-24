@@ -9706,6 +9706,18 @@ PUBLIC const char *gobj_current_state(hgobj gobj_)
 }
 
 /***************************************************************************
+ *  Return last state
+ ***************************************************************************/
+PUBLIC const char *gobj_last_state(hgobj gobj_)
+{
+    GObj_t *gobj = gobj_;
+    register const char **state_names = gobj->mach->fsm->state_names;
+    register int last_state = gobj->mach->last_state;
+
+    return *(state_names+last_state);
+}
+
+/***************************************************************************
  *  Return true if gobj is in this `state`
  ***************************************************************************/
 PUBLIC BOOL gobj_in_this_state(hgobj gobj, const char *state)
