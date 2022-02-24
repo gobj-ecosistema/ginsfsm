@@ -331,6 +331,14 @@ PRIVATE const event_flag_names_t event_flag_names[] = {
 {0, 0}
 };
 
+/*
+ *  Global (gobj) output events
+ */
+PRIVATE const EVENT global_output_events[] = {
+    {__EV_STATE_CHANGED__,  0,  0,  ""},
+    {NULL, 0, 0, ""}
+};
+
 /*---------------------------------------------*
  *      Global authz levels
  *---------------------------------------------*/
@@ -407,6 +415,7 @@ PRIVATE json_t *__2key__ = 0;
 /****************************************************************
  *         Prototypes
  ****************************************************************/
+PRIVATE BOOL _change_state(GObj_t * gobj, const char *new_state);
 PRIVATE void free_gclass_reg(gclass_register_t *gclass_reg);
 PRIVATE void free_service_reg(service_register_t *srv_reg);
 PRIVATE void free_trans_filter(trans_filter_t *trans_reg);
@@ -6174,10 +6183,9 @@ PUBLIC hsdata gobj_subscribe_event(
     /*-------------------------------------------------*
      *  Check AUTHZ
      *-------------------------------------------------*/
-//     const EVENT *output_event_list = gobj_output_event_list(publisher);
-//     while(output_event_list->event) {
-//         if(output_event_list->authz & EV_AUTHZ_SUBSCRIBE) {
-//             const char *event = output_event_list->event?output_event_list->event:"";
+//     const EVENT *output_event = gobj_output_event(publisher, event);
+//         if(output_event->authz & EV_AUTHZ_SUBSCRIBE) {
+//             const char *event = output_event->event?output_event->event:"";
 //             /*
 //              *  AUTHZ Required
 //              */
@@ -6225,15 +6233,8 @@ PUBLIC hsdata gobj_subscribe_event(
      *--------------------------------------------------------------*/
     if(!empty_string(event)) {
         if(!(publisher->gclass->gcflag & gcflag_no_check_ouput_events)) {
-            const EVENT *output_event_list = gobj_output_event_list(publisher);
-            while(output_event_list->event) {
-                if(strcasecmp(output_event_list->event, event)==0) {
-                    break;
-                }
-                output_event_list++;
-            }
-
-            if(!output_event_list->event) {
+            const EVENT *output_event = gobj_output_event(publisher, event);
+            if(!output_event) {
                 log_error(0,
                     "gobj",         "%s", __FILE__,
                     "function",     "%s", __FUNCTION__,
@@ -7009,8 +7010,9 @@ PUBLIC int gobj_send_event(
              *  If you don’t like this behavior, set the next-state to NULL
              *  and use change_state() to change the state inside the actions.
              */
+            BOOL state_changed = FALSE;
             if(actions->next_state) {
-                gobj_change_state(dst, actions->next_state);
+                state_changed = _change_state(dst, actions->next_state);
             }
             if(ev_desc->flag & EVF_KW_WRITING) {
                 KW_INCREF(kw);
@@ -7039,6 +7041,9 @@ PUBLIC int gobj_send_event(
                 );
             }
 
+            if(state_changed) {
+                gobj_publish_event(dst, __EV_STATE_CHANGED__, 0);
+            }
             __inside__ --;
 
             return ret;
@@ -9609,11 +9614,10 @@ PUBLIC BOOL gobj_typeof_inherited_gclass(hgobj gobj_, const char *gclass_name)
 }
 
 /***************************************************************************
- *  Change state
+ *  Change state (internal use)
  ***************************************************************************/
-PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
+PRIVATE BOOL _change_state(GObj_t * gobj, const char *new_state)
 {
-    GObj_t * gobj = gobj_;
     SMachine_t * mach;
     register char **state_names;
     register int i;
@@ -9658,8 +9662,9 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
                         new_state
                     );
                 }
+                return TRUE;
             }
-            return TRUE;
+            return FALSE;
         }
     }
     log_error(LOG_OPT_TRACE_STACK,
@@ -9675,9 +9680,23 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
 }
 
 /***************************************************************************
+ *  Change state
+ ***************************************************************************/
+PUBLIC BOOL gobj_change_state(hgobj gobj, const char *new_state)
+{
+    BOOL state_changed = _change_state(gobj, new_state);
+
+    if(state_changed) {
+        gobj_publish_event(gobj, __EV_STATE_CHANGED__, 0);
+    }
+
+    return state_changed;
+}
+
+/***************************************************************************
  *  Return current state
  ***************************************************************************/
-PUBLIC const char * gobj_current_state(hgobj gobj_)
+PUBLIC const char *gobj_current_state(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
     register const char **state_names = gobj->mach->fsm->state_names;
@@ -9735,7 +9754,7 @@ PUBLIC int gobj_cmp_current_state(hgobj gobj_, const char *state)
 /***************************************************************************
  *  Return input event desc
  ***************************************************************************/
-PUBLIC const EVENT * gobj_input_event(hgobj gobj_, const char *event)
+PUBLIC const EVENT *gobj_input_event(hgobj gobj_, const char *event)
 {
     GObj_t *gobj = gobj_;
     const EVENT *events = gobj->mach->fsm->input_events;
@@ -9753,29 +9772,33 @@ PUBLIC const EVENT * gobj_input_event(hgobj gobj_, const char *event)
 /***************************************************************************
  *  Return output event desc
  ***************************************************************************/
-PUBLIC const EVENT * gobj_output_event(hgobj gobj_, const char *event)
+PUBLIC const EVENT *gobj_output_event(hgobj gobj_, const char *event)
 {
     GObj_t *gobj = gobj_;
-    const EVENT *events = gobj->mach->fsm->output_events;
-    if(!events) {
-        return 0;
-    }
-    for(int i=0; events->event!=0; i++, events++) {
-        if(strcasecmp(events->event, event)==0) {
-            return events;
+    const EVENT *output_events = gobj->mach->fsm->output_events;
+
+    /*
+     *  Check gclass output events
+     */
+    if(output_events) {
+        for(int i=0; output_events->event!=0; i++, output_events++) {
+            if(strcasecmp(output_events->event, event)==0) {
+                return output_events;
+            }
         }
     }
-    return 0;
-}
 
-/***************************************************************************
- *  Return output event list
- ***************************************************************************/
-PUBLIC const EVENT *gobj_output_event_list(hgobj gobj_)
-{
-    GObj_t *gobj = gobj_;
-    const EVENT *output_event_list = gobj->mach->fsm->output_events;
-    return output_event_list;
+    /*
+     *  Check global (gobj) output events
+     */
+    output_events = global_output_events;
+    for(int i=0; output_events->event!=0; i++, output_events++) {
+        if(strcasecmp(output_events->event, event)==0) {
+            return output_events;
+        }
+    }
+
+    return 0;
 }
 
 /***************************************************************************
