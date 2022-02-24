@@ -7042,7 +7042,9 @@ PUBLIC int gobj_send_event(
             }
 
             if(state_changed) {
-                gobj_publish_event(dst, __EV_STATE_CHANGED__, 0);
+                if(gobj_input_event(dst, __EV_STATE_CHANGED__)) {
+                    gobj_publish_event(dst, __EV_STATE_CHANGED__, 0);
+                }
             }
             __inside__ --;
 
@@ -9687,7 +9689,9 @@ PUBLIC BOOL gobj_change_state(hgobj gobj, const char *new_state)
     BOOL state_changed = _change_state(gobj, new_state);
 
     if(state_changed) {
-        gobj_publish_event(gobj, __EV_STATE_CHANGED__, 0);
+        if(gobj_input_event(gobj, __EV_STATE_CHANGED__)) {
+            gobj_publish_event(gobj, __EV_STATE_CHANGED__, 0);
+        }
     }
 
     return state_changed;
