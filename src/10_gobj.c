@@ -6055,7 +6055,7 @@ PRIVATE int _delete_subscription(hsdata subs, BOOL force, BOOL not_inform)
     if(__trace_gobj_subscriptions__(subscriber) || __trace_gobj_subscriptions__(publisher) ||
         __trace_gobj_subscriptions2__(subscriber) || __trace_gobj_subscriptions2__(publisher)
     ) {
-        trace_machine("💜💜⏪ %s unsubscribing event '%s' of %s",
+        trace_machine("💜💜👎 %s unsubscribing event '%s' of %s",
             gobj_full_name(subscriber),
             event,
             gobj_full_name(publisher)
@@ -6309,7 +6309,7 @@ PUBLIC hsdata gobj_subscribe_event(
     if(__trace_gobj_subscriptions__(subscriber) || __trace_gobj_subscriptions__(publisher) ||
         __trace_gobj_subscriptions2__(subscriber) || __trace_gobj_subscriptions2__(publisher)
     ) {
-        trace_machine("💜💜⏩ %s subscribing event '%s' of %s",
+        trace_machine("💜💜👍 %s subscribing event '%s' of %s",
             gobj_full_name(subscriber),
             event?event:"*",
             gobj_full_name(publisher)
