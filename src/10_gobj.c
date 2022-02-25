@@ -7061,12 +7061,12 @@ PUBLIC int gobj_send_event(
                 json_t *kw_st = json_object();
                 json_object_set_new(
                     kw_st,
-                    "last_state",
+                    "previous_state",
                     json_string(mach->fsm->state_names[mach->last_state])
                 );
                 json_object_set_new(
                     kw_st,
-                    "new_state",
+                    "current_state",
                     json_string(mach->fsm->state_names[mach->current_state])
                 );
                 gobj_publish_event(dst, __EV_STATE_CHANGED__, kw_st);
