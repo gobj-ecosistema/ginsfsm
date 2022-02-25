@@ -6756,7 +6756,7 @@ PUBLIC int gobj_publish_event(
             /*
              *  Check if System event: don't send if subscriber has not it
              */
-            if(ev->flag & EVF_SYSTEM_EVENT) {
+            if(ev && ev->flag & EVF_SYSTEM_EVENT) {
                 if(!gobj_input_event(subscriber, event)) {
                     KW_DECREF(kw2publish);
                     i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
