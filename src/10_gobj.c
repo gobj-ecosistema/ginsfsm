@@ -9729,7 +9729,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
             "current_state",
             json_string(mach->fsm->state_names[mach->current_state])
         );
-        gobj_publish_event(gobj, __EV_STATE_CHANGED__, 0);
+        gobj_publish_event(gobj, __EV_STATE_CHANGED__, kw_st);
     }
 
     return state_changed;
