@@ -9649,27 +9649,6 @@ PRIVATE BOOL _change_state(GObj_t * gobj, const char *new_state)
     register char **state_names;
     register int i;
 
-    if(!gobj) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj NULL",
-            NULL
-        );
-        return FALSE;
-    }
-    if(gobj->obflag & obflag_destroyed) {
-        log_error(LOG_OPT_TRACE_STACK,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj DESTROYED",
-            NULL
-        );
-        return FALSE;
-    }
-
     mach = gobj->mach;
     state_names = (char **)mach->fsm->state_names;
 
@@ -9709,14 +9688,48 @@ PRIVATE BOOL _change_state(GObj_t * gobj, const char *new_state)
 /***************************************************************************
  *  Change state
  ***************************************************************************/
-PUBLIC BOOL gobj_change_state(hgobj gobj, const char *new_state)
+PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
 {
+    GObj_t * gobj =  gobj_;
+
+    if(!gobj) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "gobj NULL",
+            NULL
+        );
+        return FALSE;
+    }
+    if(gobj->obflag & obflag_destroyed) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "gobj DESTROYED",
+            NULL
+        );
+        return FALSE;
+    }
+
     BOOL state_changed = _change_state(gobj, new_state);
 
     if(state_changed) {
-        if(gobj_input_event(gobj, __EV_STATE_CHANGED__)) {
-            gobj_publish_event(gobj, __EV_STATE_CHANGED__, 0);
-        }
+        SMachine_t * mach = gobj->mach;
+
+        json_t *kw_st = json_object();
+        json_object_set_new(
+            kw_st,
+            "previous_state",
+            json_string(mach->fsm->state_names[mach->last_state])
+        );
+        json_object_set_new(
+            kw_st,
+            "current_state",
+            json_string(mach->fsm->state_names[mach->current_state])
+        );
+        gobj_publish_event(gobj, __EV_STATE_CHANGED__, 0);
     }
 
     return state_changed;
