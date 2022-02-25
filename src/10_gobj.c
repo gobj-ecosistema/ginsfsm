@@ -4613,9 +4613,7 @@ PUBLIC int gobj_stop_services(void)
             if(gobj_is_playing(srv_reg->gobj)) {
                 gobj_pause(srv_reg->gobj);
             }
-            if(gobj_is_running(srv_reg->gobj)) {
-                gobj_stop_tree(srv_reg->gobj);
-            }
+            gobj_stop_tree(srv_reg->gobj);
         }
         srv_reg = dl_next(srv_reg);
     }
