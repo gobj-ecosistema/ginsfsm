@@ -4465,9 +4465,11 @@ PUBLIC int gobj_play(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("⏯ ⏯ play: %s",
-            gobj_full_name(gobj)
-        );
+        if(!is_machine_not_tracing(gobj)) {
+            trace_machine("⏯ ⏯ play: %s",
+                gobj_full_name(gobj)
+            );
+        }
     }
     if(__trace_gobj_monitor__(gobj)) {
         monitor_gobj(MTOR_GOBJ_PLAY, gobj);
@@ -4524,9 +4526,11 @@ PUBLIC int gobj_pause(hgobj gobj_)
     }
 
     if(__trace_gobj_start_stop__(gobj)) {
-        trace_machine("⏸ ⏸ pause: %s",
-            gobj_full_name(gobj)
-        );
+        if(!is_machine_not_tracing(gobj)) {
+            trace_machine("⏸ ⏸ pause: %s",
+                gobj_full_name(gobj)
+            );
+        }
     }
     if(__trace_gobj_monitor__(gobj)) {
         monitor_gobj(MTOR_GOBJ_PAUSE, gobj);
@@ -12039,7 +12043,7 @@ PRIVATE inline BOOL is_machine_tracing(GObj_t * gobj)
  ***************************************************************************/
 PRIVATE inline BOOL is_machine_not_tracing(GObj_t * gobj)
 {
-    if(__panic_trace__) {
+    if(__deep_trace__ || __panic_trace__) {
         return FALSE;
     }
     if(!gobj) {
