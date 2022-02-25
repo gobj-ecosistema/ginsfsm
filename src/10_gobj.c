@@ -332,10 +332,10 @@ PRIVATE const event_flag_names_t event_flag_names[] = {
 };
 
 /*
- *  Global (gobj) output events
+ *  System (gobj) output events
  */
 PRIVATE const EVENT global_output_events[] = {
-    {__EV_STATE_CHANGED__,  0,  0,  ""},
+    {__EV_STATE_CHANGED__,  EVF_SYSTEM_EVENT|EVF_NO_WARN_SUBS,  0,  "gobj's state has changed"},
     {NULL, 0, 0, ""}
 };
 
@@ -6634,7 +6634,7 @@ PUBLIC int gobj_publish_event(
     BOOL tracea = is_machine_tracing(publisher);
     tracea |= __trace_gobj_subscriptions__(publisher);
     if(tracea) {
-        trace_machine("🔝 mach(%s%s^%s), ev: %s, st: %s",
+        trace_machine("🔝🔝 mach(%s%s^%s), ev: %s, st: %s",
             (!publisher->running)?"!!":"",
             gobj_gclass_name(publisher), gobj_name(publisher),
             event,
@@ -6695,10 +6695,11 @@ PUBLIC int gobj_publish_event(
             i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
             continue;
         }
-        const char *event_ = sdata_read_str(subs, "event");
+
         /*
          *  Check if event null or event in event_list
          */
+        const char *event_ = sdata_read_str(subs, "event");
         if(empty_string(event_) || strcasecmp(event_, event)==0) {
             json_t *__config__ = sdata_read_json(subs, "__config__");
             json_t *__global__ = sdata_read_json(subs, "__global__");
@@ -6725,8 +6726,8 @@ PUBLIC int gobj_publish_event(
             }
 
             /*
-                *  User filter or configured filter
-                */
+             *  User filter or configured filter
+             */
             int topublish = 1;
             if(publisher->gclass->gmt.mt_publication_filter) {
                 topublish = publisher->gclass->gmt.mt_publication_filter(
@@ -6752,6 +6753,17 @@ PUBLIC int gobj_publish_event(
                 KW_DECREF(kw2publish);
                 i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
                 continue;
+            }
+
+            /*
+             *  Check if System event: don't send if subscriber has not it
+             */
+            if(ev->flag & EVF_SYSTEM_EVENT) {
+                if(!gobj_input_event(subscriber, event)) {
+                    KW_DECREF(kw2publish);
+                    i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+                    continue;
+                }
             }
 
             /*
@@ -6785,7 +6797,7 @@ PUBLIC int gobj_publish_event(
              *  Send event
              */
             if(tracea2) {
-                trace_machine("🔝 mach(%s%s), ev: %s, from(%s%s)",
+                trace_machine("🔝🔄 mach(%s%s), ev: %s, from(%s%s)",
                     (!subscriber->running)?"!!":"",
                     gobj_short_name(subscriber),
                     event,
@@ -6794,6 +6806,7 @@ PUBLIC int gobj_publish_event(
                 );
                 log_debug_json(0, kw2publish, "kw");
             }
+
             ret_sum += gobj_send_event(subscriber, event_name, kw2publish, publisher);
 
             sent_count++;
@@ -6976,6 +6989,7 @@ PUBLIC int gobj_send_event(
 //                 "event",        "%s", event?event:"",
 //                 NULL
 //             );
+//             __inside__ --;
 //             KW_DECREF(kw);
 //             return -403;
 //         }
@@ -7042,9 +7056,18 @@ PUBLIC int gobj_send_event(
             }
 
             if(state_changed) {
-                if(gobj_input_event(dst, __EV_STATE_CHANGED__)) {
-                    gobj_publish_event(dst, __EV_STATE_CHANGED__, 0);
-                }
+                json_t *kw_st = json_object();
+                json_object_set_new(
+                    kw_st,
+                    "last_state",
+                    json_string(mach->fsm->state_names[mach->last_state])
+                );
+                json_object_set_new(
+                    kw_st,
+                    "new_state",
+                    json_string(mach->fsm->state_names[mach->current_state])
+                );
+                gobj_publish_event(dst, __EV_STATE_CHANGED__, kw_st);
             }
             __inside__ --;
 
@@ -9650,9 +9673,9 @@ PRIVATE BOOL _change_state(GObj_t * gobj, const char *new_state)
 
     for(i=0; *state_names!=0; i++, state_names++) {
         if(strcasecmp(*state_names, new_state)==0) {
-            mach->last_state = mach->current_state;
-            mach->current_state = i;
-            if(mach->last_state != mach->current_state) {
+            if(mach->current_state != i) {
+                mach->last_state = mach->current_state;
+                mach->current_state = i;
                 if(__trace_gobj_event_monitor__(gobj)) {
                     monitor_state(gobj);
                 }

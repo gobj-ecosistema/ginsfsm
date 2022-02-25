@@ -67,7 +67,7 @@ PUBLIC json_t * gobj_global_variables(void);
 
 
 /*
- *  Global events, published by internally gobj
+ *  System events, published by GObj system
  */
 #define __EV_STATE_CHANGED__ "__EV_STATE_CHANGED__"
 
@@ -103,6 +103,7 @@ typedef enum { // HACK strict ascendent value!, strings in event_flag_names[]
     EVF_KW_WRITING      = 0x0001,
     EVF_PUBLIC_EVENT    = 0x0002,   // You should document a public event, it's the API
     EVF_NO_WARN_SUBS    = 0x0004,   // Don't warn of "Publish event WITHOUT subscribers"
+    EVF_SYSTEM_EVENT    = 0x0008,   // System Event
 } event_flag_t;
 
 typedef enum { // HACK strict ascendent value!, strings in event_authz_names[]
