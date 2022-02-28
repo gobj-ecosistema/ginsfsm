@@ -6642,7 +6642,9 @@ PUBLIC int gobj_publish_event(
             event,
             publisher->mach->fsm->state_names[publisher->mach->current_state]
         );
-        log_debug_json(0, kw, "kw");
+        if(__trace_gobj_ev_kw__(publisher)) {
+            log_debug_json(0, kw, "kw");
+        }
     }
     BOOL tracea2 = __trace_gobj_subscriptions2__(publisher);
 
@@ -6806,7 +6808,9 @@ PUBLIC int gobj_publish_event(
                     (publisher && !publisher->running)?"!!":"",
                     gobj_short_name(publisher)
                 );
-                log_debug_json(0, kw2publish, "kw");
+                if(__trace_gobj_ev_kw__(publisher)) {
+                    log_debug_json(0, kw2publish, "kw");
+                }
             }
 
             ret_sum += gobj_send_event(subscriber, event_name, kw2publish, publisher);
