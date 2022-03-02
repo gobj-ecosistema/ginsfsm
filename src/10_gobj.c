@@ -479,8 +479,7 @@ PRIVATE hgobj _create_tree(
     GObj_t *parent,
     json_t *jn_tree,
     const char *ev_on_setup,
-    const char *ev_on_setup_complete,
-    obflag_t obflag
+    const char *ev_on_setup_complete
 );
 
 PRIVATE int print_attr_not_found(void *user_data, const char *attr)
@@ -1217,6 +1216,8 @@ PUBLIC hgobj gobj_service_factory(
     );
     json_decref(jn_global);
 
+    json_object_set_new(kw_service_config, "service", json_true()); // Mark as service
+
     if(__trace_gobj_create_delete2__(__yuno__)) {
         trace_machine("🌞🌞 %s^%s => service final",
             gclass_name,
@@ -1229,8 +1230,7 @@ PUBLIC hgobj gobj_service_factory(
         __yuno__,
         kw_service_config,  // owned
         0,
-        0,
-        obflag_service
+        0
     );
 
     JSON_DECREF(jn_service_config);
@@ -2251,9 +2251,10 @@ PRIVATE hgobj _create_tree(
     GObj_t *parent,
     json_t *jn_tree,
     const char *ev_on_setup,
-    const char *ev_on_setup_complete,
-    obflag_t obflag)
+    const char *ev_on_setup_complete
+)
 {
+    obflag_t obflag = 0;
     const char *gclass_name = kw_get_str(jn_tree, "gclass", "", KW_REQUIRED);
     const char *name = kw_get_str(jn_tree, "name", "", 0);
     BOOL default_service = kw_get_bool(jn_tree, "default_service", 0, 0);
@@ -2381,8 +2382,7 @@ PRIVATE hgobj _create_tree(
             first_child,
             jn_child,
             ev_on_setup,
-            ev_on_setup_complete,
-            0
+            ev_on_setup_complete
         );
         if(!last_child) {
             log_error(0,
@@ -2466,7 +2466,7 @@ PUBLIC hgobj gobj_create_tree(
         // error already logged
         return 0;
     }
-    return _create_tree(parent, jn_tree, ev_on_setup, ev_on_setup_complete, 0);
+    return _create_tree(parent, jn_tree, ev_on_setup, ev_on_setup_complete);
 }
 
 /***************************************************************************
