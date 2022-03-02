@@ -475,13 +475,6 @@ PRIVATE void monitor_state(
 PRIVATE int _delete_subscriptions(GObj_t * publisher);
 PRIVATE int _delete_subscribings(GObj_t * subscriber);
 
-PRIVATE hgobj _create_tree(
-    GObj_t *parent,
-    json_t *jn_tree,
-    const char *ev_on_setup,
-    const char *ev_on_setup_complete
-);
-
 PRIVATE int print_attr_not_found(void *user_data, const char *attr)
 {
     hgobj gobj = user_data;
@@ -1226,7 +1219,7 @@ PUBLIC hgobj gobj_service_factory(
         log_debug_json(0, kw_service_config, "service final");
     }
 
-    hgobj gobj = _create_tree(
+    hgobj gobj = gobj_create_tree0(
         __yuno__,
         kw_service_config,  // owned
         0,
@@ -2247,13 +2240,14 @@ PUBLIC hgobj gobj_create_service(
 /***************************************************************************
  *  Create tree
  ***************************************************************************/
-PRIVATE hgobj _create_tree(
-    GObj_t *parent,
+PUBLIC hgobj gobj_create_tree0(
+    hgobj parent_,
     json_t *jn_tree,
     const char *ev_on_setup,
     const char *ev_on_setup_complete
 )
 {
+    GObj_t *parent = parent_;
     obflag_t obflag = 0;
     const char *gclass_name = kw_get_str(jn_tree, "gclass", "", KW_REQUIRED);
     const char *name = kw_get_str(jn_tree, "name", "", 0);
@@ -2378,7 +2372,7 @@ PRIVATE hgobj _create_tree(
             continue;
         }
         json_incref(jn_child);
-        last_child = _create_tree(
+        last_child = gobj_create_tree0(
             first_child,
             jn_child,
             ev_on_setup,
@@ -2389,7 +2383,7 @@ PRIVATE hgobj _create_tree(
                 "gobj",         "%s", __FILE__,
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-                "msg",          "%s", "_create_tree() FAILED",
+                "msg",          "%s", "gobj_create_tree0() FAILED",
                 "jn_child",     "%j", jn_child,
                 NULL
             );
@@ -2466,7 +2460,7 @@ PUBLIC hgobj gobj_create_tree(
         // error already logged
         return 0;
     }
-    return _create_tree(parent, jn_tree, ev_on_setup, ev_on_setup_complete);
+    return gobj_create_tree0(parent, jn_tree, ev_on_setup, ev_on_setup_complete);
 }
 
 /***************************************************************************
@@ -7402,7 +7396,7 @@ PUBLIC hgobj gobj_set_bottom_gobj(hgobj gobj_, hgobj bottom_gobj)
 /***************************************************************************
  *  Return the last bottom gobj of gobj tree.
  *  Useful when there is a stack of gobjs acting as a unit.
- *  Filled by _create_tree() function.
+ *  Filled by gobj_create_tree0() function.
  ***************************************************************************/
 PUBLIC hgobj gobj_last_bottom_gobj(hgobj gobj_)
 {

@@ -514,6 +514,13 @@ PUBLIC hgobj gobj_create_service(
     hgobj parent
 );
 
+PUBLIC hgobj gobj_create_tree0(
+    hgobj parent,
+    json_t *jn_tree,
+    const char *ev_on_setup,
+    const char *ev_on_setup_complete
+);
+
 /*
  * Json config of tree
  *
