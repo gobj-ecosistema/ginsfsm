@@ -276,6 +276,7 @@ typedef int (*mt_trace_on_fn)(hgobj gobj, const char *level, json_t *kw);
 typedef int (*mt_trace_off_fn)(hgobj gobj, const char *level, json_t *kw);
 
 typedef void (*mt_gobj_created_fn)(hgobj gobj, hgobj gobj_created);
+typedef int (*mt_state_changed_fn)(hgobj gobj, json_t *kw);
 
 typedef int (*future_method_fn)(hgobj gobj, void *data, int c, char x);
 
@@ -315,7 +316,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_add_child_resource_link_fn mt_add_child_resource_link;
     mt_delete_child_resource_link_fn mt_delete_child_resource_link;
     mt_get_resource_fn mt_get_resource;
-    future_method_fn mt_future24;
+    mt_state_changed_fn mt_state_changed; // If this method is defined then the __EV_STATE_CHANGED__ will not published
     mt_authenticate_fn mt_authenticate; // Return webix
     mt_list_childs_fn mt_list_childs;
     mt_stats_updated_fn mt_stats_updated;       // Return 0 if own the stats, or -1 if not.

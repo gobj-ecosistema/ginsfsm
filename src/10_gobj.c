@@ -6642,9 +6642,13 @@ PUBLIC int gobj_publish_event(
     }
     BOOL tracea2 = __trace_gobj_subscriptions2__(publisher);
 
-    /*---------------------------*
+    /*-------------------------------------*
      *  Own publication method
-     *---------------------------*/
+     *  Return:
+     *     -1  (broke),
+     *      0  continue without publish,
+     *      1  continue and publish
+     *-------------------------------------*/
     if(publisher->gclass->gmt.mt_publish_event) {
         int topublish = publisher->gclass->gmt.mt_publish_event(
             publisher,
@@ -6667,6 +6671,13 @@ PUBLIC int gobj_publish_event(
     i_subs = rc_first_instance(dl_subs, (rc_resource_t **)&subs);
     while(i_subs) {
         // TODO no protegido contra borrados
+        /*-------------------------------------*
+         *  Pre-filter
+         *  Return:
+         *     -1  (broke),
+         *      0  continue without publish,
+         *      1  continue and publish
+         *-------------------------------------*/
         if(publisher->gclass->gmt.mt_publication_pre_filter) {
             int topublish = publisher->gclass->gmt.mt_publication_pre_filter(
                 publisher,
@@ -6723,9 +6734,13 @@ PUBLIC int gobj_publish_event(
                 kw2publish = kw_duplicate(kw);
             }
 
-            /*
+            /*-------------------------------------*
              *  User filter or configured filter
-             */
+             *  Return:
+             *     -1  (broke),
+             *      0  continue without publish,
+             *      1  continue and publish
+             *-------------------------------------*/
             int topublish = 1;
             if(publisher->gclass->gmt.mt_publication_filter) {
                 topublish = publisher->gclass->gmt.mt_publication_filter(
@@ -7067,7 +7082,12 @@ PUBLIC int gobj_send_event(
                     "current_state",
                     json_string(mach->fsm->state_names[mach->current_state])
                 );
-                gobj_publish_event(dst, __EV_STATE_CHANGED__, kw_st);
+
+                if(dst->gclass->gmt.mt_state_changed) {
+                    dst->gclass->gmt.mt_state_changed(dst, kw_st);
+                } else {
+                    gobj_publish_event(dst, __EV_STATE_CHANGED__, kw_st);
+                }
             }
             __inside__ --;
 
@@ -8869,6 +8889,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_delete_child_resource_link"));
     if(gmt->mt_get_resource)
         json_array_append_new(jn_methods, json_string("mt_get_resource"));
+    if(gmt->mt_state_changed)
+        json_array_append_new(jn_methods, json_string("mt_state_changed"));
     if(gmt->mt_authenticate)
         json_array_append_new(jn_methods, json_string("mt_authenticate"));
     if(gmt->mt_list_childs)
@@ -8892,7 +8914,7 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
     if(gmt->mt_publish_event)
         json_array_append_new(jn_methods, json_string("mt_publish_event"));
     if(gmt->mt_publication_pre_filter)
-        json_array_append_new(jn_methods, json_string("mt_publish_event"));
+        json_array_append_new(jn_methods, json_string("mt_publication_pre_filter"));
     if(gmt->mt_publication_filter)
         json_array_append_new(jn_methods, json_string("mt_publication_filter"));
     if(gmt->mt_authz_checker)
@@ -9727,7 +9749,12 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
             "current_state",
             json_string(mach->fsm->state_names[mach->current_state])
         );
-        gobj_publish_event(gobj, __EV_STATE_CHANGED__, kw_st);
+
+        if(gobj->gclass->gmt.mt_state_changed) {
+            gobj->gclass->gmt.mt_state_changed(gobj, kw_st);
+        } else {
+            gobj_publish_event(gobj, __EV_STATE_CHANGED__, kw_st);
+        }
     }
 
     return state_changed;
