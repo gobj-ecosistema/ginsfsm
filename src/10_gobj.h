@@ -1408,7 +1408,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj, const char *new_state);
 PUBLIC const char *gobj_current_state(hgobj gobj);
 PUBLIC const char *gobj_last_state(hgobj gobj);
 PUBLIC BOOL gobj_in_this_state(hgobj gobj, const char *state);
-PUBLIC int gobj_cmp_current_state(hgobj gobj, const char *state);
+PUBLIC int gobj_cmp_current_state(hgobj gobj, const char *state); // < lower, == igual, > higher
 PUBLIC const EVENT *gobj_input_event(hgobj gobj, const char* event);
 PUBLIC const EVENT *gobj_output_event(hgobj gobj, const char* event);
 PUBLIC BOOL gobj_event_in_input_event_list(

@@ -7065,11 +7065,13 @@ PUBLIC int gobj_send_event(
 
             if(state_changed) {
                 if(tracea_states) {
-                    trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s), ev: %s, from(%s%s^%s)",
+                    trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s%s%s), ev: %s, from(%s%s^%s)",
                         (!dst->running)?"!!":"",
                         gobj_gclass_name(dst), gobj_name(dst),
                         mach->current_state,
+                        On_Black Green,
                         mach->fsm->state_names[mach->current_state],
+                        Color_Off,
                         event,
                         (src && !src->running)?"!!":"",
                         gobj_gclass_name(src), gobj_name(src)
@@ -9762,11 +9764,13 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
         SMachine_t * mach = gobj->mach;
 
         if(tracea_states) {
-            trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s)",
+            trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s%s%s)",
                 (!gobj->running)?"!!":"",
                 gobj_gclass_name(gobj), gobj_name(gobj),
                 mach->current_state,
-                mach->fsm->state_names[mach->current_state]
+                On_Black Green,
+                mach->fsm->state_names[mach->current_state],
+                Color_Off
             );
         }
 
