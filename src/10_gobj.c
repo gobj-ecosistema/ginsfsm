@@ -279,17 +279,19 @@ PRIVATE const trace_level_t s_global_trace_level[16] = {
 {"ev_kw",           "Trace event keywords"},
 {"authzs",          "Trace authorizations"},
 {"subscriptions2",  "Trace subscriptions of gobjs with every send event"},
+{"states",          "Trace change of states"},
 {0, 0},
 };
 #define __trace_gobj_create_delete__(gobj)  (gobj_trace_level(gobj) & TRACE_CREATE_DELETE)
 #define __trace_gobj_create_delete2__(gobj) (gobj_trace_level(gobj) & TRACE_CREATE_DELETE2)
 #define __trace_gobj_subscriptions__(gobj)  (gobj_trace_level(gobj) & TRACE_SUBSCRIPTIONS)
-#define __trace_gobj_subscriptions2__(gobj)  (gobj_trace_level(gobj) & TRACE_SUBSCRIPTIONS2)
 #define __trace_gobj_start_stop__(gobj)     (gobj_trace_level(gobj) & TRACE_START_STOP)
 #define __trace_gobj_oids__(gobj)           (gobj_trace_level(gobj) & TRACE_OIDS)
 #define __trace_gobj_uv__(gobj)             (gobj_trace_level(gobj) & TRACE_UV)
 #define __trace_gobj_ev_kw__(gobj)          (gobj_trace_level(gobj) & TRACE_EV_KW)
 #define __trace_gobj_authzs__(gobj)         (gobj_trace_level(gobj) & TRACE_AUTHZS)
+#define __trace_gobj_subscriptions2__(gobj) (gobj_trace_level(gobj) & TRACE_SUBSCRIPTIONS2)
+#define __trace_gobj_states__(gobj)         (gobj_trace_level(gobj) & TRACE_STATES)
 
 //#define __trace_gobj_monitor__(gobj)        (gobj_trace_level(gobj) & TRACE_MONITOR)
 //#define __trace_gobj_event_monitor__(gobj)  (gobj_trace_level(gobj) & TRACE_EVENT_MONITOR)
@@ -7013,6 +7015,8 @@ PUBLIC int gobj_send_event(
     /*----------------------------------*
      *  Search event in current state
      *----------------------------------*/
+    BOOL tracea_states = __trace_gobj_states__(dst)?TRUE:FALSE;
+
     while(actions->event) {
         if(strcasecmp(actions->event, event)==0) {
             if(tracea) {
@@ -7059,18 +7063,24 @@ PUBLIC int gobj_send_event(
                 monitor_event(MTOR_EVENT_ACCEPTED, event, src, dst);
             }
 
-            if(tracea && !(dst->obflag & obflag_destroyed)) {
-                trace_machine("<- mach(%s%s^%s), ev: %s, st(%d:%s), ret: %d",
-                    (!dst->running)?"!!":"",
-                    gobj_gclass_name(dst), gobj_name(dst),
-                    event,
-                    mach->current_state,
-                    mach->fsm->state_names[mach->current_state],
-                    ret
-                );
-            }
-
             if(state_changed) {
+                if(tracea_states) {
+                    trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s), ev: %s, from(%s%s^%s)",
+                        (!dst->running)?"!!":"",
+                        gobj_gclass_name(dst), gobj_name(dst),
+                        mach->current_state,
+                        mach->fsm->state_names[mach->current_state],
+                        event,
+                        (src && !src->running)?"!!":"",
+                        gobj_gclass_name(src), gobj_name(src)
+                    );
+                    if(kw) {
+                        if(__trace_gobj_ev_kw__(dst)) {
+                            log_debug_json(0, kw, "kw");
+                        }
+                    }
+                }
+
                 json_t *kw_st = json_object();
                 json_object_set_new(
                     kw_st,
@@ -7089,6 +7099,18 @@ PUBLIC int gobj_send_event(
                     gobj_publish_event(dst, __EV_STATE_CHANGED__, kw_st);
                 }
             }
+
+            if(tracea && !(dst->obflag & obflag_destroyed)) {
+                trace_machine("<- mach(%s%s^%s), ev: %s, st(%d:%s), ret: %d",
+                    (!dst->running)?"!!":"",
+                    gobj_gclass_name(dst), gobj_name(dst),
+                    event,
+                    mach->current_state,
+                    mach->fsm->state_names[mach->current_state],
+                    ret
+                );
+            }
+
             __inside__ --;
 
             return ret;
@@ -9736,7 +9758,17 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
     BOOL state_changed = _change_state(gobj, new_state);
 
     if(state_changed) {
+        BOOL tracea_states = __trace_gobj_states__(gobj)?TRUE:FALSE;
         SMachine_t * mach = gobj->mach;
+
+        if(tracea_states) {
+            trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s)",
+                (!gobj->running)?"!!":"",
+                gobj_gclass_name(gobj), gobj_name(gobj),
+                mach->current_state,
+                mach->fsm->state_names[mach->current_state]
+            );
+        }
 
         json_t *kw_st = json_object();
         json_object_set_new(
