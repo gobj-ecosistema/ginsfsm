@@ -7096,7 +7096,7 @@ PUBLIC int gobj_send_event(
                 );
 
                 if(dst->gclass->gmt.mt_state_changed) {
-                    dst->gclass->gmt.mt_state_changed(dst, kw_st);
+                    dst->gclass->gmt.mt_state_changed(dst, __EV_STATE_CHANGED__, kw_st);
                 } else {
                     gobj_publish_event(dst, __EV_STATE_CHANGED__, kw_st);
                 }
@@ -9787,7 +9787,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
         );
 
         if(gobj->gclass->gmt.mt_state_changed) {
-            gobj->gclass->gmt.mt_state_changed(gobj, kw_st);
+            gobj->gclass->gmt.mt_state_changed(gobj, __EV_STATE_CHANGED__, kw_st);
         } else {
             gobj_publish_event(gobj, __EV_STATE_CHANGED__, kw_st);
         }

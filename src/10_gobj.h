@@ -276,7 +276,7 @@ typedef int (*mt_trace_on_fn)(hgobj gobj, const char *level, json_t *kw);
 typedef int (*mt_trace_off_fn)(hgobj gobj, const char *level, json_t *kw);
 
 typedef void (*mt_gobj_created_fn)(hgobj gobj, hgobj gobj_created);
-typedef int (*mt_state_changed_fn)(hgobj gobj, json_t *kw);
+typedef int (*mt_state_changed_fn)(hgobj gobj, const char *event, json_t *kw);
 
 typedef int (*future_method_fn)(hgobj gobj, void *data, int c, char x);
 
