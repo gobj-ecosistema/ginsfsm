@@ -7063,7 +7063,7 @@ PUBLIC int gobj_send_event(
                 monitor_event(MTOR_EVENT_ACCEPTED, event, src, dst);
             }
 
-            if(state_changed) {
+            if(state_changed && gobj_is_running(dst)) {
                 if(tracea_states) {
                     trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s%s%s), ev: %s, from(%s%s^%s)",
                         (!dst->running)?"!!":"",
@@ -7098,9 +7098,7 @@ PUBLIC int gobj_send_event(
                 if(dst->gclass->gmt.mt_state_changed) {
                     dst->gclass->gmt.mt_state_changed(dst, kw_st);
                 } else {
-                    if(gobj_is_running(dst)) {
-                        gobj_publish_event(dst, __EV_STATE_CHANGED__, kw_st);
-                    }
+                    gobj_publish_event(dst, __EV_STATE_CHANGED__, kw_st);
                 }
             }
 
@@ -9761,7 +9759,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
 
     BOOL state_changed = _change_state(gobj, new_state);
 
-    if(state_changed) {
+    if(state_changed && gobj_is_running(gobj)) {
         BOOL tracea_states = __trace_gobj_states__(gobj)?TRUE:FALSE;
         SMachine_t * mach = gobj->mach;
 
@@ -9791,9 +9789,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
         if(gobj->gclass->gmt.mt_state_changed) {
             gobj->gclass->gmt.mt_state_changed(gobj, kw_st);
         } else {
-            if(gobj_is_running(gobj)) {
-                gobj_publish_event(gobj, __EV_STATE_CHANGED__, kw_st);
-            }
+            gobj_publish_event(gobj, __EV_STATE_CHANGED__, kw_st);
         }
     }
 
