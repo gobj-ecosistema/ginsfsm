@@ -7037,6 +7037,7 @@ PUBLIC int gobj_send_event(
             }
 
             /*
+             *  IMPORTANT HACK
              *  Set new state BEFORE run 'action'
              *
              *  The next state is changed before executing the action.
