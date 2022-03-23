@@ -169,11 +169,19 @@ typedef BOOL  (*mt_publication_filter_fn) ( // Return -1,0,1
 typedef int   (*mt_child_added_fn)(hgobj gobj, hgobj child);
 typedef int   (*mt_child_removed_fn)(hgobj gobj, hgobj child);
 
-typedef hsdata (*mt_create_resource_fn)(hgobj gobj, const char *resource, json_t *kw);
-typedef dl_list_t * (*mt_list_resource_fn)(hgobj gobj, const char *resource, json_t *kw);
-typedef int   (*mt_update_resource_fn)(hgobj gobj, hsdata hs);
-typedef int   (*mt_delete_resource_fn)(hgobj gobj, hsdata hs);
-typedef hsdata (*mt_get_resource_fn)(hgobj gobj, const char *resource, json_int_t parent_id, json_int_t id);
+typedef json_t *(*mt_create_resource_fn)(hgobj gobj, const char *resource, json_t *kw, json_t *jn_options);
+typedef void *(*mt_list_resource_fn)(
+    hgobj gobj, const char *resource, json_t *kw, json_t *jn_options
+);
+typedef json_t *(*mt_update_resource_fn)(
+    hgobj gobj, const char *resource, json_t *jn_filter, json_t *kw, json_t *jn_options
+);
+typedef int   (*mt_delete_resource_fn)(
+    hgobj gobj, const char *resource, json_t *str_or_kw, json_t *jn_options
+);
+typedef json_t *(*mt_get_resource_fn)(
+    hgobj gobj, const char *resource, json_t *str_or_kw, json_t *jn_options
+);
 
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
@@ -308,7 +316,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     json_function_t mt_command_parser;  // User command parser. Preference over gclass.command_table. Return webix. HACK must implement AUTHZ
     gobj_action_fn mt_inject_event;     // Won't use the static built-in gclass machine? process yourself your events.
     mt_create_resource_fn mt_create_resource;
-    mt_list_resource_fn mt_list_resource; // Must return an iter, although empty
+    mt_list_resource_fn mt_list_resource; // Can return an iter or a json, depends of gclass
     mt_update_resource_fn mt_update_resource;
     mt_delete_resource_fn mt_delete_resource;
     future_method_fn mt_future21; // OLD mt_add_child_resource_link;
@@ -564,32 +572,46 @@ PUBLIC int gobj_destroy_named_childs(hgobj gobj, const char *name); // with auto
 PUBLIC void gobj_destroy_childs(hgobj gobj);
 PUBLIC GCLASS *gobj_subclass_gclass(GCLASS *base, const char *gclass_name);
 
-/*--------------------------------------------*
- *  Resource functions DEPRECATED
- *--------------------------------------------*/
-PUBLIC hsdata gobj_create_resource(
+/*-----------------------------------------------------*
+ *  Resource functions
+ *-----------------------------------------------------*/
+PUBLIC json_t *gobj_create_resource( // Return is NOT YOURS
     hgobj gobj,
     const char *resource,
-    json_t *kw  // owned
+    json_t *kw,  // owned
+    json_t *jn_options // owned
 );
-PUBLIC int gobj_update_resource(hgobj gobj, hsdata hs);
-PUBLIC int gobj_delete_resource(hgobj gobj, hsdata hs);
+PUBLIC json_t *gobj_update_resource( // Return is NOT YOURS
+    hgobj gobj,
+    const char *resource,
+    json_t *jn_filter,  // owned can be a string or dict with 'id'
+    json_t *kw,  // owned 'id' field are used to find the node if jn_filter is null
+    json_t *jn_options  // owned
+);
+PUBLIC int gobj_delete_resource(
+    hgobj gobj,
+    const char *resource,
+    json_t *jn_filter,  // owned can be a string or dict with 'id'
+    json_t *jn_options // owned
+);
 
 /*
- *  Remember free with rc_free_iter(iter, TRUE, 0);
+ *  WARNING Remember free return:
+ *      - using GCLASS_RESOURCE: with rc_free_iter(iter, TRUE, 0);
+ *      - using GCLASS_RESOURCE2: with json_decref()
  */
-PUBLIC dl_list_t * gobj_list_resource( // WARNING free return with rc_free_iter(iter, TRUE, 0);
+PUBLIC json_t *gobj_list_resource( // WARNING free return (iter or json)
     hgobj gobj,
     const char *resource,
-    json_t *jn_filter  // owned
+    json_t *jn_filter,  // owned
+    json_t *jn_options  // owned
 );
-PUBLIC hsdata gobj_get_resource(
+PUBLIC json_t *gobj_get_resource( // return (iter or json), NOT yours!
     hgobj gobj,
     const char *resource,
-    json_int_t parent_id,
-    json_int_t id
+    json_t *jn_filter,  // owned, string 'id' or dict with 'id' field are used to find the node
+    json_t *jn_options  // owned
 );
-
 
 /*--------------------------------------------------*
  *  Node functions. Don't use resource, use this.
