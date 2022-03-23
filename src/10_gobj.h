@@ -173,8 +173,6 @@ typedef hsdata (*mt_create_resource_fn)(hgobj gobj, const char *resource, json_t
 typedef dl_list_t * (*mt_list_resource_fn)(hgobj gobj, const char *resource, json_t *kw);
 typedef int   (*mt_update_resource_fn)(hgobj gobj, hsdata hs);
 typedef int   (*mt_delete_resource_fn)(hgobj gobj, hsdata hs);
-typedef int   (*mt_add_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, hsdata hs_child);
-typedef int   (*mt_delete_child_resource_link_fn)(hgobj gobj, hsdata hs_parent, hsdata hs_child);
 typedef hsdata (*mt_get_resource_fn)(hgobj gobj, const char *resource, json_int_t parent_id, json_int_t id);
 
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
@@ -313,8 +311,8 @@ typedef struct { // GClass methods (Yuneta framework methods)
     mt_list_resource_fn mt_list_resource; // Must return an iter, although empty
     mt_update_resource_fn mt_update_resource;
     mt_delete_resource_fn mt_delete_resource;
-    mt_add_child_resource_link_fn mt_add_child_resource_link;
-    mt_delete_child_resource_link_fn mt_delete_child_resource_link;
+    future_method_fn mt_future21; // OLD mt_add_child_resource_link;
+    future_method_fn mt_future22; // OLD mt_delete_child_resource_link;
     mt_get_resource_fn mt_get_resource;
     mt_state_changed_fn mt_state_changed; // If this method is defined then the __EV_STATE_CHANGED__ will not published
     mt_authenticate_fn mt_authenticate; // Return webix
@@ -576,8 +574,6 @@ PUBLIC hsdata gobj_create_resource(
 );
 PUBLIC int gobj_update_resource(hgobj gobj, hsdata hs);
 PUBLIC int gobj_delete_resource(hgobj gobj, hsdata hs);
-PUBLIC int gobj_add_child_resource_link(hgobj gobj, hsdata hs_parent, hsdata hs_child);
-PUBLIC int gobj_delete_child_resource_link(hgobj gobj, hsdata hs_parent, hsdata hs_child);
 
 /*
  *  Remember free with rc_free_iter(iter, TRUE, 0);

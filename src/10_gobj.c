@@ -2909,7 +2909,11 @@ PRIVATE int deregister_unique_gobj(GObj_t * gobj)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC hsdata gobj_create_resource(hgobj gobj_, const char *resource, json_t *kw)
+PUBLIC hsdata gobj_create_resource(
+    hgobj gobj_,
+    const char *resource,
+    json_t *kw
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3016,66 +3020,6 @@ PUBLIC int gobj_delete_resource(hgobj gobj_, hsdata hs)
     }
 
     return gobj->gclass->gmt.mt_delete_resource(gobj, hs);
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC int gobj_add_child_resource_link(hgobj gobj_, hsdata hs_parent, hsdata hs_child)
-{
-    GObj_t *gobj = gobj_;
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        return 0;
-    }
-    if(!gobj->gclass->gmt.mt_add_child_resource_link) {
-        log_error(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "mt_add_child_resource_link not defined",
-            NULL
-        );
-        return 0;
-    }
-
-    return gobj->gclass->gmt.mt_add_child_resource_link(gobj, hs_parent, hs_child);
-}
-
-/***************************************************************************
- *
- ***************************************************************************/
-PUBLIC int gobj_delete_child_resource_link(hgobj gobj_, hsdata hs_parent, hsdata hs_child)
-{
-    GObj_t *gobj = gobj_;
-    if(!gobj || gobj->obflag & obflag_destroyed) {
-        log_error(0,
-            "gobj",         "%s", __FILE__,
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "hgobj NULL or DESTROYED",
-            NULL
-        );
-        return 0;
-    }
-    if(!gobj->gclass->gmt.mt_delete_child_resource_link) {
-        log_error(0,
-            "gobj",         "%s", gobj_full_name(gobj),
-            "function",     "%s", __FUNCTION__,
-            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "mt_delete_child_resource_link not defined",
-            NULL
-        );
-        return 0;
-    }
-
-    return gobj->gclass->gmt.mt_delete_child_resource_link(gobj, hs_parent, hs_child);
 }
 
 /***************************************************************************
@@ -8959,10 +8903,10 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_update_resource"));
     if(gmt->mt_delete_resource)
         json_array_append_new(jn_methods, json_string("mt_delete_resource"));
-    if(gmt->mt_add_child_resource_link)
-        json_array_append_new(jn_methods, json_string("mt_add_child_resource_link"));
-    if(gmt->mt_delete_child_resource_link)
-        json_array_append_new(jn_methods, json_string("mt_delete_child_resource_link"));
+    if(gmt->mt_future21)
+        json_array_append_new(jn_methods, json_string("mt_future21"));
+    if(gmt->mt_future22)
+        json_array_append_new(jn_methods, json_string("mt_future22"));
     if(gmt->mt_get_resource)
         json_array_append_new(jn_methods, json_string("mt_get_resource"));
     if(gmt->mt_state_changed)
