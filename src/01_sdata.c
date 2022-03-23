@@ -3533,4 +3533,39 @@ PUBLIC int sdata_write_pointer(hsdata hs, const char *name, void *value)
     return ret;
 }
 
+/***************************************************************************
+ *  WRITE - high level -
+ ***************************************************************************/
+PUBLIC int sdata_write_default_values(
+    hsdata hs,
+    sdata_flag_t include_flag,
+    sdata_flag_t exclude_flag
+)
+{
+    SData_t *sdata = hs;
+    if(!sdata) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hs is NULL",
+            NULL
+        );
+        return -1;
+    }
+    const sdata_desc_t *it = sdata->items;
+    while(it->name) {
+        if(exclude_flag && (it->flag & exclude_flag)) {
+            it++;
+            continue;
+        }
+        if(include_flag == -1 || (it->flag & include_flag)) {
+            set_default(sdata, it, it->default_value);
+        }
+        it++;
+    }
+
+    return 0;
+}
+
 

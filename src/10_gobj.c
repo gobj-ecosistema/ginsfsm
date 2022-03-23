@@ -8595,6 +8595,44 @@ PUBLIC int gobj_write_str_attr(hgobj gobj, const char *name, const char *value)
 /***************************************************************************
  *  ATTR: write
  ***************************************************************************/
+PUBLIC int gobj_write_strn_attr(hgobj gobj, const char *name, const char *value, int string_length)
+{
+    // HACK TODO sdata_write_str() está mal diseñado, no permite pasar un string con longitud
+    hsdata hs = gobj_hsdata2(gobj, name, FALSE);
+    if(hs) {
+        char *value_ = gbmem_strndup(value, string_length);
+        if(!value_) {
+            log_warning(LOG_OPT_TRACE_STACK,
+                "gobj",         "%s", gobj_full_name(gobj),
+                "function",     "%s", __FUNCTION__,
+                "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+                "msg",          "%s", "gbmem_strndup() FAILED",
+                "gclass",       "%s", gobj_gclass_name(gobj),
+                "attr",         "%s", name?name:"",
+                "string_length","%d", string_length,
+                NULL
+            );
+            return -1;
+        }
+        int ret = sdata_write_str(hs, name, value_);
+        GBMEM_FREE(value_);
+        return ret;
+    }
+    log_warning(LOG_OPT_TRACE_STACK,
+        "gobj",         "%s", gobj_full_name(gobj),
+        "function",     "%s", __FUNCTION__,
+        "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+        "msg",          "%s", "GClass Attribute NOT FOUND",
+        "gclass",       "%s", gobj_gclass_name(gobj),
+        "attr",         "%s", name?name:"",
+        NULL
+    );
+    return -1;
+}
+
+/***************************************************************************
+ *  ATTR: write
+ ***************************************************************************/
 PUBLIC int gobj_write_bool_attr(hgobj gobj, const char *name, BOOL value)
 {
     hsdata hs = gobj_hsdata2(gobj, name, FALSE);
@@ -8859,6 +8897,19 @@ PUBLIC int gobj_update_writable_attrs(
 
     JSON_DECREF(jn_attrs);
     return ret;
+}
+
+/***************************************************************************
+ *  ATTR: write
+ *  Reset volatile attributes
+ ***************************************************************************/
+PUBLIC int gobj_reset_volatil_attrs(hgobj gobj)
+{
+    return sdata_write_default_values(
+        gobj_hsdata(gobj),
+        SDF_VOLATIL,    // include_flag
+        0               // exclude_flag
+    );
 }
 
 /***************************************************************************

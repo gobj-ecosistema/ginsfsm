@@ -1349,6 +1349,7 @@ PUBLIC int gobj_kw_set_user_data(
 );
 
 PUBLIC int gobj_write_str_attr(hgobj gobj, const char *name, const char *value);
+PUBLIC int gobj_write_strn_attr(hgobj gobj, const char *name, const char *value, int string_length);
 PUBLIC int gobj_write_bool_attr(hgobj gobj, const char *name, BOOL value);
 PUBLIC int gobj_write_int32_attr(hgobj gobj, const char *name, int32_t value);
 PUBLIC int gobj_write_uint32_attr(hgobj gobj, const char *name, uint32_t value);
@@ -1366,7 +1367,7 @@ PUBLIC int gobj_update_writable_attrs( // with authz
     json_t *jn_attrs, // owned
     hgobj src
 );
-
+PUBLIC int gobj_reset_volatil_attrs(hgobj gobj); // Reset SDF_VOLATIL attrs (to their default values)
 
 /*--------------------------------------------*
  *  Info functions

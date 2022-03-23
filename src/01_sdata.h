@@ -723,8 +723,11 @@ PUBLIC int sdata_write_integer(hsdata hs, const char *name, uint64_t value);
 PUBLIC int sdata_write_real(hsdata hs, const char *name, double value);
 PUBLIC int sdata_write_json(hsdata hs, const char *name, json_t *value); // WARNING json is incref
 PUBLIC int sdata_write_pointer(hsdata hs, const char *name, void *value);
-PUBLIC int sdata_write_struct(hsdata hs, const char *name, void *value, int size);
-
+PUBLIC int sdata_write_default_values(
+    hsdata hs,
+    sdata_flag_t include_flag,
+    sdata_flag_t exclude_flag
+);
 
 #ifdef __cplusplus
 }
