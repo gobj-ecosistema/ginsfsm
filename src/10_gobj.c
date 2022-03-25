@@ -2948,11 +2948,11 @@ PUBLIC json_t *gobj_create_resource(
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_update_resource(
+PUBLIC int gobj_update_resource(
     hgobj gobj_,
     const char *resource,
     json_t *jn_filter,  // owned can be a string or dict with 'id'
-    json_t *kw,
+    json_t *record,     // WARNING NOT owned
     json_t *jn_options
 )
 {
@@ -2966,22 +2966,20 @@ PUBLIC json_t *gobj_update_resource(
             NULL
         );
         KW_DECREF(jn_filter);
-        KW_DECREF(kw);
         KW_DECREF(jn_options);
-        return 0;
+        return -1;
     }
-    if(!kw) {
+    if(!record) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj_update_resource(): kw NULL",
+            "msg",          "%s", "gobj_update_resource(): record NULL",
             NULL
         );
         KW_DECREF(jn_filter);
-        KW_DECREF(kw);
         KW_DECREF(jn_options);
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_update_resource) {
         log_error(0,
@@ -2992,12 +2990,11 @@ PUBLIC json_t *gobj_update_resource(
             NULL
         );
         KW_DECREF(jn_filter);
-        KW_DECREF(kw);
         KW_DECREF(jn_options);
-        return 0;
+        return -1;
     }
 
-    return gobj->gclass->gmt.mt_update_resource(gobj, resource, jn_filter, kw, jn_options);
+    return gobj->gclass->gmt.mt_update_resource(gobj, resource, jn_filter, record, jn_options);
 }
 
 /***************************************************************************
@@ -3087,7 +3084,7 @@ PUBLIC json_t *gobj_list_resource(hgobj gobj_, const char *resource, json_t *jn_
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_get_resource( // return (iter or json), NOT yours!
+PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
     hgobj gobj_,
     const char *resource,
     json_t *str_or_kw,  // string 'id' or dict with 'id' field are used to find the node

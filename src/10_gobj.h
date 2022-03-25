@@ -173,7 +173,7 @@ typedef json_t *(*mt_create_resource_fn)(hgobj gobj, const char *resource, json_
 typedef void *(*mt_list_resource_fn)(
     hgobj gobj, const char *resource, json_t *kw, json_t *jn_options
 );
-typedef json_t *(*mt_update_resource_fn)(
+typedef int (*mt_update_resource_fn)(
     hgobj gobj, const char *resource, json_t *jn_filter, json_t *kw, json_t *jn_options
 );
 typedef int   (*mt_delete_resource_fn)(
@@ -574,6 +574,7 @@ PUBLIC GCLASS *gobj_subclass_gclass(GCLASS *base, const char *gclass_name);
 
 /*-----------------------------------------------------*
  *  Resource functions
+ *  In this case the 'resource' is the 'key' of value (record)
  *-----------------------------------------------------*/
 PUBLIC json_t *gobj_create_resource( // Return is NOT YOURS
     hgobj gobj,
@@ -581,13 +582,16 @@ PUBLIC json_t *gobj_create_resource( // Return is NOT YOURS
     json_t *kw,  // owned
     json_t *jn_options // owned
 );
-PUBLIC json_t *gobj_update_resource( // Return is NOT YOURS
+PUBLIC int gobj_update_resource( // TODO cambia a gobj_save_resource
     hgobj gobj,
     const char *resource,
     json_t *jn_filter,  // owned can be a string or dict with 'id'
-    json_t *kw,  // owned 'id' field are used to find the node if jn_filter is null
+    json_t *record,     // WARNING NOT owned
     json_t *jn_options  // owned
 );
+
+#define gobj_save_resource gobj_update_resource
+
 PUBLIC int gobj_delete_resource(
     hgobj gobj,
     const char *resource,
@@ -606,7 +610,7 @@ PUBLIC json_t *gobj_list_resource( // WARNING free return (iter or json)
     json_t *jn_filter,  // owned
     json_t *jn_options  // owned
 );
-PUBLIC json_t *gobj_get_resource( // return (iter or json), NOT yours!
+PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
     hgobj gobj,
     const char *resource,
     json_t *jn_filter,  // owned, string 'id' or dict with 'id' field are used to find the node
