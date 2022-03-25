@@ -2912,8 +2912,7 @@ PRIVATE int deregister_unique_gobj(GObj_t * gobj)
 PUBLIC json_t *gobj_create_resource(
     hgobj gobj_,
     const char *resource,
-    json_t *kw,  // owned
-    json_t *jn_options // owned
+    json_t *kw  // owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -2926,7 +2925,6 @@ PUBLIC json_t *gobj_create_resource(
             NULL
         );
         KW_DECREF(kw);
-        KW_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_create_resource) {
@@ -2938,22 +2936,19 @@ PUBLIC json_t *gobj_create_resource(
             NULL
         );
         KW_DECREF(kw);
-        KW_DECREF(jn_options);
         return 0;
     }
 
-    return gobj->gclass->gmt.mt_create_resource(gobj, resource, kw, jn_options);
+    return gobj->gclass->gmt.mt_create_resource(gobj, resource, kw);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_update_resource(
+PUBLIC int gobj_save_resource(
     hgobj gobj_,
     const char *resource,
-    json_t *jn_filter,  // owned can be a string or dict with 'id'
-    json_t *record,     // WARNING NOT owned
-    json_t *jn_options
+    json_t *record     // WARNING NOT owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -2965,8 +2960,6 @@ PUBLIC int gobj_update_resource(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(jn_filter);
-        KW_DECREF(jn_options);
         return -1;
     }
     if(!record) {
@@ -2974,27 +2967,23 @@ PUBLIC int gobj_update_resource(
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj_update_resource(): record NULL",
+            "msg",          "%s", "gobj_save_resource(): record NULL",
             NULL
         );
-        KW_DECREF(jn_filter);
-        KW_DECREF(jn_options);
         return -1;
     }
-    if(!gobj->gclass->gmt.mt_update_resource) {
+    if(!gobj->gclass->gmt.mt_save_resource) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "mt_update_resource not defined",
+            "msg",          "%s", "mt_save_resource not defined",
             NULL
         );
-        KW_DECREF(jn_filter);
-        KW_DECREF(jn_options);
         return -1;
     }
 
-    return gobj->gclass->gmt.mt_update_resource(gobj, resource, jn_filter, record, jn_options);
+    return gobj->gclass->gmt.mt_save_resource(gobj, resource, record);
 }
 
 /***************************************************************************
@@ -3003,8 +2992,7 @@ PUBLIC int gobj_update_resource(
 PUBLIC int gobj_delete_resource(
     hgobj gobj_,
     const char *resource,
-    json_t *jn_filter,  // owned can be a string or dict with 'id'
-    json_t *jn_options
+    json_t *record  // owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -3016,21 +3004,17 @@ PUBLIC int gobj_delete_resource(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(jn_filter);
-        KW_DECREF(jn_options);
-        return 0;
+        return -1;
     }
-    if(!jn_filter) {
+    if(!record) {
         log_error(0,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "gobj_delete_resource(): jn_filter NULL",
+            "msg",          "%s", "gobj_delete_resource(): record NULL",
             NULL
         );
-        KW_DECREF(jn_filter);
-        KW_DECREF(jn_options);
-        return 0;
+        return -1;
     }
     if(!gobj->gclass->gmt.mt_delete_resource) {
         log_error(0,
@@ -3040,18 +3024,20 @@ PUBLIC int gobj_delete_resource(
             "msg",          "%s", "mt_delete_resource not defined",
             NULL
         );
-        KW_DECREF(jn_filter);
-        KW_DECREF(jn_options);
-        return 0;
+        return -1;
     }
 
-    return gobj->gclass->gmt.mt_delete_resource(gobj, resource, jn_filter, jn_options);
+    return gobj->gclass->gmt.mt_delete_resource(gobj, resource, record);
 }
 
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC json_t *gobj_list_resource(hgobj gobj_, const char *resource, json_t *jn_filter, json_t *jn_options)
+PUBLIC json_t *gobj_list_resource(
+    hgobj gobj_,
+    const char *resource,
+    json_t *jn_filter  // owned
+)
 {
     GObj_t *gobj = gobj_;
     if(!gobj || gobj->obflag & obflag_destroyed) {
@@ -3063,7 +3049,6 @@ PUBLIC json_t *gobj_list_resource(hgobj gobj_, const char *resource, json_t *jn_
             NULL
         );
         KW_DECREF(jn_filter);
-        KW_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_resource) {
@@ -3075,10 +3060,9 @@ PUBLIC json_t *gobj_list_resource(hgobj gobj_, const char *resource, json_t *jn_
             NULL
         );
         KW_DECREF(jn_filter);
-        KW_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_list_resource(gobj, resource, jn_filter, jn_options);
+    return gobj->gclass->gmt.mt_list_resource(gobj, resource, jn_filter);
 }
 
 /***************************************************************************
@@ -3087,8 +3071,7 @@ PUBLIC json_t *gobj_list_resource(hgobj gobj_, const char *resource, json_t *jn_
 PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
     hgobj gobj_,
     const char *resource,
-    json_t *str_or_kw,  // string 'id' or dict with 'id' field are used to find the node
-    json_t *jn_options
+    json_t *jn_filter  // owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -3100,8 +3083,7 @@ PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(str_or_kw);
-        KW_DECREF(jn_options);
+        KW_DECREF(jn_filter);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_get_resource) {
@@ -3112,11 +3094,10 @@ PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
             "msg",          "%s", "mt_get_resource not defined",
             NULL
         );
-        KW_DECREF(str_or_kw);
-        KW_DECREF(jn_options);
+        KW_DECREF(jn_filter);
         return 0;
     }
-    return gobj->gclass->gmt.mt_get_resource(gobj, resource, str_or_kw, jn_options);
+    return gobj->gclass->gmt.mt_get_resource(gobj, resource, jn_filter);
 }
 
 
@@ -8932,8 +8913,8 @@ PRIVATE json_t *yunetamethods2json(GMETHODS *gmt)
         json_array_append_new(jn_methods, json_string("mt_create_resource"));
     if(gmt->mt_list_resource)
         json_array_append_new(jn_methods, json_string("mt_list_resource"));
-    if(gmt->mt_update_resource)
-        json_array_append_new(jn_methods, json_string("mt_update_resource"));
+    if(gmt->mt_save_resource)
+        json_array_append_new(jn_methods, json_string("mt_save_resource"));
     if(gmt->mt_delete_resource)
         json_array_append_new(jn_methods, json_string("mt_delete_resource"));
     if(gmt->mt_future21)

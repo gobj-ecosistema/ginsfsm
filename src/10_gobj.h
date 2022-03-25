@@ -169,19 +169,11 @@ typedef BOOL  (*mt_publication_filter_fn) ( // Return -1,0,1
 typedef int   (*mt_child_added_fn)(hgobj gobj, hgobj child);
 typedef int   (*mt_child_removed_fn)(hgobj gobj, hgobj child);
 
-typedef json_t *(*mt_create_resource_fn)(hgobj gobj, const char *resource, json_t *kw, json_t *jn_options);
-typedef void *(*mt_list_resource_fn)(
-    hgobj gobj, const char *resource, json_t *kw, json_t *jn_options
-);
-typedef int (*mt_update_resource_fn)(
-    hgobj gobj, const char *resource, json_t *jn_filter, json_t *kw, json_t *jn_options
-);
-typedef int   (*mt_delete_resource_fn)(
-    hgobj gobj, const char *resource, json_t *str_or_kw, json_t *jn_options
-);
-typedef json_t *(*mt_get_resource_fn)(
-    hgobj gobj, const char *resource, json_t *str_or_kw, json_t *jn_options
-);
+typedef json_t *(*mt_create_resource_fn)(hgobj gobj, const char *resource, json_t *kw);
+typedef void *(*mt_list_resource_fn)(hgobj gobj, const char *resource, json_t *jn_filter);
+typedef int (*mt_save_resource_fn)(hgobj gobj, const char *resource, json_t *record);
+typedef int (*mt_delete_resource_fn)(hgobj gobj, const char *resource, json_t *record);
+typedef json_t *(*mt_get_resource_fn)(hgobj gobj, const char *resource, json_t *jn_filter);
 
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
@@ -317,7 +309,7 @@ typedef struct { // GClass methods (Yuneta framework methods)
     gobj_action_fn mt_inject_event;     // Won't use the static built-in gclass machine? process yourself your events.
     mt_create_resource_fn mt_create_resource;
     mt_list_resource_fn mt_list_resource; // Can return an iter or a json, depends of gclass
-    mt_update_resource_fn mt_update_resource;
+    mt_save_resource_fn mt_save_resource;
     mt_delete_resource_fn mt_delete_resource;
     future_method_fn mt_future21; // OLD mt_add_child_resource_link;
     future_method_fn mt_future22; // OLD mt_delete_child_resource_link;
@@ -574,29 +566,23 @@ PUBLIC GCLASS *gobj_subclass_gclass(GCLASS *base, const char *gclass_name);
 
 /*-----------------------------------------------------*
  *  Resource functions
- *  In this case the 'resource' is the 'key' of value (record)
+ *  Here the 'resource' is the 'key' of value (record)
  *-----------------------------------------------------*/
 PUBLIC json_t *gobj_create_resource( // Return is NOT YOURS
     hgobj gobj,
     const char *resource,
-    json_t *kw,  // owned
-    json_t *jn_options // owned
+    json_t *kw  // owned
 );
-PUBLIC int gobj_update_resource( // TODO cambia a gobj_save_resource
+PUBLIC int gobj_save_resource(
     hgobj gobj,
     const char *resource,
-    json_t *jn_filter,  // owned can be a string or dict with 'id'
-    json_t *record,     // WARNING NOT owned
-    json_t *jn_options  // owned
+    json_t *record     // WARNING NOT owned
 );
-
-#define gobj_save_resource gobj_update_resource
 
 PUBLIC int gobj_delete_resource(
     hgobj gobj,
     const char *resource,
-    json_t *jn_filter,  // owned can be a string or dict with 'id'
-    json_t *jn_options // owned
+    json_t *record  // owned
 );
 
 /*
@@ -607,14 +593,12 @@ PUBLIC int gobj_delete_resource(
 PUBLIC json_t *gobj_list_resource( // WARNING free return (iter or json)
     hgobj gobj,
     const char *resource,
-    json_t *jn_filter,  // owned
-    json_t *jn_options  // owned
+    json_t *jn_filter  // owned
 );
 PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
     hgobj gobj,
     const char *resource,
-    json_t *jn_filter,  // owned, string 'id' or dict with 'id' field are used to find the node
-    json_t *jn_options  // owned
+    json_t *jn_filter  // owned
 );
 
 /*--------------------------------------------------*
