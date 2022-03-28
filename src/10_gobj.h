@@ -172,14 +172,18 @@ typedef int   (*mt_child_removed_fn)(hgobj gobj, hgobj child);
 typedef json_t *(*mt_create_resource_fn)(
     hgobj gobj, const char *resource, json_t *kw, json_t *jn_options
 );
-typedef void *(*mt_list_resource_fn)(hgobj gobj, const char *resource, json_t *jn_filter);
+typedef void *(*mt_list_resource_fn)(
+    hgobj gobj, const char *resource, json_t *jn_filter, json_t *jn_options
+);
 typedef int (*mt_save_resource_fn)(
     hgobj gobj, const char *resource, json_t *record, json_t *jn_options
 );
 typedef int (*mt_delete_resource_fn)(
     hgobj gobj, const char *resource, json_t *record, json_t *jn_options
 );
-typedef json_t *(*mt_get_resource_fn)(hgobj gobj, const char *resource, json_t *jn_filter);
+typedef json_t *(*mt_get_resource_fn)(
+    hgobj gobj, const char *resource, json_t *jn_filter, json_t *jn_options
+);
 
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
 typedef json_t *(*mt_update_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
@@ -602,12 +606,14 @@ PUBLIC int gobj_delete_resource(
 PUBLIC json_t *gobj_list_resource( // WARNING free return (iter or json)
     hgobj gobj,
     const char *resource,
-    json_t *jn_filter  // owned
+    json_t *jn_filter,  // owned
+    json_t *jn_options // owned
 );
 PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
     hgobj gobj,
     const char *resource,
-    json_t *jn_filter  // owned
+    json_t *jn_filter,  // owned
+    json_t *jn_options // owned
 );
 
 /*--------------------------------------------------*

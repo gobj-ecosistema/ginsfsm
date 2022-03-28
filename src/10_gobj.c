@@ -3049,7 +3049,8 @@ PUBLIC int gobj_delete_resource(
 PUBLIC json_t *gobj_list_resource(
     hgobj gobj_,
     const char *resource,
-    json_t *jn_filter  // owned
+    json_t *jn_filter,  // owned
+    json_t *jn_options // owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -3062,6 +3063,7 @@ PUBLIC json_t *gobj_list_resource(
             NULL
         );
         KW_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_resource) {
@@ -3073,9 +3075,10 @@ PUBLIC json_t *gobj_list_resource(
             NULL
         );
         KW_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_list_resource(gobj, resource, jn_filter);
+    return gobj->gclass->gmt.mt_list_resource(gobj, resource, jn_filter, jn_options);
 }
 
 /***************************************************************************
@@ -3084,7 +3087,8 @@ PUBLIC json_t *gobj_list_resource(
 PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
     hgobj gobj_,
     const char *resource,
-    json_t *jn_filter  // owned
+    json_t *jn_filter,  // owned
+    json_t *jn_options // owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -3097,6 +3101,7 @@ PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
             NULL
         );
         KW_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_get_resource) {
@@ -3108,9 +3113,10 @@ PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
             NULL
         );
         KW_DECREF(jn_filter);
+        JSON_DECREF(jn_options);
         return 0;
     }
-    return gobj->gclass->gmt.mt_get_resource(gobj, resource, jn_filter);
+    return gobj->gclass->gmt.mt_get_resource(gobj, resource, jn_filter, jn_options);
 }
 
 
