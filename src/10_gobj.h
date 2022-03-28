@@ -169,10 +169,16 @@ typedef BOOL  (*mt_publication_filter_fn) ( // Return -1,0,1
 typedef int   (*mt_child_added_fn)(hgobj gobj, hgobj child);
 typedef int   (*mt_child_removed_fn)(hgobj gobj, hgobj child);
 
-typedef json_t *(*mt_create_resource_fn)(hgobj gobj, const char *resource, json_t *kw);
+typedef json_t *(*mt_create_resource_fn)(
+    hgobj gobj, const char *resource, json_t *kw, json_t *jn_options
+);
 typedef void *(*mt_list_resource_fn)(hgobj gobj, const char *resource, json_t *jn_filter);
-typedef int (*mt_save_resource_fn)(hgobj gobj, const char *resource, json_t *record);
-typedef int (*mt_delete_resource_fn)(hgobj gobj, const char *resource, json_t *record);
+typedef int (*mt_save_resource_fn)(
+    hgobj gobj, const char *resource, json_t *record, json_t *jn_options
+);
+typedef int (*mt_delete_resource_fn)(
+    hgobj gobj, const char *resource, json_t *record, json_t *jn_options
+);
 typedef json_t *(*mt_get_resource_fn)(hgobj gobj, const char *resource, json_t *jn_filter);
 
 typedef json_t *(*mt_create_node_fn)(hgobj gobj, const char *topic_name, json_t *kw, json_t *jn_options, hgobj src);
@@ -571,18 +577,21 @@ PUBLIC GCLASS *gobj_subclass_gclass(GCLASS *base, const char *gclass_name);
 PUBLIC json_t *gobj_create_resource( // Return is NOT YOURS
     hgobj gobj,
     const char *resource,
-    json_t *kw  // owned
+    json_t *kw,  // owned
+    json_t *jn_options // owned
 );
 PUBLIC int gobj_save_resource(
     hgobj gobj,
     const char *resource,
-    json_t *record     // WARNING NOT owned
+    json_t *record,     // WARNING NOT owned
+    json_t *jn_options // owned
 );
 
 PUBLIC int gobj_delete_resource(
     hgobj gobj,
     const char *resource,
-    json_t *record  // owned
+    json_t *record,     // WARNING NOT owned
+    json_t *jn_options // owned
 );
 
 /*

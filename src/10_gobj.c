@@ -2912,7 +2912,8 @@ PRIVATE int deregister_unique_gobj(GObj_t * gobj)
 PUBLIC json_t *gobj_create_resource(
     hgobj gobj_,
     const char *resource,
-    json_t *kw  // owned
+    json_t *kw,  // owned
+    json_t *jn_options // owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -2925,6 +2926,7 @@ PUBLIC json_t *gobj_create_resource(
             NULL
         );
         KW_DECREF(kw);
+        JSON_DECREF(jn_options);
         return 0;
     }
     if(!gobj->gclass->gmt.mt_create_resource) {
@@ -2936,10 +2938,11 @@ PUBLIC json_t *gobj_create_resource(
             NULL
         );
         KW_DECREF(kw);
+        JSON_DECREF(jn_options);
         return 0;
     }
 
-    return gobj->gclass->gmt.mt_create_resource(gobj, resource, kw);
+    return gobj->gclass->gmt.mt_create_resource(gobj, resource, kw, jn_options);
 }
 
 /***************************************************************************
@@ -2948,7 +2951,8 @@ PUBLIC json_t *gobj_create_resource(
 PUBLIC int gobj_save_resource(
     hgobj gobj_,
     const char *resource,
-    json_t *record     // WARNING NOT owned
+    json_t *record,     // WARNING NOT owned
+    json_t *jn_options // owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -2960,6 +2964,7 @@ PUBLIC int gobj_save_resource(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        JSON_DECREF(jn_options);
         return -1;
     }
     if(!record) {
@@ -2970,6 +2975,7 @@ PUBLIC int gobj_save_resource(
             "msg",          "%s", "gobj_save_resource(): record NULL",
             NULL
         );
+        JSON_DECREF(jn_options);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_save_resource) {
@@ -2980,10 +2986,11 @@ PUBLIC int gobj_save_resource(
             "msg",          "%s", "mt_save_resource not defined",
             NULL
         );
+        JSON_DECREF(jn_options);
         return -1;
     }
 
-    return gobj->gclass->gmt.mt_save_resource(gobj, resource, record);
+    return gobj->gclass->gmt.mt_save_resource(gobj, resource, record, jn_options);
 }
 
 /***************************************************************************
@@ -2992,7 +2999,8 @@ PUBLIC int gobj_save_resource(
 PUBLIC int gobj_delete_resource(
     hgobj gobj_,
     const char *resource,
-    json_t *record  // owned
+    json_t *record,  // owned
+    json_t *jn_options // owned
 )
 {
     GObj_t *gobj = gobj_;
@@ -3004,6 +3012,8 @@ PUBLIC int gobj_delete_resource(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
+        KW_DECREF(record);
+        JSON_DECREF(jn_options);
         return -1;
     }
     if(!record) {
@@ -3014,6 +3024,7 @@ PUBLIC int gobj_delete_resource(
             "msg",          "%s", "gobj_delete_resource(): record NULL",
             NULL
         );
+        JSON_DECREF(jn_options);
         return -1;
     }
     if(!gobj->gclass->gmt.mt_delete_resource) {
@@ -3024,10 +3035,12 @@ PUBLIC int gobj_delete_resource(
             "msg",          "%s", "mt_delete_resource not defined",
             NULL
         );
+        KW_DECREF(record);
+        JSON_DECREF(jn_options);
         return -1;
     }
 
-    return gobj->gclass->gmt.mt_delete_resource(gobj, resource, record);
+    return gobj->gclass->gmt.mt_delete_resource(gobj, resource, record, jn_options);
 }
 
 /***************************************************************************
