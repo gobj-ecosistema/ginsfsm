@@ -601,7 +601,7 @@ PUBLIC int gobj_delete_resource(
 /*
  *  WARNING Remember free return:
  *      - using GCLASS_RESOURCE: with rc_free_iter(iter, TRUE, 0);
- *      - using GCLASS_RESOURCE2: with json_decref()
+ *      - using GCLASS_RESOURCE2: with json_decref(), content (records) is yours!
  */
 PUBLIC json_t *gobj_list_resource( // WARNING free return (iter or json)
     hgobj gobj,

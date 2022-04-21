@@ -2930,7 +2930,7 @@ PUBLIC json_t *gobj_create_resource(
         return 0;
     }
     if(!gobj->gclass->gmt.mt_create_resource) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
@@ -2968,7 +2968,7 @@ PUBLIC int gobj_save_resource(
         return -1;
     }
     if(!record) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -2979,7 +2979,7 @@ PUBLIC int gobj_save_resource(
         return -1;
     }
     if(!gobj->gclass->gmt.mt_save_resource) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -3017,7 +3017,7 @@ PUBLIC int gobj_delete_resource(
         return -1;
     }
     if(!record) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -3028,7 +3028,7 @@ PUBLIC int gobj_delete_resource(
         return -1;
     }
     if(!gobj->gclass->gmt.mt_delete_resource) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -3067,7 +3067,7 @@ PUBLIC json_t *gobj_list_resource(
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_resource) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
@@ -3105,7 +3105,7 @@ PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
         return 0;
     }
     if(!gobj->gclass->gmt.mt_get_resource) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
