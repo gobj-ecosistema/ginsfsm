@@ -256,10 +256,11 @@ PUBLIC json_t *msg_iev_answer(
         json_object_set_new(kw_answer, "__md_iev__", request_msg_area);
         msg_set_msg_type(kw_answer, msg_type);
         if(!kw_has_key(request_msg_area, "__md_yuno__")) {
-            json_t *jn_metadata = json_pack("{s:s, s:s, s:s, s:I, s:s}",
+            json_t *jn_metadata = json_pack("{s:s, s:s, s:s, s:s, s:I, s:s}",
                 "realm_name", gobj_yuno_realm_name(),
                 "yuno_role", gobj_yuno_role(),
                 "yuno_name", gobj_yuno_name(),
+                "yuno_id", gobj_yuno_id(),
                 "pid", (json_int_t)getpid(),
                 "user", get_user_name()
             );
@@ -295,10 +296,11 @@ PUBLIC json_t *msg_iev_answer_without_answer_filter(
         msg_set_msg_type(kw_answer, msg_type);
 
         if(!kw_has_key(request_msg_area, "__md_yuno__")) {
-            json_t *jn_metadata = json_pack("{s:s, s:s, s:s, s:I, s:s}",
+            json_t *jn_metadata = json_pack("{s:s, s:s, s:s, s:s, s:I, s:s}",
                 "realm_name", gobj_yuno_realm_name(),
                 "yuno_role", gobj_yuno_role(),
                 "yuno_name", gobj_yuno_name(),
+                "yuno_id", gobj_yuno_id(),
                 "pid", (json_int_t)getpid(),
                 "user", get_user_name()
             );
@@ -448,4 +450,3 @@ PUBLIC const char *msg_get_msg_type(
 {
     return kw_get_str(kw, "__md_iev__`__msg_type__", "", 0);
 }
-

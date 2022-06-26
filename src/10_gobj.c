@@ -239,6 +239,7 @@ PRIVATE char __realm_role__[NAME_MAX];
 PRIVATE char __realm_name__[NAME_MAX];
 PRIVATE char __realm_env__[NAME_MAX];
 PRIVATE char __yuno_role__[NAME_MAX];
+PRIVATE char __yuno_id__[NAME_MAX];
 PRIVATE char __yuno_name__[NAME_MAX];
 PRIVATE char __yuno_tag__[NAME_MAX];
 PRIVATE char __yuno_role_plus_name__[NAME_MAX];
@@ -769,6 +770,7 @@ PUBLIC hgobj gobj_yuno_factory(
     const char *realm_role,
     const char *realm_name,
     const char *realm_env,
+    const char *yuno_id,
     const char *yuno_name,
     const char *yuno_tag,
     json_t *jn_yuno_settings) // own
@@ -799,6 +801,7 @@ PUBLIC hgobj gobj_yuno_factory(
                 "realm_owner",  "%s", realm_owner,
                 "realm_id",     "%s", realm_id,
                 "yuno_role",    "%s", gclass_reg->role,
+                "yuno_id",      "%s", yuno_id,
                 "yuno_name",    "%s", yuno_name,
                 "yuno_tag",     "%s", yuno_tag,
                 "gclass",       "%s", gclass_reg->gclass->gclass_name,
@@ -830,6 +833,10 @@ PUBLIC hgobj gobj_yuno_factory(
             );
             snprintf(
                 __yuno_role__, sizeof(__yuno_role__), "%s", gclass_reg->role
+            );
+            snprintf(
+                __yuno_id__, sizeof(__yuno_id__),
+                "%s", yuno_id?yuno_id:""
             );
             if(empty_string(yuno_name)) {
                 snprintf(__yuno_role_plus_name__, sizeof(__yuno_role_plus_name__),
@@ -1121,13 +1128,14 @@ PUBLIC json_t * gobj_repr_unique_register(void)
  ***************************************************************************/
 PUBLIC json_t * gobj_global_variables(void)
 {
-    return json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+    return json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
         "__node_owner__", __node_owner__,
         "__realm_id__", __realm_id__,
         "__realm_owner__", __realm_owner__,
         "__realm_role__", __realm_role__,
         "__realm_name__", __realm_name__,
         "__realm_env__", __realm_env__,
+        "__yuno_id__", __yuno_id__,
         "__yuno_role__", __yuno_role__,
         "__yuno_name__", __yuno_name__,
         "__yuno_tag__", __yuno_tag__,
@@ -9256,6 +9264,14 @@ PUBLIC const char *gobj_yuno_realm_env(void)
 /***************************************************************************
  *
  ***************************************************************************/
+PUBLIC const char *gobj_yuno_id(void)
+{
+    return __yuno_id__;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
 PUBLIC const char *gobj_yuno_name(void)
 {
     return __yuno_name__;
@@ -10150,6 +10166,7 @@ PUBLIC int append_yuno_metadata(hgobj gobj, json_t *kw, const char *source)
     json_object_set_new(jn_metadatos, "realm_role", json_string(__realm_role__));
     json_object_set_new(jn_metadatos, "realm_name", json_string(__realm_name__));
     json_object_set_new(jn_metadatos, "realm_env", json_string(__realm_env__));
+    json_object_set_new(jn_metadatos, "yuno_id", json_string(__yuno_id__));
     json_object_set_new(jn_metadatos, "yuno_role", json_string(__yuno_role__));
     json_object_set_new(jn_metadatos, "yuno_name", json_string(__yuno_name__));
     json_object_set_new(jn_metadatos, "gobj_name", json_string(gobj_short_name(gobj)));
@@ -12385,6 +12402,7 @@ PRIVATE void monitor_gobj(
             "yuno_id",      "%p", gobj_yuno(),
             "role",         "%s", __yuno_role__,
             "gclass",       "%s", gobj_gclass_name(gobj),
+            "id",           "%s", __yuno_id__,
             "name",         "%s", __yuno_name__,
             "level",        "%d", _gobj_level(gobj),
             "parent_id",    "%p", gobj->__parent__,
@@ -12399,6 +12417,7 @@ PRIVATE void monitor_gobj(
             "yuno_id",      "%p", gobj_yuno(),
             "role",         "%s", __yuno_role__,
             "gclass",       "%s", gobj_gclass_name(gobj),
+            "id",           "%s", __yuno_id__,
             "name",         "%s", __yuno_name__,
             "level",        "%d", _gobj_level(gobj),
             "parent_id",    "%p", gobj->__parent__,
@@ -12412,6 +12431,7 @@ PRIVATE void monitor_gobj(
             "yuno_id",      "%p", gobj_yuno(),
             "role",         "%s", __yuno_role__,
             "gclass",       "%s", gobj_gclass_name(gobj),
+            "id",           "%s", __yuno_id__,
             "name",         "%s", __yuno_name__,
             "level",        "%d", _gobj_level(gobj),
             "parent_id",    "%p", gobj->__parent__,
@@ -12424,6 +12444,7 @@ PRIVATE void monitor_gobj(
             "op",           "%s", "GOBJ_UNIQUE_CREATED",
             "yuno_id",      "%p", gobj_yuno(),
             "gclass",       "%s", gobj_gclass_name(gobj),
+            "id",           "%s", __yuno_id__,
             "name",         "%s", gobj_name(gobj),
             "level",        "%d", _gobj_level(gobj),
             "parent_id",    "%p", gobj->__parent__,
@@ -12797,4 +12818,3 @@ PUBLIC json_t *gobj_2key_get_value(const char *key1, const char *key2)
 {
     return kw_get_subdict_value(__2key__, key1, key2, 0, KW_REQUIRED);
 }
-

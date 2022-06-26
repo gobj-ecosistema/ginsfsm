@@ -459,6 +459,7 @@ PUBLIC hgobj gobj_yuno_factory(
     const char *realm_role,
     const char *realm_name,
     const char *realm_env,
+    const char *yuno_id,
     const char *yuno_name,
     const char *yuno_tag,
     json_t *jn_yuno_settings // own
@@ -1400,6 +1401,7 @@ PUBLIC const char *gobj_yuno_realm_owner(void);
 PUBLIC const char *gobj_yuno_realm_role(void);
 PUBLIC const char *gobj_yuno_realm_name(void);
 PUBLIC const char *gobj_yuno_realm_env(void);
+PUBLIC const char *gobj_yuno_id(void);
 PUBLIC const char *gobj_yuno_role(void);
 PUBLIC const char *gobj_yuno_name(void);
 PUBLIC const char *gobj_yuno_role_plus_name(void);
