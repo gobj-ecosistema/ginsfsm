@@ -243,6 +243,7 @@ PRIVATE char __yuno_id__[NAME_MAX];
 PRIVATE char __yuno_name__[NAME_MAX];
 PRIVATE char __yuno_tag__[NAME_MAX];
 PRIVATE char __yuno_role_plus_name__[NAME_MAX];
+PRIVATE char __yuno_role_plus_id__[NAME_MAX];
 
 
 PRIVATE json_t *__jn_global_settings__ = 0;
@@ -852,6 +853,20 @@ PUBLIC hgobj gobj_yuno_factory(
                 );
                 snprintf(__yuno_name__, sizeof(__yuno_name__), "%s", yuno_name);
             }
+            if(empty_string(yuno_id)) {
+                snprintf(__yuno_role_plus_id__, sizeof(__yuno_role_plus_id__),
+                    "%s",
+                    gclass_reg->role
+                );
+                __yuno_id__[0] = 0;
+            } else {
+                snprintf(__yuno_role_plus_id__, sizeof(__yuno_role_plus_id__),
+                    "%s^%s",
+                    gclass_reg->role,
+                    yuno_id
+                );
+                snprintf(__yuno_id__, sizeof(__yuno_id__), "%s", yuno_id);
+            }
             snprintf(
                 __yuno_tag__, sizeof(__yuno_tag__),
                 "%s", yuno_tag?yuno_tag:""
@@ -1128,7 +1143,7 @@ PUBLIC json_t * gobj_repr_unique_register(void)
  ***************************************************************************/
 PUBLIC json_t * gobj_global_variables(void)
 {
-    return json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
+    return json_pack("{s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s, s:s}",
         "__node_owner__", __node_owner__,
         "__realm_id__", __realm_id__,
         "__realm_owner__", __realm_owner__,
@@ -1140,6 +1155,7 @@ PUBLIC json_t * gobj_global_variables(void)
         "__yuno_name__", __yuno_name__,
         "__yuno_tag__", __yuno_tag__,
         "__yuno_role_plus_name__", __yuno_role_plus_name__,
+        "__yuno_role_plus_id__", __yuno_role_plus_id__,
         "__hostname__", get_host_name(),
         "__sys_system_name__", sys.sysname,
         "__sys_node_name__", sys.nodename,
@@ -9291,6 +9307,14 @@ PUBLIC const char *gobj_yuno_role(void)
 PUBLIC const char *gobj_yuno_role_plus_name(void)
 {
     return __yuno_role_plus_name__;
+}
+
+/***************************************************************************
+ *
+ ***************************************************************************/
+PUBLIC const char *gobj_yuno_role_plus_id(void)
+{
+    return __yuno_role_plus_id__;
 }
 
 /***************************************************************************

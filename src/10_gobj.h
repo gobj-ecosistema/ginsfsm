@@ -1405,6 +1405,7 @@ PUBLIC const char *gobj_yuno_id(void);
 PUBLIC const char *gobj_yuno_role(void);
 PUBLIC const char *gobj_yuno_name(void);
 PUBLIC const char *gobj_yuno_role_plus_name(void);
+PUBLIC const char *gobj_yuno_role_plus_id(void);
 PUBLIC const char *gobj_yuno_tag(void);
 
 PUBLIC json_t *gobj_services(void); // return list of strings
