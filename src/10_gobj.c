@@ -11607,7 +11607,7 @@ PUBLIC int gobj_set_gclass_trace(GCLASS *gclass, const char *level, BOOL set)
     if(empty_string(level)) {
         bitmask = TRACE_USER_LEVEL;
     } else {
-        if(isdigit(*level)) {
+        if(isdigit(*((unsigned char *)level))) {
             bitmask = atoi(level);
         }
         if(!bitmask) {
@@ -11678,7 +11678,7 @@ PRIVATE int _set_gobj_trace_level(GObj_t * gobj, const char *level, BOOL set)
     if(empty_string(level)) {
         bitmask = TRACE_USER_LEVEL;
     } else {
-        if(isdigit(*level)) {
+        if(isdigit(*((unsigned char *)level))) {
             bitmask = atoi(level);
         }
         if(!bitmask) {
@@ -11725,7 +11725,7 @@ PUBLIC int gobj_set_global_trace(const char *level, BOOL set)
     if(empty_string(level)) {
         bitmask = TRACE_GLOBAL_LEVEL;
     } else {
-        if(isdigit(*level)) {
+        if(isdigit(*((unsigned char *)level))) {
             bitmask = atoi(level);
         }
         if(!bitmask) {
@@ -11770,7 +11770,7 @@ PUBLIC int gobj_set_gclass_no_trace(GCLASS *gclass, const char *level, BOOL set)
     if(empty_string(level)) {
         bitmask = -1;
     } else {
-        if(isdigit(*level)) {
+        if(isdigit(*((unsigned char *)level))) {
             bitmask = atoi(level);
         }
         if(!bitmask) {
@@ -11821,7 +11821,7 @@ PRIVATE int _set_gobj_no_trace_level(hgobj gobj_, const char *level, BOOL set)
     if(empty_string(level)) {
         bitmask = -1;
     } else {
-        if(isdigit(*level)) {
+        if(isdigit(*((unsigned char *)level))) {
             bitmask = atoi(level);
         }
         if(!bitmask) {
