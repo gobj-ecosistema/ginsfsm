@@ -38,7 +38,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
-#include <pcre2posix.h>
+#include <regex.h>
 #include <limits.h>
 #include <ctype.h>
 #include <string.h>
