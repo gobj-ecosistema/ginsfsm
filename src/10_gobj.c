@@ -35,8 +35,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
-#include <dirent.h>
-#include <errno.h>
 #include <unistd.h>
 #include <regex.h>
 #include <limits.h>

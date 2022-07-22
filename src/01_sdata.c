@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <strings.h>
-#define PCRE2_CODE_UNIT_WIDTH 8
-#include <pcre2.h>
 #include "01_sdata.h"
 
 /****************************************************************
@@ -3567,5 +3565,3 @@ PUBLIC int sdata_write_default_values(
 
     return 0;
 }
-
-
