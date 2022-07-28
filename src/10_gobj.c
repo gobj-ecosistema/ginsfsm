@@ -7069,7 +7069,7 @@ PUBLIC int gobj_send_event(
                         (!dst->running)?"!!":"",
                         gobj_gclass_name(dst), gobj_name(dst),
                         mach->current_state,
-                        On_Black Green,
+                        On_Black RGreen,
                         mach->fsm->state_names[mach->current_state],
                         Color_Off,
                         event,
@@ -9835,7 +9835,7 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
                 (!gobj->running)?"!!":"",
                 gobj_gclass_name(gobj), gobj_name(gobj),
                 mach->current_state,
-                On_Black Green,
+                On_Black RGreen,
                 mach->fsm->state_names[mach->current_state],
                 Color_Off
             );
