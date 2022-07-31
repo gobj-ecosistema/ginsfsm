@@ -15,19 +15,67 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClCompile Include="src\01_sdata.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\10_gobj.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\11_inter_event.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\11_istream.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\12_msg_ievent.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\13_authz_helper.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\13_command_parser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\13_stats_parser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ginsfsm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\treedb_schema_gobjs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ginsfsm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClInclude Include="src\ginsfsm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\11_istream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\12_msg_ievent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\13_authz_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\13_command_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\13_stats_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\01_sdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\10_gobj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\11_inter_event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\00_msglog_ginsfsm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

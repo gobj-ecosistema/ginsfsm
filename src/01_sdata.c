@@ -8,8 +8,12 @@
 #include <inttypes.h>
 #include <string.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <strings.h>
+#if  defined(WIN32) || defined(_WINDOWS)
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <strings.h>
+#endif
 #include "01_sdata.h"
 
 /****************************************************************

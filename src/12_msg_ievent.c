@@ -6,8 +6,13 @@
  *          Copyright (c) 2016 Niyamaka.
  *          All Rights Reserved.
 ***********************************************************************/
-#include <unistd.h>
 #include <sys/types.h>
+#if defined(WIN32) || defined(_WINDOWS)
+    #include <io.h>
+#else
+    #include <unistd.h>
+#endif
+
 #include "12_msg_ievent.h"
 
 /****************************************************************

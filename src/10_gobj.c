@@ -35,13 +35,17 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
-#include <unistd.h>
 #include <regex.h>
 #include <limits.h>
 #include <ctype.h>
 #include <string.h>
-#include <strings.h>
-#include <sys/utsname.h>
+#if defined(WIN32) || defined(_WINDOWS)
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <strings.h>
+	#include <sys/utsname.h>
+#endif
 #include "10_gobj.h"
 #include "12_msg_ievent.h"
 
@@ -200,7 +204,9 @@ typedef struct _GObj_t {
 /****************************************************************
  *         Data
  ****************************************************************/
-PRIVATE struct utsname sys;
+#ifdef __linux__
+    PRIVATE struct utsname sys;
+#endif
 
 PRIVATE json_t *jn_treedb_schema_gobjs = 0;
 PRIVATE volatile int  __shutdowning__ = 0;
@@ -600,9 +606,11 @@ PUBLIC int gobj_start_up(
 
     __2key__ = json_object();
 
+#ifdef __linux__
     if(uname(&sys)==0) {
         change_char(sys.machine, '_', '-');
     }
+#endif
 
     __initialized__ = TRUE;
     return 0;
@@ -877,7 +885,11 @@ PUBLIC hgobj gobj_yuno_factory(
             );
             if(__yuno__) {
                 register_service("__yuno__", gobj);
+#ifdef __linux__
                 gobj_write_uint32_attr(__yuno__, "watcher_pid", get_watcher_pid());
+#else
+                gobj_write_uint32_attr(__yuno__, "watcher_pid", 0);
+#endif
             }
             return __yuno__;
         }
@@ -1155,11 +1167,19 @@ PUBLIC json_t * gobj_global_variables(void)
         "__yuno_role_plus_name__", __yuno_role_plus_name__,
         "__yuno_role_plus_id__", __yuno_role_plus_id__,
         "__hostname__", get_host_name(),
+#ifdef __linux__
         "__sys_system_name__", sys.sysname,
         "__sys_node_name__", sys.nodename,
         "__sys_version__", sys.version,
         "__sys_release__", sys.release,
         "__sys_machine__", sys.machine
+#else
+        "__sys_system_name__", "",
+        "__sys_node_name__", "",
+        "__sys_version__", "",
+        "__sys_release__", "",
+        "__sys_machine__", ""
+#endif
     );
 }
 
@@ -12280,14 +12300,23 @@ PUBLIC json_t *gobj_authenticate(hgobj gobj_, json_t *kw, hgobj src)
      *  Then use the global authzs parser
      *-----------------------------------------------*/
     if(!__global_authenticate_parser_fn__) {
+#ifdef __linux__
         struct passwd *pw = getpwuid(getuid());
 
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return json_pack("{s:i, s:s, s:s}",
             "result", 0,
             "comment", "Working without authentication",
             "username", pw->pw_name
         );
+#else
+        KW_DECREF(kw)
+        return json_pack("{s:i, s:s, s:s}",
+            "result", 0,
+            "comment", "Working without authentication",
+            "username", "yuneta"
+        );
+#endif
     }
 
     return __global_authenticate_parser_fn__(gobj, kw, src);
