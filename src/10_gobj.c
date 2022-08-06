@@ -6648,8 +6648,9 @@ PUBLIC int gobj_publish_event(
         }
     }
 
-    BOOL tracea = is_machine_tracing(publisher);
-    tracea |= __trace_gobj_subscriptions__(publisher);
+    BOOL tracea = is_machine_tracing(publisher) &&
+        !is_machine_not_tracing(publisher) &&
+        __trace_gobj_subscriptions__(publisher);
     if(tracea) {
         trace_machine("🔝🔝 mach(%s%s^%s), ev: %s, st: %s",
             (!publisher->running)?"!!":"",
@@ -7084,7 +7085,7 @@ PUBLIC int gobj_send_event(
             }
 
             if(state_changed && gobj_is_running(dst)) {
-                if(tracea_states) {
+                if(tracea && tracea_states) {
                     trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s%s%s), ev: %s, from(%s%s^%s)",
                         (!dst->running)?"!!":"",
                         gobj_gclass_name(dst), gobj_name(dst),
@@ -7096,11 +7097,6 @@ PUBLIC int gobj_send_event(
                         (src && !src->running)?"!!":"",
                         gobj_gclass_name(src), gobj_name(src)
                     );
-                    if(kw) {
-                        if(__trace_gobj_ev_kw__(dst)) {
-                            log_debug_json(0, kw, "kw");
-                        }
-                    }
                 }
 
                 json_t *kw_st = json_object();
@@ -9848,9 +9844,10 @@ PUBLIC BOOL gobj_change_state(hgobj gobj_, const char *new_state)
 
     if(state_changed && gobj_is_running(gobj)) {
         BOOL tracea_states = __trace_gobj_states__(gobj)?TRUE:FALSE;
+        BOOL tracea = is_machine_tracing(gobj) && !is_machine_not_tracing(gobj);
         SMachine_t * mach = gobj->mach;
 
-        if(tracea_states) {
+        if(tracea && tracea_states) {
             trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s%s%s)",
                 (!gobj->running)?"!!":"",
                 gobj_gclass_name(gobj), gobj_name(gobj),
@@ -10084,6 +10081,13 @@ PUBLIC BOOL gobj_is_running(hgobj gobj_)
 {
     GObj_t *gobj = gobj_;
     if(!gobj_ || gobj->obflag & (obflag_destroyed|obflag_destroying)) {
+        log_error(LOG_OPT_TRACE_STACK,
+          "gobj",         "%s", __FILE__,
+          "function",     "%s", __FUNCTION__,
+          "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+          "msg",          "%s", "hgobj NULL or DESTROYED",
+          NULL
+        );
         return FALSE;
     }
     return gobj->running;
@@ -10097,6 +10101,13 @@ PUBLIC BOOL gobj_is_playing(hgobj gobj_)
     GObj_t *gobj = gobj_;
 
     if(!gobj_ || gobj->obflag & (obflag_destroyed|obflag_destroying)) {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "hgobj NULL or DESTROYED",
+            NULL
+        );
         return FALSE;
     }
     return gobj->playing;
@@ -11675,9 +11686,9 @@ PUBLIC int gobj_set_panic_trace(BOOL panic_trace)
 /***************************************************************************
  *
  ***************************************************************************/
-PUBLIC int gobj_set_deep_tracing(BOOL set)
+PUBLIC int gobj_set_deep_tracing(int level)
 {
-    __deep_trace__ = set?TRUE:FALSE;
+    __deep_trace__ = level;
 
     return 0;
 }
@@ -12205,7 +12216,7 @@ PRIVATE inline BOOL is_machine_tracing(GObj_t * gobj)
  ***************************************************************************/
 PRIVATE inline BOOL is_machine_not_tracing(GObj_t * gobj)
 {
-    if(__deep_trace__ || __panic_trace__) {
+    if(abs(__deep_trace__) > 1 || __panic_trace__) {
         return FALSE;
     }
     if(!gobj) {

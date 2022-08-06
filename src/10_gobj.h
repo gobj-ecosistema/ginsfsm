@@ -1656,7 +1656,7 @@ PUBLIC json_t *gobj_trace_level_list2(
 PUBLIC int gobj_set_gobj_trace(hgobj gobj, const char* level, BOOL set, json_t* kw);
 PUBLIC int gobj_set_gclass_trace(GCLASS *gclass, const char *level, BOOL set);
 PUBLIC int gobj_set_panic_trace(BOOL panic_trace);
-PUBLIC int gobj_set_deep_tracing(BOOL set);
+PUBLIC int gobj_set_deep_tracing(int level);
 PUBLIC int gobj_set_global_trace(const char* level, BOOL set); // If level is empty, set all global traces
 
 /*
