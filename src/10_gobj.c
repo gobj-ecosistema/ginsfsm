@@ -4801,11 +4801,13 @@ PUBLIC hgobj gobj_find_service(const char *service, BOOL verbose)
         return srv_reg->gobj;
     }
     if(verbose) {
+        char temp[250];
+        snprintf(temp, sizeof(temp), "service NOT FOUND: %s", service);
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "service NOT FOUND",
+            "msg",          "%s", temp,
             "service",      "%s", service,
             NULL
         );
