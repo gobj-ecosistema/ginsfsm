@@ -4127,7 +4127,7 @@ PUBLIC int gobj_start(hgobj gobj_)
         return -1;
     }
     if(gobj->running) {
-        log_error(0,
+        log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_OPERATIONAL_ERROR,
