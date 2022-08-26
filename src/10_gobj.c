@@ -6248,10 +6248,10 @@ PUBLIC hsdata gobj_subscribe_event(
 
     /*--------------------------------------------------------------*
      *  Event must be in output event list
-     *  You can avoid this with gcflag_no_check_ouput_events flag
+     *  You can avoid this with gcflag_no_check_output_events flag
      *--------------------------------------------------------------*/
     if(!empty_string(event)) {
-        if(!(publisher->gclass->gcflag & gcflag_no_check_ouput_events)) {
+        if(!(publisher->gclass->gcflag & gcflag_no_check_output_events)) {
             const EVENT *output_event = gobj_output_event(publisher, event);
             if(!output_event) {
                 log_error(0,
@@ -6632,11 +6632,11 @@ PUBLIC int gobj_publish_event(
 
     /*--------------------------------------------------------------*
      *  Event must be in output event list
-     *  You can avoid this with gcflag_no_check_ouput_events flag
+     *  You can avoid this with gcflag_no_check_output_events flag
      *--------------------------------------------------------------*/
     const EVENT *ev = gobj_output_event(publisher, event);
     if(!ev) {
-        if(!(publisher->gclass->gcflag & gcflag_no_check_ouput_events)) {
+        if(!(publisher->gclass->gcflag & gcflag_no_check_output_events)) {
             log_error(0,
                 "gobj",         "%s", gobj_full_name(publisher),
                 "function",     "%s", __FUNCTION__,
