@@ -11686,7 +11686,8 @@ PUBLIC int gobj_set_panic_trace(BOOL panic_trace)
 }
 
 /***************************************************************************
- *
+ *  level 1 all but considering __gobj_no_trace_level__
+ *  level >1 all
  ***************************************************************************/
 PUBLIC int gobj_set_deep_tracing(int level)
 {
