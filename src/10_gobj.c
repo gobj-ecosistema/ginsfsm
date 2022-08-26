@@ -7665,7 +7665,7 @@ PRIVATE int gobj_write_json_parameters(
         hs,
         new_kw,
         -1,
-        (gobj->gclass->gcflag & gcflag_ignore_unkwnow_attrs)?0:print_attr_not_found,
+        (gobj->gclass->gcflag & gcflag_ignore_unknown_attrs)?0:print_attr_not_found,
         gobj
     );
 
