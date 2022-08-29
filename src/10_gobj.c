@@ -6580,7 +6580,7 @@ PRIVATE json_t *apply_trans_filters(json_t *kw, json_t *jn_trans_filters)
 }
 
 /***************************************************************************
- *  Return the sum of sent events returns.
+ *  Return the number of sent events
  ***************************************************************************/
 PUBLIC int gobj_publish_event(
     hgobj publisher_,
@@ -6679,7 +6679,7 @@ PUBLIC int gobj_publish_event(
             event,
             kw  // not owned
         );
-        if(topublish<0) {
+        if(topublish<=0) {
             KW_DECREF(kw);
             return 0;
         }
@@ -6689,7 +6689,6 @@ PUBLIC int gobj_publish_event(
      *  Default publication method
      *--------------------------------------------------------------*/
     dl_list_t *dl_subs = &publisher->dl_subscriptions;
-    int ret_sum = 0;
     int sent_count = 0;
     hsdata subs; rc_instance_t *i_subs;
     i_subs = rc_first_instance(dl_subs, (rc_resource_t **)&subs);
@@ -6784,7 +6783,7 @@ PUBLIC int gobj_publish_event(
                 break;
             } else if(topublish==0) {
                 /*
-                 *  Must not be publicated
+                 *  Must not be published
                  *  Next subs
                  */
                 KW_DECREF(kw2publish);
@@ -6846,7 +6845,7 @@ PUBLIC int gobj_publish_event(
                 }
             }
 
-            ret_sum += gobj_send_event(subscriber, event_name, kw2publish, publisher);
+            gobj_send_event(subscriber, event_name, kw2publish, publisher);
 
             sent_count++;
 
@@ -6880,7 +6879,7 @@ PUBLIC int gobj_publish_event(
     }
 
     KW_DECREF(kw);
-    return ret_sum;
+    return sent_count;
 }
 
 /***************************************************************************

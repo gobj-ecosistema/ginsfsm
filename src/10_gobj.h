@@ -1213,8 +1213,13 @@ PUBLIC int gobj_add_publication_transformation_filter_fn(
  *      3) __trans_filter__ to transform kw
  *      4) __global__ to add global keys
  *
+ *  Own publication method (mt_publish_event) Return or
+ *  filters (mt_publication_pre_filter or mt_publication_filter) Returns:
+ *     -1  (broke),
+ *      0  continue without publish,
+ *      1  continue and publish
  */
-PUBLIC int gobj_publish_event( // Return the sum of sent events returns.
+PUBLIC int gobj_publish_event( // Return the number of sent events (>=0)
     hgobj publisher,
     const char *event,
     json_t *kw  // this kw extends kw_request.
