@@ -1212,7 +1212,7 @@ PUBLIC int gobj_add_publication_transformation_filter_fn(
  *      1  publish and continue
  *
  *  The process of publishing is:
- *  1) Own method: If publisher gclass has mt_publish_event call it.
+ *  1) Own mt_publish_event method: If publisher gclass has mt_publish_event() call it.
  *      if return <= 0 return (all publishing process done by gclass)
  *      if return >0 continue with publishing process of gobj.c
  *
