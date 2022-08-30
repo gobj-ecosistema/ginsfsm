@@ -6846,9 +6846,11 @@ PUBLIC int gobj_publish_event(
                 }
             }
 
-            gobj_send_event(subscriber, event_name, kw2publish, publisher);
-
+            int ret = gobj_send_event(subscriber, event_name, kw2publish, publisher);
             sent_count++;
+            if(ret < 0 && (subs_flag & __own_event__)) {
+                break;
+            }
 
             if(publisher->obflag & obflag_destroyed) {
                 /*

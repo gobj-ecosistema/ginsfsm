@@ -1115,6 +1115,7 @@ typedef enum {
     __hard_subscription__   = 0x00000002,
     __first_shot__          = 0x00000004,
     __share_kw__            = 0x00000008,   // Don't twin kw, use the same.
+    __own_event__           = 0x00000010,   // If gobj_send_event return -1 don't continue publishing
 } subs_flag_t;
 
 
@@ -1243,6 +1244,7 @@ PUBLIC int gobj_add_publication_transformation_filter_fn(
  *          - Add global keys (defined in __global__)
  *
  *      7) Publish (gobj_send_event to subscriber)
+ *          If __own_event__ defined and return -1 don't continue publishing
  *
  */
 PUBLIC int gobj_publish_event( // Return the number of sent events (>=0)
