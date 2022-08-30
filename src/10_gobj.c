@@ -5840,14 +5840,23 @@ PRIVATE hsdata _create_subscription(
             }
             if(kw_has_key(kw_clone, "__first_shot__")) {
                 BOOL first_short = kw_get_bool(kw_clone, "__first_short__", 0, 0);
+                // don't delete, external use
                 if(first_short) {
                     subs_flag |= __first_shot__;
                 }
             }
             if(kw_has_key(kw_clone, "__share_kw__")) {
                 BOOL share_kw = kw_get_bool(kw_clone, "__share_kw__", 0, 0);
+                json_object_del(kw_clone, "__share_kw__");
                 if(share_kw) {
                     subs_flag |= __share_kw__;
+                }
+            }
+            if(kw_has_key(kw_clone, "__own_event__")) {
+                BOOL share_kw = kw_get_bool(kw_clone, "__own_event__", 0, 0);
+                json_object_del(kw_clone, "__own_event__");
+                if(share_kw) {
+                    subs_flag |= __own_event__;
                 }
             }
         }
