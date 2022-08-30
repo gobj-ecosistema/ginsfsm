@@ -6855,11 +6855,17 @@ PUBLIC int gobj_publish_event(
                 }
             }
 
-            int ret = gobj_send_event(subscriber, event_name, kw2publish, publisher);
-            sent_count++;
+            int ret = gobj_send_event(
+                subscriber,
+                event_name,
+                kw2publish,
+                publisher
+            );
             if(ret < 0 && (subs_flag & __own_event__)) {
+                sent_count = -1; // Return of -1 indicates that someone owned the event
                 break;
             }
+            sent_count++;
 
             if(publisher->obflag & obflag_destroyed) {
                 /*
