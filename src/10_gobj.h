@@ -1247,7 +1247,7 @@ PUBLIC int gobj_add_publication_transformation_filter_fn(
  *          If __own_event__ defined and return -1 don't continue publishing
  *
  */
-PUBLIC int gobj_publish_event( // Return the number of sent events (>=0)
+PUBLIC int gobj_publish_event( // Return the number of sent events (>=0), or -1 if someone owned the event
     hgobj publisher,
     const char *event,
     json_t *kw  // this kw extends kw_request.
