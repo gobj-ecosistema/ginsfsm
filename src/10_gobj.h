@@ -1206,18 +1206,44 @@ PUBLIC int gobj_add_publication_transformation_filter_fn(
 );
 
 /*
- *  The kw process to publish is:
- *  Apply
- *      1) __filter__ or mt_publication_filter() to select publication
- *      2) __local__ to remove local keys from kw
- *      3) __trans_filter__ to transform kw
- *      4) __global__ to add global keys
+ *  In general the meaning of returns are:
+ *     -1  broke (could be interpreted like 'own the event and don't publish to others)
+ *      0  continue without publish
+ *      1  publish and continue
  *
- *  Own publication method (mt_publish_event) Return or
- *  filters (mt_publication_pre_filter or mt_publication_filter) Returns:
- *     -1  (broke),
- *      0  continue without publish,
- *      1  continue and publish
+ *  The process of publishing is:
+ *  1) Own method: If publisher gclass has mt_publish_event call it.
+ *      if return <= 0 return (all publishing process done by gclass)
+ *      if return >0 continue with publishing process of gobj.c
+ *
+ *  2) LOOP over subscriptions:
+ *      1) Pre-filter: If publisher gclass has mt_publication_pre_filter call it (before KW filling)
+ *          kw NOT owned! you can modify the publishing kw
+ *          Return:
+ *              -1  broke
+ *              0  continue without publish
+ *              1  continue to publish
+ *
+ *      2) Check renamed_event
+ *      3) Duplicate the kw to publish if not shared (subscription flag ``__share_kw__``)
+ *      4) Filter with filter if either not null:
+ *          - call publisher mt_publication_filter() method or
+ *          - filter with subscription parameter ``__filter__`` (kw_match_simple())
+ *              Return:
+ *                  -1  broke
+ *                  0  continue without publish
+ *                  1  continue to publish
+ *
+ *      5) Check if System event: don't send if subscriber has not it
+ *          ev->flag & EVF_SYSTEM_EVENT
+ *
+ *      6) KW filling
+ *          - Remove local keys (defined in __local__)
+ *          - Apply transformation filters (defined in __trans_filter__ and calling apply_trans_filters())
+ *          - Add global keys (defined in __global__)
+ *
+ *      7) Publish (gobj_send_event to subscriber)
+ *
  */
 PUBLIC int gobj_publish_event( // Return the number of sent events (>=0)
     hgobj publisher,

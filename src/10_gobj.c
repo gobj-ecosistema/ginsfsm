@@ -6666,13 +6666,13 @@ PUBLIC int gobj_publish_event(
     }
     BOOL tracea2 = __trace_gobj_subscriptions2__(publisher);
 
-    /*-------------------------------------*
+    /*----------------------------------------------------------*
      *  Own publication method
      *  Return:
-     *     -1  (broke),
-     *      0  continue without publish,
-     *      1  continue and publish
-     *-------------------------------------*/
+     *     -1  broke                        -> return
+     *      0  continue without publish     -> return
+     *      1  publish and continue         -> continue below
+     *----------------------------------------------------------*/
     if(publisher->gclass->gmt.mt_publish_event) {
         int topublish = publisher->gclass->gmt.mt_publish_event(
             publisher,
@@ -6696,10 +6696,11 @@ PUBLIC int gobj_publish_event(
         // TODO no protegido contra borrados
         /*-------------------------------------*
          *  Pre-filter
+         *  kw NOT owned! you can modify the publishing kw
          *  Return:
-         *     -1  (broke),
-         *      0  continue without publish,
-         *      1  continue and publish
+         *     -1  broke
+         *      0  continue without publish
+         *      1  continue to publish
          *-------------------------------------*/
         if(publisher->gclass->gmt.mt_publication_pre_filter) {
             int topublish = publisher->gclass->gmt.mt_publication_pre_filter(
@@ -6747,7 +6748,7 @@ PUBLIC int gobj_publish_event(
             }
 
             /*
-             *  Clone the kw to publish if not shared
+             *  Duplicate the kw to publish if not shared
              */
             json_t *kw2publish = 0;
             if(subs_flag & __share_kw__) {
@@ -6758,7 +6759,7 @@ PUBLIC int gobj_publish_event(
             }
 
             /*-------------------------------------*
-             *  User filter or configured filter
+             *  User filter method or filter parameter
              *  Return:
              *     -1  (broke),
              *      0  continue without publish,
