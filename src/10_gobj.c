@@ -6295,7 +6295,7 @@ PUBLIC hsdata gobj_subscribe_event(
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
-            "msg",          "%s", "subscription(s) REPEATED, will be deleted and overrided",
+            "msg",          "%s", "subscription(s) REPEATED, will be deleted and override",
             "event",        "%s", event,
             "publisher",    "%s", gobj_full_name(publisher),
             "subscriber",   "%s", gobj_full_name(subscriber),
