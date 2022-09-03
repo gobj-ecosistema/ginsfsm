@@ -1120,17 +1120,17 @@ typedef enum {
 
 
 /*
- *  Return schema of subcriptions hsdata
+ *  Return schema of subscriptions hsdata
  */
 PUBLIC const sdata_desc_t *gobj_subscription_schema(void);
 
 /*
- *  Return number of subcriptions
+ *  Return number of subscriptions
  */
 PUBLIC size_t gobj_subscriptions_size(hgobj publisher);
 
 /*
- *  Return number of subcribings
+ *  Return number of subscribings
  */
 PUBLIC size_t gobj_subscribings_size(hgobj subscriber);
 
