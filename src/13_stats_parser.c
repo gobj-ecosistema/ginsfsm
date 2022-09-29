@@ -173,7 +173,7 @@ PUBLIC json_t * build_stats(hgobj gobj, const char *stats, json_t *kw, hgobj src
      *----------------------------*/
     const char *key;
     json_t *v;
-    json_t *jn_stats = gobj_jn_stats(gobj);
+    json_t *jn_stats = gobj_jn_stats(gobj); // Stats in gobj->jn_stats;
     json_object_foreach(jn_stats, key, v) {
         if(!empty_string(stats)) {
             if(strstr(stats, key)==0) {
@@ -183,7 +183,6 @@ PUBLIC json_t * build_stats(hgobj gobj, const char *stats, json_t *kw, hgobj src
         json_object_set(jn_data, key, v);
     }
 
-    KW_DECREF(kw);
+    KW_DECREF(kw)
     return jn_data;
 }
-
