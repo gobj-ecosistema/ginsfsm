@@ -595,7 +595,7 @@ PUBLIC int gobj_save_resource(
 PUBLIC int gobj_delete_resource(
     hgobj gobj,
     const char *resource,
-    json_t *record,     // WARNING NOT owned
+    json_t *record,     // owned
     json_t *jn_options // owned
 );
 

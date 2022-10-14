@@ -2967,8 +2967,8 @@ PUBLIC json_t *gobj_create_resource(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
-        JSON_DECREF(jn_options);
+        KW_DECREF(kw)
+        JSON_DECREF(jn_options)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_create_resource) {
@@ -2979,8 +2979,8 @@ PUBLIC json_t *gobj_create_resource(
             "msg",          "%s", "mt_create_resource not defined",
             NULL
         );
-        KW_DECREF(kw);
-        JSON_DECREF(jn_options);
+        KW_DECREF(kw)
+        JSON_DECREF(jn_options)
         return 0;
     }
 
@@ -3006,7 +3006,7 @@ PUBLIC int gobj_save_resource(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return -1;
     }
     if(!record) {
@@ -3017,7 +3017,7 @@ PUBLIC int gobj_save_resource(
             "msg",          "%s", "gobj_save_resource(): record NULL",
             NULL
         );
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return -1;
     }
     if(!gobj->gclass->gmt.mt_save_resource) {
@@ -3028,7 +3028,7 @@ PUBLIC int gobj_save_resource(
             "msg",          "%s", "mt_save_resource not defined",
             NULL
         );
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return -1;
     }
 
@@ -3054,8 +3054,8 @@ PUBLIC int gobj_delete_resource(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(record);
-        JSON_DECREF(jn_options);
+        KW_DECREF(record)
+        JSON_DECREF(jn_options)
         return -1;
     }
     if(!record) {
@@ -3066,7 +3066,7 @@ PUBLIC int gobj_delete_resource(
             "msg",          "%s", "gobj_delete_resource(): record NULL",
             NULL
         );
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return -1;
     }
     if(!gobj->gclass->gmt.mt_delete_resource) {
@@ -3077,8 +3077,8 @@ PUBLIC int gobj_delete_resource(
             "msg",          "%s", "mt_delete_resource not defined",
             NULL
         );
-        KW_DECREF(record);
-        JSON_DECREF(jn_options);
+        KW_DECREF(record)
+        JSON_DECREF(jn_options)
         return -1;
     }
 
@@ -3105,7 +3105,7 @@ PUBLIC json_t *gobj_list_resource(
             NULL
         );
         KW_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_resource) {
@@ -3117,7 +3117,7 @@ PUBLIC json_t *gobj_list_resource(
             NULL
         );
         KW_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
     return gobj->gclass->gmt.mt_list_resource(gobj, resource, jn_filter, jn_options);
@@ -3143,7 +3143,7 @@ PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
             NULL
         );
         KW_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_get_resource) {
@@ -3155,7 +3155,7 @@ PUBLIC json_t *gobj_get_resource( // WARNING return is NOT yours!
             NULL
         );
         KW_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
     return gobj->gclass->gmt.mt_get_resource(gobj, resource, jn_filter, jn_options);
@@ -3189,7 +3189,7 @@ PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_treedbs) {
@@ -3200,7 +3200,7 @@ PUBLIC json_t *gobj_treedbs( // Return a list with treedb names
             "msg",          "%s", "mt_treedbs not defined",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     return gobj->gclass->gmt.mt_treedbs(gobj, kw, src);
@@ -3294,7 +3294,7 @@ PUBLIC json_t *gobj_topic_links(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_topic_links) {
@@ -3305,7 +3305,7 @@ PUBLIC json_t *gobj_topic_links(
             "msg",          "%s", "mt_topic_links not defined",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     return gobj->gclass->gmt.mt_topic_links(gobj, treedb_name, topic_name, kw, src);
@@ -3331,7 +3331,7 @@ PUBLIC json_t *gobj_topic_hooks(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_topic_hooks) {
@@ -3342,7 +3342,7 @@ PUBLIC json_t *gobj_topic_hooks(
             "msg",          "%s", "mt_topic_hooks not defined",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     return gobj->gclass->gmt.mt_topic_hooks(gobj, treedb_name, topic_name, kw, src);
@@ -3400,8 +3400,8 @@ PUBLIC json_t *gobj_create_node( // Return is YOURS
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
-        JSON_DECREF(jn_options);
+        KW_DECREF(kw)
+        JSON_DECREF(jn_options)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_create_node) {
@@ -3412,8 +3412,8 @@ PUBLIC json_t *gobj_create_node( // Return is YOURS
             "msg",          "%s", "mt_create_node not defined",
             NULL
         );
-        KW_DECREF(kw);
-        JSON_DECREF(jn_options);
+        KW_DECREF(kw)
+        JSON_DECREF(jn_options)
         return 0;
     }
     return gobj->gclass->gmt.mt_create_node(gobj, topic_name, kw, jn_options, src);
@@ -3439,8 +3439,8 @@ PUBLIC json_t *gobj_update_node( // Return is YOURS
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
-        JSON_DECREF(jn_options);
+        KW_DECREF(kw)
+        JSON_DECREF(jn_options)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_update_node) {
@@ -3451,8 +3451,8 @@ PUBLIC json_t *gobj_update_node( // Return is YOURS
             "msg",          "%s", "mt_update_node not defined",
             NULL
         );
-        KW_DECREF(kw);
-        JSON_DECREF(jn_options);
+        KW_DECREF(kw)
+        JSON_DECREF(jn_options)
         return 0;
     }
     return gobj->gclass->gmt.mt_update_node(gobj, topic_name, kw, jn_options, src);
@@ -3478,8 +3478,8 @@ PUBLIC int gobj_delete_node(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
-        JSON_DECREF(jn_options);
+        KW_DECREF(kw)
+        JSON_DECREF(jn_options)
         return -1;
     }
     if(!gobj->gclass->gmt.mt_delete_node) {
@@ -3490,8 +3490,8 @@ PUBLIC int gobj_delete_node(
             "msg",          "%s", "mt_delete_node not defined",
             NULL
         );
-        KW_DECREF(kw);
-        JSON_DECREF(jn_options);
+        KW_DECREF(kw)
+        JSON_DECREF(jn_options)
         return -1;
     }
     return gobj->gclass->gmt.mt_delete_node(gobj, topic_name, kw, jn_options, src);
@@ -3616,7 +3616,7 @@ PUBLIC json_t *gobj_get_node(
             NULL
         );
         JSON_DECREF(kw);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_get_node) {
@@ -3628,7 +3628,7 @@ PUBLIC json_t *gobj_get_node(
             NULL
         );
         JSON_DECREF(kw);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
     return gobj->gclass->gmt.mt_get_node(gobj, topic_name, kw, jn_options, src);
@@ -3655,7 +3655,7 @@ PUBLIC json_t *gobj_list_nodes(
             NULL
         );
         JSON_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_nodes) {
@@ -3667,7 +3667,7 @@ PUBLIC json_t *gobj_list_nodes(
             NULL
         );
         JSON_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
 
@@ -3696,7 +3696,7 @@ PUBLIC json_t *gobj_list_instances(
             NULL
         );
         JSON_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_list_instances) {
@@ -3709,7 +3709,7 @@ PUBLIC json_t *gobj_list_instances(
         );
 
         JSON_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         return 0;
     }
 
@@ -3740,7 +3740,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         JSON_DECREF(kw);
         return 0;
     }
@@ -3752,7 +3752,7 @@ PUBLIC json_t *gobj_node_parents( // Return MUST be decref
             "msg",          "%s", "mt_node_parents not defined",
             NULL
         );
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         JSON_DECREF(kw);
         return 0;
     }
@@ -3782,7 +3782,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         JSON_DECREF(kw);
         return 0;
     }
@@ -3794,7 +3794,7 @@ PUBLIC json_t *gobj_node_childs( // Return MUST be decref
             "msg",          "%s", "mt_node_childs not defined",
             NULL
         );
-        JSON_DECREF(jn_options);
+        JSON_DECREF(jn_options)
         JSON_DECREF(kw);
         return 0;
     }
@@ -3829,8 +3829,8 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
             NULL
         );
         JSON_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
-        KW_DECREF(kw);
+        JSON_DECREF(jn_options)
+        KW_DECREF(kw)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_topic_jtree) {
@@ -3842,8 +3842,8 @@ PUBLIC json_t *gobj_topic_jtree( // Return MUST be decref
             NULL
         );
         JSON_DECREF(jn_filter);
-        JSON_DECREF(jn_options);
-        KW_DECREF(kw);
+        JSON_DECREF(jn_options)
+        KW_DECREF(kw)
         return 0;
     }
     return gobj->gclass->gmt.mt_topic_jtree(
@@ -3878,8 +3878,8 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        JSON_DECREF(jn_options);
-        KW_DECREF(kw);
+        JSON_DECREF(jn_options)
+        KW_DECREF(kw)
         return 0;
     }
     if(!gobj->gclass->gmt.mt_node_tree) {
@@ -3890,8 +3890,8 @@ PUBLIC json_t *gobj_node_tree( // Return MUST be decref
             "msg",          "%s", "mt_node_tree not defined",
             NULL
         );
-        JSON_DECREF(jn_options);
-        KW_DECREF(kw);
+        JSON_DECREF(jn_options)
+        KW_DECREF(kw)
         return 0;
     }
     return gobj->gclass->gmt.mt_node_tree(
@@ -3922,7 +3922,7 @@ PUBLIC int gobj_shoot_snap(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return -1;
     }
     if(!gobj->gclass->gmt.mt_shoot_snap) {
@@ -3933,7 +3933,7 @@ PUBLIC int gobj_shoot_snap(
             "msg",          "%s", "mt_shoot_snap not defined",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return -1;
     }
     return gobj->gclass->gmt.mt_shoot_snap(gobj, tag, kw, src);
@@ -3958,7 +3958,7 @@ PUBLIC int gobj_activate_snap(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return -1;
     }
     if(!gobj->gclass->gmt.mt_activate_snap) {
@@ -3969,7 +3969,7 @@ PUBLIC int gobj_activate_snap(
             "msg",          "%s", "mt_activate_snap not defined",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return -1;
     }
     return gobj->gclass->gmt.mt_activate_snap(gobj, tag, kw, src);
@@ -5995,7 +5995,7 @@ PRIVATE dl_list_t * _find_subscription(
         subs = next_subs;
     }
 
-    KW_DECREF(kw);
+    KW_DECREF(kw)
     return iter;
 }
 
@@ -6192,7 +6192,7 @@ PUBLIC hsdata gobj_subscribe_event(
             "event",        "%s", event?event:"",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     if(!subscriber) {
@@ -6204,7 +6204,7 @@ PUBLIC hsdata gobj_subscribe_event(
             "event",        "%s", event?event:"",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
 
@@ -6241,7 +6241,7 @@ PUBLIC hsdata gobj_subscribe_event(
 //                     "event",        "%s", event?event:"",
 //                     NULL
 //                 );
-//                 KW_DECREF(kw);
+//                 KW_DECREF(kw)
 //                 return 0;
 //             }
 //         }
@@ -6325,7 +6325,7 @@ PUBLIC hsdata gobj_subscribe_event(
             "subscriber",   "%s", gobj_full_name(subscriber),
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     rc_add_instance(&publisher->dl_subscriptions, subs, 0);
@@ -6363,7 +6363,7 @@ PUBLIC hsdata gobj_subscribe_event(
         }
     }
 
-    KW_DECREF(kw);
+    KW_DECREF(kw)
     return subs;
 }
 
@@ -6391,7 +6391,7 @@ PUBLIC int gobj_unsubscribe_event(
             "event",        "%s", event?event:"",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return -1;
     }
     if(!subscriber) {
@@ -6403,7 +6403,7 @@ PUBLIC int gobj_unsubscribe_event(
             "event",        "%s", event?event:"",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return -1;
     }
 
@@ -6455,7 +6455,7 @@ PUBLIC int gobj_unsubscribe_event(
     }
     rc_free_iter(dl_subs, TRUE, sdata_destroy);
 
-    KW_DECREF(kw);
+    KW_DECREF(kw)
     return 0;
 }
 
@@ -6613,7 +6613,7 @@ PUBLIC int gobj_publish_event(
             "msg",          "%s", "gobj NULL",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     if(publisher->obflag & obflag_destroyed) {
@@ -6624,7 +6624,7 @@ PUBLIC int gobj_publish_event(
             "msg",          "%s", "gobj DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
     if(empty_string(event)) {
@@ -6635,7 +6635,7 @@ PUBLIC int gobj_publish_event(
             "msg",          "%s", "event EMPTY",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
 
@@ -6654,7 +6654,7 @@ PUBLIC int gobj_publish_event(
                 "event",        "%s", event,
                 NULL
             );
-            KW_DECREF(kw);
+            KW_DECREF(kw)
             return 0;
         }
     }
@@ -6689,7 +6689,7 @@ PUBLIC int gobj_publish_event(
             kw  // not owned
         );
         if(topublish<=0) {
-            KW_DECREF(kw);
+            KW_DECREF(kw)
             return 0;
         }
     }
@@ -6896,7 +6896,7 @@ PUBLIC int gobj_publish_event(
         }
     }
 
-    KW_DECREF(kw);
+    KW_DECREF(kw)
     return sent_count;
 }
 
@@ -6946,7 +6946,7 @@ PUBLIC int gobj_send_event(
             "msg",          "%s", "gobj NULL",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return RETEVENT_NO_GOBJ;
     }
     if(dst->obflag & (obflag_destroyed|obflag_destroying)) {
@@ -6957,7 +6957,7 @@ PUBLIC int gobj_send_event(
             "msg",          "%s", (dst->obflag & obflag_destroyed)? "gobj DESTROYED":"gobj DESTROYING",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return RETEVENT_NO_GOBJ;
     }
 
@@ -7013,7 +7013,7 @@ PUBLIC int gobj_send_event(
 
         __inside__ --;
 
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return RETEVENT_INPUT_EVENT_NOT_DEFINED;
     }
 
@@ -7046,7 +7046,7 @@ PUBLIC int gobj_send_event(
 //                 NULL
 //             );
 //             __inside__ --;
-//             KW_DECREF(kw);
+//             KW_DECREF(kw)
 //             return -403;
 //         }
 //     }
@@ -7096,7 +7096,7 @@ PUBLIC int gobj_send_event(
             } else {
                 // No action, there is nothing amiss!.
                 ret = RETEVENT_NO_ACTION;
-                KW_DECREF(kw);
+                KW_DECREF(kw)
             }
 
             if((src && __trace_gobj_event_monitor__(src)) || (dst &&  __trace_gobj_event_monitor__(dst))) {
@@ -7181,7 +7181,7 @@ PUBLIC int gobj_send_event(
          monitor_event(MTOR_EVENT_REFUSED, event, src, dst);
     }
 
-    KW_DECREF(kw);
+    KW_DECREF(kw)
 
     __inside__ --;
 
@@ -10263,7 +10263,7 @@ PUBLIC json_t *gobj_stats(hgobj gobj_, const char *stats, json_t *kw, hgobj src)
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
 
@@ -10288,7 +10288,7 @@ PUBLIC json_t *gobj_stats(hgobj gobj_, const char *stats, json_t *kw, hgobj src)
             "stats",        "%s", stats?stats:"",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
     }
     return 0;
 }
@@ -10359,7 +10359,7 @@ PUBLIC json_t *gobj_command( // With AUTHZ
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
 
@@ -10406,7 +10406,7 @@ PUBLIC json_t *gobj_command( // With AUTHZ
                 "command",      "%s", command?command:"",
                 NULL
             );
-            KW_DECREF(kw);
+            KW_DECREF(kw)
             return 0;
         }
     } else {
@@ -11624,12 +11624,12 @@ PUBLIC int gobj_set_gobj_trace(hgobj gobj_, const char *level, BOOL set, json_t 
     GObj_t * gobj = gobj_;
     if(!gobj) {
         int ret = gobj_set_global_trace(level, set);
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return ret;
     }
 
     if(_set_gobj_trace_level(gobj, level, set)<0) {
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return -1;
     }
     if(set) {
@@ -11641,7 +11641,7 @@ PUBLIC int gobj_set_gobj_trace(hgobj gobj_, const char *level, BOOL set, json_t 
             return gobj->gclass->gmt.mt_trace_off(gobj, level, kw);
         }
     }
-    KW_DECREF(kw);
+    KW_DECREF(kw)
     return 0;
 }
 
@@ -12316,7 +12316,7 @@ PUBLIC json_t *gobj_authenticate(hgobj gobj_, json_t *kw, hgobj src)
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return 0;
     }
 
@@ -12406,7 +12406,7 @@ PUBLIC BOOL gobj_user_has_authz(
             "msg",          "%s", "hgobj NULL or DESTROYED",
             NULL
         );
-        KW_DECREF(kw);
+        KW_DECREF(kw)
         return FALSE;
     }
 
@@ -12440,7 +12440,7 @@ PUBLIC BOOL gobj_user_has_authz(
         return has_permission;
     }
 
-    KW_DECREF(kw);
+    KW_DECREF(kw)
     return TRUE; // HACK if there is no authz checker the authz is TRUE
 }
 
