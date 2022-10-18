@@ -16,7 +16,6 @@ extern "C"{
 #define MSGSET_OPERATIONAL_ERROR     "Operational error"
 #define MSGSET_SMACHINE_ERROR        "SMachine error"
 #define MSGSET_SNMP_ERROR            "Snmp error"
-#define MSGSET_SERVICE_ERROR         "Service error"
 
 /*
  *   GinsFSM Info's MSGLOGs
