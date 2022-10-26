@@ -421,13 +421,13 @@ PUBLIC json_t * msg_iev_pop_stack(
  *
  ***************************************************************************/
 PRIVATE const char *msg_type_list[] = {
-    "__publishing__",
     "__command__",
+    "__publishing__",
     "__subscribing__",
     "__unsubscribing__",
+    "__query__",
+    "__response__",
     "__order__",
-    "__request__",
-    "__answer__",
     "__first_shot__",
     0
 };
@@ -439,7 +439,7 @@ PUBLIC int msg_set_msg_type(
 {
     if(!empty_string(msg_type)) {
         if(is_metadata_key(msg_type) && !str_in_list(msg_type_list, msg_type, TRUE)) {
-            // If it's a metadata key then only admit the message inter-event msg_type_list
+            // HACK If it's a metadata key then only admit our message inter-event msg_type_list
             return kw_delete(kw, "__md_iev__`__msg_type__");
         }
         return kw_set_subdict_value(kw, "__md_iev__", "__msg_type__", json_string(msg_type));
