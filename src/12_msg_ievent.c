@@ -437,7 +437,8 @@ PUBLIC int msg_set_msg_type(
 )
 {
     if(!empty_string(msg_type)) {
-        if(!str_in_list(msg_type_list, msg_type, TRUE)) {
+        if(is_metadata_key(msg_type) && !str_in_list(msg_type_list, msg_type, TRUE)) {
+            // If it's a metadata key then only admit the message inter-event msg_type_list
             return -1;
         }
         return kw_set_subdict_value(kw, "__md_iev__", "__msg_type__", json_string(msg_type));
