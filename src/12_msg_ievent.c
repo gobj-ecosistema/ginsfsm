@@ -421,12 +421,13 @@ PUBLIC json_t * msg_iev_pop_stack(
  *
  ***************************************************************************/
 PRIVATE const char *msg_type_list[] = {
-    "__order__",
-    "__request__",
-    "__answer__",
     "__publishing__",
     "__subscribing__",
     "__unsubscribing__",
+    "__command__",
+    "__order__",
+    "__request__",
+    "__answer__",
     "__first_shot__",
     0
 };
