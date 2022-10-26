@@ -257,7 +257,6 @@ PUBLIC json_t *msg_iev_answer(
     json_t *__md_iev__ = kw_get_dict(kw_request, "__md_iev__", 0, 0);
     if(__md_iev__) {
         json_t *request_msg_area = kw_duplicate(__md_iev__);
-        json_object_set_new(request_msg_area, "__msg_type__", json_string(""));
         json_object_set_new(kw_answer, "__md_iev__", request_msg_area);
         msg_set_msg_type(kw_answer, msg_type);
         if(!kw_has_key(request_msg_area, "__md_yuno__")) {
@@ -296,7 +295,6 @@ PUBLIC json_t *msg_iev_answer_without_answer_filter(
     json_t *__md_iev__ = kw_get_dict(kw_request, "__md_iev__", 0, 0);
     if(__md_iev__) {
         json_t *request_msg_area = kw_duplicate(__md_iev__);
-        json_object_set_new(request_msg_area, "__msg_type__", json_string(""));
         json_object_set_new(kw_answer, "__md_iev__", request_msg_area);
         msg_set_msg_type(kw_answer, msg_type);
 
@@ -443,8 +441,6 @@ PUBLIC int msg_set_msg_type(
             return kw_delete(kw, "__md_iev__`__msg_type__");
         }
         return kw_set_subdict_value(kw, "__md_iev__", "__msg_type__", json_string(msg_type));
-    } else {
-        return kw_delete(kw, "__md_iev__`__msg_type__");
     }
 }
 
