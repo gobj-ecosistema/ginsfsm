@@ -12335,17 +12335,19 @@ PUBLIC json_t *gobj_authenticate(hgobj gobj_, json_t *kw, hgobj src)
         struct passwd *pw = getpwuid(getuid());
 
         KW_DECREF(kw)
-        return json_pack("{s:i, s:s, s:s}",
+        return json_pack("{s:i, s:s, s:s, s:o}",
             "result", 0,
             "comment", "Working without authentication",
-            "username", pw->pw_name
+            "username", pw->pw_name,
+            "jwt_payload", json_null()
         );
 #else
         KW_DECREF(kw)
-        return json_pack("{s:i, s:s, s:s}",
+        return json_pack("{s:i, s:s, s:s, s:o}",
             "result", 0,
             "comment", "Working without authentication",
-            "username", "yuneta"
+            "username", "yuneta",
+            "jwt_payload", json_null()
         );
 #endif
     }

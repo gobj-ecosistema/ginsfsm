@@ -273,6 +273,7 @@ PUBLIC json_t *msg_iev_answer(
 
         msg_apply_answer_filters(gobj, request_msg_area, kw_answer);
     }
+    json_object_del(kw_answer, "__temp__");
 
     KW_DECREF(kw_request);
     return kw_answer;
@@ -310,6 +311,7 @@ PUBLIC json_t *msg_iev_answer_without_answer_filter(
             json_object_set_new(request_msg_area, "__md_yuno__", jn_metadata);
         }
     }
+    json_object_del(kw_answer, "__temp__");
 
     KW_DECREF(kw_request);
     return kw_answer;
