@@ -5855,7 +5855,7 @@ PRIVATE hsdata _create_subscription(
             if(kw_has_key(kw_clone, "__own_event__")) {
                 BOOL own_event= kw_get_bool(kw_clone, "__own_event__", 0, 0);
                 json_object_del(kw_clone, "__own_event__");
-                if(own_event {
+                if(own_event) {
                     subs_flag |= __own_event__;
                 }
             }
