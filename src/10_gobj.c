@@ -6697,6 +6697,7 @@ PUBLIC int gobj_publish_event(
     /*--------------------------------------------------------------*
      *  Default publication method
      *--------------------------------------------------------------*/
+    BOOL global_kw_shared = kw_get_bool(kw, "__share_kw__", FALSE, KW_WILD_NUMBER);
     dl_list_t *dl_subs = &publisher->dl_subscriptions;
     int sent_count = 0;
     hsdata subs; rc_instance_t *i_subs;
@@ -6760,7 +6761,7 @@ PUBLIC int gobj_publish_event(
              *  Duplicate the kw to publish if not shared
              */
             json_t *kw2publish = 0;
-            if(subs_flag & __share_kw__) {
+            if(global_kw_shared || (subs_flag & __share_kw__)) {
                 KW_INCREF(kw);
                 kw2publish = kw;
             } else {

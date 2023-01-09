@@ -1227,6 +1227,7 @@ PUBLIC int gobj_add_publication_transformation_filter_fn(
  *
  *      2) Check renamed_event
  *      3) Duplicate the kw to publish if not shared (subscription flag ``__share_kw__``)
+ *          New: if kw has `__share_kw__` then share the kw to all subscribers
  *      4) Filter with filter if either not null:
  *          - call publisher mt_publication_filter() method or
  *          - filter with subscription parameter ``__filter__`` (kw_match_simple())
