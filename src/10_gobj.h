@@ -1082,7 +1082,7 @@ Possible values for config arguments:
 
     If True then subscriber wants receive the event on subscription.
     Subscribing gobj mt_subscription_added() will be called
-    and it's his responsability to check the flag and to emit the event.
+    and it's his responsibility to check the flag and to emit the event.
 
 * "__share_kw__": bool
     Use the same kw to all publications. This let subscribers modify the same kw.
@@ -1227,7 +1227,7 @@ PUBLIC int gobj_add_publication_transformation_filter_fn(
  *
  *      2) Check renamed_event
  *      3) Duplicate the kw to publish if not shared (subscription flag ``__share_kw__``)
- *          New: if kw has `__share_kw__` then share the kw to all subscribers
+ *          New: if kw has `__share_kw__` (set by publisher) then share the kw to all subscribers
  *      4) Filter with filter if either not null:
  *          - call publisher mt_publication_filter() method or
  *          - filter with subscription parameter ``__filter__`` (kw_match_simple())
