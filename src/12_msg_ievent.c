@@ -444,6 +444,7 @@ PUBLIC int msg_set_msg_type(
         }
         return kw_set_subdict_value(kw, "__md_iev__", "__msg_type__", json_string(msg_type));
     }
+    return 0;
 }
 
 /***************************************************************************

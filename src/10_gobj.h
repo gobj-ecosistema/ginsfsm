@@ -1352,7 +1352,7 @@ PUBLIC void *gobj_danger_attr_ptr2(hgobj gobj_, const char *name, const sdata_de
 
 PUBLIC json_t *gobj_read_attr( // Return is yours! Must be decref. With AUTHZ
     hgobj gobj,
-    const char *name,
+    const char *path, // If it has ` then segments are gobj and leaf is the attribute (+bottom)
     hgobj src
 );
 PUBLIC json_t *gobj_read_user_data( // Return is NOT yours
@@ -1389,7 +1389,7 @@ PUBLIC SData_Value_t gobj_read_default_attr_value(hgobj gobj, const char* name);
 
 PUBLIC int gobj_write_attr( // With AUTHZ
     hgobj gobj,
-    const char *path,
+    const char *path, // If it has ` then segments are gobj and leaf is the attribute (+bottom)
     json_t *value,  // owned
     hgobj src
 );

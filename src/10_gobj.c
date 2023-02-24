@@ -8052,11 +8052,9 @@ PUBLIC void *gobj_danger_attr_ptr2(hgobj gobj, const char *name, const sdata_des
 }
 
 /***************************************************************************
- *  ATTR: read str
- *  Return is yours! Must be decref. New api (May/2019), js style
- *  With AUTHZ
+ *
  ***************************************************************************/
-PUBLIC json_t *gobj_read_attr(
+PRIVATE json_t *_gobj_read_attr(
     hgobj gobj,
     const char *name,
     hgobj src
@@ -8133,6 +8131,25 @@ PUBLIC json_t *gobj_read_attr(
     }
 
     return jn_value;
+}
+
+/***************************************************************************
+ *  ATTR: read str
+ *  Return is yours! Must be decref. New api (May/2019), js style
+ *  With AUTHZ
+ *  Inherit from js-core
+ ***************************************************************************/
+PUBLIC json_t *gobj_read_attr(
+    hgobj gobj,
+    const char *path, // If it has ` then segments are gobj and leaf is the attribute (+bottom)
+    hgobj src
+)
+{
+    // TODO use segments of ` to search in childs
+
+    json_t *jn_attr = _gobj_read_attr(gobj, path, src);
+
+    return jn_attr;
 }
 
 /***************************************************************************
@@ -8486,18 +8503,16 @@ PUBLIC SData_Value_t gobj_read_default_attr_value(hgobj gobj, const char* name) 
 }
 
 /***************************************************************************
- *  ATTR: write
- *  New api (May/2019), js style
- *  With AUTHZ
+ *
  ***************************************************************************/
-PUBLIC int gobj_write_attr(
+PRIVATE int _gobj_write_attr(
     hgobj gobj,
-    const char *path,
+    const char *name,
     json_t *value,  // owned
     hgobj src
 )
 {
-    hsdata hs = gobj_hsdata2(gobj, path, FALSE);
+    hsdata hs = gobj_hsdata2(gobj, name, FALSE); // This search in bottom's
     if(!hs) {
         log_warning(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
@@ -8505,14 +8520,14 @@ PUBLIC int gobj_write_attr(
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute NOT FOUND",
             "gclass",       "%s", gobj_gclass_name(gobj),
-            "attr",         "%s", path?path:"",
+            "attr",         "%s", name?name:"",
             NULL
         );
         JSON_DECREF(value);
         return -1;
     }
 
-    const sdata_desc_t *it = sdata_it_desc(sdata_schema(hs), path);
+    const sdata_desc_t *it = sdata_it_desc(sdata_schema(hs), name);
 
 //     if(it->flag & SDF_AUTHZ_W) {
 //         /*
@@ -8539,24 +8554,24 @@ PUBLIC int gobj_write_attr(
     int ret;
 
     if(ASN_IS_STRING(it->type)) {
-        ret = sdata_write_str(hs, path, json_string_value(value));
+        ret = sdata_write_str(hs, name, json_string_value(value));
     } else if(ASN_IS_BOOLEAN(it->type)) {
-        ret = sdata_write_bool(hs, path, json_boolean_value(value));
+        ret = sdata_write_bool(hs, name, json_boolean_value(value));
     } else if(ASN_IS_UNSIGNED32(it->type)) {
-        ret = sdata_write_uint32(hs, path, json_integer_value(value));
+        ret = sdata_write_uint32(hs, name, json_integer_value(value));
     } else if(ASN_IS_SIGNED32(it->type)) {
-        ret = sdata_write_int32(hs, path, json_integer_value(value));
+        ret = sdata_write_int32(hs, name, json_integer_value(value));
     } else if(ASN_IS_UNSIGNED64(it->type)) {
-        ret = sdata_write_uint64(hs, path, json_integer_value(value));
+        ret = sdata_write_uint64(hs, name, json_integer_value(value));
     } else if(ASN_IS_SIGNED64(it->type)) {
-        ret = sdata_write_int64(hs, path, json_integer_value(value));
+        ret = sdata_write_int64(hs, name, json_integer_value(value));
     } else if(ASN_IS_DOUBLE(it->type)) {
-        ret = sdata_write_real(hs, path, json_real_value(value));
+        ret = sdata_write_real(hs, name, json_real_value(value));
     } else if(ASN_IS_JSON(it->type)) {
-        ret = sdata_write_json(hs, path, value); // WARNING json is incref
+        ret = sdata_write_json(hs, name, value); // WARNING json is incref
         JSON_DECREF(value);
     } else if(ASN_IS_POINTER(it->type)) {
-        ret = sdata_write_pointer(hs, path, (void *)(size_t)json_integer_value(value));
+        ret = sdata_write_pointer(hs, name, (void *)(size_t)json_integer_value(value));
     } else {
         log_error(LOG_OPT_TRACE_STACK,
             "gobj",         "%s", gobj_full_name(gobj),
@@ -8564,7 +8579,7 @@ PUBLIC int gobj_write_attr(
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
             "msg",          "%s", "GClass Attribute Type NOT VALID",
             "gclass",       "%s", gobj_gclass_name(gobj),
-            "attr",         "%s", path?path:"",
+            "attr",         "%s", name?name:"",
             NULL
         );
         ret = -1;
@@ -8572,6 +8587,24 @@ PUBLIC int gobj_write_attr(
 
     JSON_DECREF(value);
     return ret;
+}
+
+/***************************************************************************
+ *  ATTR: write
+ *  New api (May/2019), js style
+ *  With AUTHZ
+ *  Inherit from js-core
+ ***************************************************************************/
+PUBLIC int gobj_write_attr(
+    hgobj gobj,
+    const char *path, // If it has ` then segments are gobj and leaf is the attribute (+bottom)
+    json_t *value,  // owned
+    hgobj src
+)
+{
+    // TODO use segments of ` to search in childs
+
+    return _gobj_write_attr(gobj, path, value, src);
 }
 
 /***************************************************************************
@@ -8895,6 +8928,7 @@ PUBLIC BOOL gobj_is_writable_attr(hgobj gobj, const char *name)
 /***************************************************************************
  *  ATTR: write
  *  Return a json list of writable attribute names
+ *  Inherit from js-core
  ***************************************************************************/
 PUBLIC json_t *gobj_get_writable_attrs(hgobj gobj) // Return is yours, decref!
 {
@@ -8914,6 +8948,7 @@ PUBLIC json_t *gobj_get_writable_attrs(hgobj gobj) // Return is yours, decref!
 /***************************************************************************
  *  ATTR: write
  *  Update writable attrs
+ *  Inherit from js-core
  ***************************************************************************/
 PUBLIC int gobj_update_writable_attrs(
     hgobj gobj,
