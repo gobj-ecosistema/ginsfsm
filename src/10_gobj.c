@@ -143,7 +143,7 @@ SDATA (ASN_POINTER,     "publisher",        0,                  0,              
 SDATA (ASN_POINTER,     "subscriber",       0,                  0,              "subscriber gobj"),
 SDATA (ASN_OCTET_STR,   "event",            0,                  0,              "event name subscribed"),
 SDATA (ASN_OCTET_STR,   "renamed_event",    0,                  0,              "rename event name"),
-SDATA (ASN_UNSIGNED64,  "subs_flag",        0,                  0,              "subscripton flag"),
+SDATA (ASN_UNSIGNED64,  "subs_flag",        0,                  0,              "subscription flag"),
 SDATA (ASN_JSON,        "__config__",       0,                  0,              "subscription config kw"),
 SDATA (ASN_JSON,        "__global__",       0,                  0,              "global event kw"),
 SDATA (ASN_JSON,        "__local__",        0,                  0,              "local event kw"),
@@ -6700,10 +6700,15 @@ PUBLIC int gobj_publish_event(
     BOOL global_kw_shared = kw_get_bool(kw, "__share_kw__", FALSE, KW_WILD_NUMBER);
     dl_list_t *dl_subs = &publisher->dl_subscriptions;
     int sent_count = 0;
-    hsdata subs; rc_instance_t *i_subs;
+    hsdata subs; rc_instance_t *i_subs; hsdata next_subs;
     i_subs = rc_first_instance(dl_subs, (rc_resource_t **)&subs);
     while(i_subs) {
-        // TODO no protegido contra borrados
+        // TODO no protegido contra borrados (protegido contra el borrado de un subs)
+        /*
+         *  Next subs
+         */
+        i_subs = rc_next_instance(i_subs, (rc_resource_t **)&next_subs);
+
         /*-------------------------------------*
          *  Pre-filter
          *  kw NOT owned! you can modify the publishing kw
@@ -6725,23 +6730,25 @@ PUBLIC int gobj_publish_event(
                 /*
                  *  Next subs
                  */
-                i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+                //i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+                subs = next_subs;
                 continue;
             }
         }
-        subs_flag_t subs_flag = sdata_read_uint64(subs, "subs_flag");
         GObj_t *subscriber = sdata_read_pointer(subs, "subscriber");
         if(!(subscriber && !(subscriber->obflag & obflag_destroyed))) {
             /*
              *  Next subs
              */
-            i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+            //i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+            subs = next_subs;
             continue;
         }
 
         /*
          *  Check if event null or event in event_list
          */
+        subs_flag_t subs_flag = sdata_read_uint64(subs, "subs_flag");
         const char *event_ = sdata_read_str(subs, "event");
         if(empty_string(event_) || strcasecmp(event_, event)==0) {
             json_t *__config__ = sdata_read_json(subs, "__config__");
@@ -6798,7 +6805,8 @@ PUBLIC int gobj_publish_event(
                  *  Next subs
                  */
                 KW_DECREF(kw2publish);
-                i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+                //i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+                subs = next_subs;
                 continue;
             }
 
@@ -6879,7 +6887,8 @@ PUBLIC int gobj_publish_event(
         /*
          *  Next subs
          */
-        i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+        //i_subs = rc_next_instance(i_subs, (rc_resource_t **)&subs);
+        subs = next_subs;
     }
 
     if(!sent_count) {
