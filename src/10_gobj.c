@@ -7114,7 +7114,7 @@ PUBLIC int gobj_send_event(
             }
 
             if(state_changed && gobj_is_running(dst)) {
-                if(tracea && tracea_states) {
+                if(tracea || tracea_states) {
                     trace_machine("🔀🔀 mach(%s%s^%s), st(%d:%s%s%s), ev: %s, from(%s%s^%s)",
                         (!dst->running)?"!!":"",
                         gobj_gclass_name(dst), gobj_name(dst),
