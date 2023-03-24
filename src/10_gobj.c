@@ -270,6 +270,8 @@ PRIVATE dl_list_t dl_trans_filter = {0};
 
 PRIVATE kw_match_fn __publish_event_match__ = kw_match_simple;
 
+PRIVATE json_t *jn_gclass_trace_filter = 0;
+
 /*
  *  Global trace levels
  */
@@ -2659,6 +2661,7 @@ PUBLIC void gobj_destroy(hgobj gobj_)
 
     if(gobj->obflag & obflag_yuno) {
         JSON_DECREF(__jn_unique_named_dict__);
+        JSON_DECREF(jn_gclass_trace_filter);
     }
     gobj_free(gobj);
 }
@@ -11852,6 +11855,116 @@ PUBLIC int gobj_set_global_trace(const char *level, BOOL set)
         __global_trace_level__ &= ~bitmask;
     }
     return 0;
+}
+
+/****************************************************************************
+ *
+ ****************************************************************************/
+PUBLIC int gobj_add_trace_filter(const char *attr, const char *value)
+{
+    if(empty_string(attr)) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "attr NULL",
+            NULL
+        );
+        return -1;
+    }
+    if(!jn_gclass_trace_filter) {
+        jn_gclass_trace_filter = json_object();
+    }
+
+    json_t *jn_list = kw_get_list(jn_gclass_trace_filter, attr, json_array(), KW_CREATE);
+    if(!jn_list) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_MEMORY_ERROR,
+            "msg",          "%s", "cannot create list",
+            "attr",         "%s", attr,
+            "value",        "%s", value?value:"",
+            NULL
+        );
+        return -1;
+    }
+
+    if(!value) {
+        value = "";
+    }
+    int idx = kw_find_str_in_list(jn_list, value);
+    if(idx < 0) {
+        json_array_append_new(jn_list, json_string(value));
+    }
+    return 0;
+}
+
+/****************************************************************************
+ *
+ ****************************************************************************/
+PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
+{
+    if(empty_string(attr)) {
+        JSON_DECREF(jn_gclass_trace_filter)
+        return 0;
+    }
+    if(!jn_gclass_trace_filter) {
+        jn_gclass_trace_filter = json_object();
+    }
+
+    json_t *jn_list = kw_get_list(jn_gclass_trace_filter, attr, 0, 0);
+    if(!jn_list) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "attr not found",
+            "attr",         "%s", attr,
+            "value",        "%s", value?value:"",
+            NULL
+        );
+        return -1;
+    }
+
+    if(empty_string(value)) {
+        json_array_clear(jn_list);
+        kw_delete(jn_gclass_trace_filter, attr);
+        return 0;
+    }
+
+    int idx = kw_find_str_in_list(jn_list, value);
+    if(idx < 0) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "value not found",
+            "attr",         "%s", attr,
+            "value",        "%s", value?value:"",
+            NULL
+        );
+        return -1;
+    }
+
+    json_array_remove(jn_list, idx);
+
+    if(json_array_size(jn_list) == 0) {
+        kw_delete(jn_gclass_trace_filter, attr);
+    }
+
+    return 0;
+}
+
+/****************************************************************************
+ *  Return is not YOURS
+ ****************************************************************************/
+PUBLIC json_t *gobj_get_trace_filter(void)
+{
+    if(!jn_gclass_trace_filter) {
+        jn_gclass_trace_filter = json_object();
+    }
+    return jn_gclass_trace_filter;
 }
 
 /****************************************************************************
