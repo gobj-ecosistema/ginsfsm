@@ -740,6 +740,7 @@ PUBLIC int gobj_register_yuno(
 PRIVATE void free_gclass_reg(gclass_register_t *gclass_reg)
 {
     dl_delete(&dl_gclass, gclass_reg, 0);
+    JSON_DECREF(gclass_reg->gclass->__jn_trace_filter__);
     if(gclass_reg->to_free) {
         GBMEM_FREE(gclass_reg->gclass);
     }
