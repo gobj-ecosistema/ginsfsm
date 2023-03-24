@@ -270,8 +270,6 @@ PRIVATE dl_list_t dl_trans_filter = {0};
 
 PRIVATE kw_match_fn __publish_event_match__ = kw_match_simple;
 
-PRIVATE json_t *__jn_trace_filters__ = 0;
-
 /*
  *  Global trace levels
  */
@@ -2661,7 +2659,6 @@ PUBLIC void gobj_destroy(hgobj gobj_)
 
     if(gobj->obflag & obflag_yuno) {
         JSON_DECREF(__jn_unique_named_dict__);
-        JSON_DECREF(__jn_trace_filters__);
     }
     gobj_free(gobj);
 }
@@ -11860,17 +11857,17 @@ PUBLIC int gobj_set_global_trace(const char *level, BOOL set)
 /****************************************************************************
  *
  ****************************************************************************/
-PUBLIC int gobj_load_trace_filter(json_t *jn_trace_filters) // owned
+PUBLIC int gobj_load_trace_filter(GCLASS *gclass, json_t *jn_trace_filter) // owned
 {
-    JSON_DECREF(__jn_trace_filters__)
-    __jn_trace_filters__ = jn_trace_filters;
+    JSON_DECREF(gclass->__jn_trace_filter__)
+    gclass->__jn_trace_filter__ = jn_trace_filter;
     return 0;
 }
 
 /****************************************************************************
  *
  ****************************************************************************/
-PUBLIC int gobj_add_trace_filter(const char *attr, const char *value)
+PUBLIC int gobj_add_trace_filter(GCLASS *gclass, const char *attr, const char *value)
 {
     if(empty_string(attr)) {
         log_error(0,
@@ -11882,11 +11879,11 @@ PUBLIC int gobj_add_trace_filter(const char *attr, const char *value)
         );
         return -1;
     }
-    if(!__jn_trace_filters__) {
-        __jn_trace_filters__ = json_object();
+    if(!gclass->__jn_trace_filter__) {
+        gclass->__jn_trace_filter__ = json_object();
     }
 
-    json_t *jn_list = kw_get_list(__jn_trace_filters__, attr, json_array(), KW_CREATE);
+    json_t *jn_list = kw_get_list(gclass->__jn_trace_filter__, attr, json_array(), KW_CREATE);
     if(!jn_list) {
         log_error(0,
             "gobj",         "%s", __FILE__,
@@ -11913,17 +11910,17 @@ PUBLIC int gobj_add_trace_filter(const char *attr, const char *value)
 /****************************************************************************
  *
  ****************************************************************************/
-PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
+PUBLIC int gobj_remove_trace_filter(GCLASS *gclass, const char *attr, const char *value)
 {
     if(empty_string(attr)) {
-        JSON_DECREF(__jn_trace_filters__)
+        JSON_DECREF(gclass->__jn_trace_filter__)
         return 0;
     }
-    if(!__jn_trace_filters__) {
-        __jn_trace_filters__ = json_object();
+    if(!gclass->__jn_trace_filter__) {
+        return -1;
     }
 
-    json_t *jn_list = kw_get_list(__jn_trace_filters__, attr, 0, 0);
+    json_t *jn_list = kw_get_list(gclass->__jn_trace_filter__, attr, 0, 0);
     if(!jn_list) {
         log_error(0,
             "gobj",         "%s", __FILE__,
@@ -11939,7 +11936,7 @@ PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
 
     if(empty_string(value)) {
         json_array_clear(jn_list);
-        kw_delete(__jn_trace_filters__, attr);
+        kw_delete(gclass->__jn_trace_filter__, attr);
         return 0;
     }
 
@@ -11960,7 +11957,10 @@ PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
     json_array_remove(jn_list, idx);
 
     if(json_array_size(jn_list) == 0) {
-        kw_delete(__jn_trace_filters__, attr);
+        kw_delete(gclass->__jn_trace_filter__, attr);
+        if(json_object_size(gclass->__jn_trace_filter__)==0) {
+            JSON_DECREF(gclass->__jn_trace_filter__)
+        }
     }
 
     return 0;
@@ -11969,12 +11969,9 @@ PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
 /****************************************************************************
  *  Return is not YOURS
  ****************************************************************************/
-PUBLIC json_t *gobj_get_trace_filter(void)
+PUBLIC json_t *gobj_get_trace_filter(GCLASS *gclass)
 {
-    if(!__jn_trace_filters__) {
-        __jn_trace_filters__ = json_object();
-    }
-    return __jn_trace_filters__;
+    return gclass->__jn_trace_filter__;
 }
 
 /****************************************************************************
@@ -12102,9 +12099,11 @@ PUBLIC uint32_t gobj_trace_level(hgobj gobj_)
     uint32_t bitmask = __global_trace_level__;
     if(gobj) {
         bitmask |= gobj->__gobj_trace_level__;
-        if(gobj->gclass) {
+        if (gobj->gclass) {
             bitmask |= gobj->gclass->__gclass_trace_level__;
         }
+//        if (json_object_size(gobj->gclass.__jn_trace_filter__)) {
+//        }
     }
 
     return bitmask;
