@@ -270,7 +270,7 @@ PRIVATE dl_list_t dl_trans_filter = {0};
 
 PRIVATE kw_match_fn __publish_event_match__ = kw_match_simple;
 
-PRIVATE json_t *jn_gclass_trace_filter = 0;
+PRIVATE json_t *__jn_trace_filters__ = 0;
 
 /*
  *  Global trace levels
@@ -320,8 +320,8 @@ typedef struct {
 
 PRIVATE const s_gcflag_t s_gcflag[] = {
 {"manual_start",            "gobj_start_tree() don't start gobjs of this /gclass"},
-{"no_check_ouput_events",   "When publishing don't check events in output_event_list"},
-{"ignore_unkwnow_attrs",    "When creating a gobj, ignore not existing attrs"},
+{"no_check_output_events",  "When publishing don't check events in output_event_list"},
+{"ignore_unknown_attrs",    "When creating a gobj, ignore not existing attrs"},
 {"required_start_to_play",  "Require start before play"},
 {0, 0},
 };
@@ -2661,7 +2661,7 @@ PUBLIC void gobj_destroy(hgobj gobj_)
 
     if(gobj->obflag & obflag_yuno) {
         JSON_DECREF(__jn_unique_named_dict__);
-        JSON_DECREF(jn_gclass_trace_filter);
+        JSON_DECREF(__jn_trace_filters__);
     }
     gobj_free(gobj);
 }
@@ -11860,6 +11860,16 @@ PUBLIC int gobj_set_global_trace(const char *level, BOOL set)
 /****************************************************************************
  *
  ****************************************************************************/
+PUBLIC int gobj_load_trace_filter(json_t *jn_trace_filters) // owned
+{
+    JSON_DECREF(__jn_trace_filters__)
+    __jn_trace_filters__ = jn_trace_filters;
+    return 0;
+}
+
+/****************************************************************************
+ *
+ ****************************************************************************/
 PUBLIC int gobj_add_trace_filter(const char *attr, const char *value)
 {
     if(empty_string(attr)) {
@@ -11872,11 +11882,11 @@ PUBLIC int gobj_add_trace_filter(const char *attr, const char *value)
         );
         return -1;
     }
-    if(!jn_gclass_trace_filter) {
-        jn_gclass_trace_filter = json_object();
+    if(!__jn_trace_filters__) {
+        __jn_trace_filters__ = json_object();
     }
 
-    json_t *jn_list = kw_get_list(jn_gclass_trace_filter, attr, json_array(), KW_CREATE);
+    json_t *jn_list = kw_get_list(__jn_trace_filters__, attr, json_array(), KW_CREATE);
     if(!jn_list) {
         log_error(0,
             "gobj",         "%s", __FILE__,
@@ -11906,14 +11916,14 @@ PUBLIC int gobj_add_trace_filter(const char *attr, const char *value)
 PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
 {
     if(empty_string(attr)) {
-        JSON_DECREF(jn_gclass_trace_filter)
+        JSON_DECREF(__jn_trace_filters__)
         return 0;
     }
-    if(!jn_gclass_trace_filter) {
-        jn_gclass_trace_filter = json_object();
+    if(!__jn_trace_filters__) {
+        __jn_trace_filters__ = json_object();
     }
 
-    json_t *jn_list = kw_get_list(jn_gclass_trace_filter, attr, 0, 0);
+    json_t *jn_list = kw_get_list(__jn_trace_filters__, attr, 0, 0);
     if(!jn_list) {
         log_error(0,
             "gobj",         "%s", __FILE__,
@@ -11929,7 +11939,7 @@ PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
 
     if(empty_string(value)) {
         json_array_clear(jn_list);
-        kw_delete(jn_gclass_trace_filter, attr);
+        kw_delete(__jn_trace_filters__, attr);
         return 0;
     }
 
@@ -11950,7 +11960,7 @@ PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
     json_array_remove(jn_list, idx);
 
     if(json_array_size(jn_list) == 0) {
-        kw_delete(jn_gclass_trace_filter, attr);
+        kw_delete(__jn_trace_filters__, attr);
     }
 
     return 0;
@@ -11961,10 +11971,10 @@ PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value)
  ****************************************************************************/
 PUBLIC json_t *gobj_get_trace_filter(void)
 {
-    if(!jn_gclass_trace_filter) {
-        jn_gclass_trace_filter = json_object();
+    if(!__jn_trace_filters__) {
+        __jn_trace_filters__ = json_object();
     }
-    return jn_gclass_trace_filter;
+    return __jn_trace_filters__;
 }
 
 /****************************************************************************

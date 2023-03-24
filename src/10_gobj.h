@@ -1694,6 +1694,7 @@ PUBLIC int gobj_set_panic_trace(BOOL panic_trace);
 PUBLIC int gobj_set_deep_tracing(int level); /* 1 all but considering __gobj_no_trace_level__, > 1 all */
 PUBLIC int gobj_set_global_trace(const char *level, BOOL set); // If level is empty, set all global traces
 
+PUBLIC int gobj_load_trace_filter(json_t *jn_trace_filters); // owned
 PUBLIC int gobj_add_trace_filter(const char *attr, const char *value);
 PUBLIC int gobj_remove_trace_filter(const char *attr, const char *value);  // If attr is empty then remove all filters, if value is empty then remove all values of attr
 PUBLIC json_t *gobj_get_trace_filter(void); // Return is not YOURS
