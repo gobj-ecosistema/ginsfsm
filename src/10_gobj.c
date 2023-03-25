@@ -8215,7 +8215,7 @@ PUBLIC const char *gobj_read_str_attr(hgobj gobj, const char *name)
         "function",     "%s", __FUNCTION__,
         "msgset",       "%s", MSGSET_PARAMETER_ERROR,
         "msg",          "%s", "GClass Attribute NOT FOUND",
-        "gclass",       "%s", gobj_gclass_name(gobj),
+        "short_name",   "%s", gobj_short_name(gobj),
         "attr",         "%s", name?name:"",
         NULL
     );
@@ -11880,6 +11880,18 @@ PUBLIC int gobj_add_trace_filter(GCLASS *gclass, const char *attr, const char *v
         );
         return -1;
     }
+    if(!gclass_has_attr(gclass, attr)) {
+        log_error(0,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_PARAMETER_ERROR,
+            "msg",          "%s", "gclass has not this attribute",
+            "attr",         "%s", attr,
+            NULL
+        );
+        return -1;
+    }
+
     if(!gclass->__jn_trace_filter__) {
         gclass->__jn_trace_filter__ = json_object();
     }
@@ -11918,7 +11930,7 @@ PUBLIC int gobj_remove_trace_filter(GCLASS *gclass, const char *attr, const char
         return 0;
     }
     if(!gclass->__jn_trace_filter__) {
-        return -1;
+        return 0;
     }
 
     json_t *jn_list = kw_get_list(gclass->__jn_trace_filter__, attr, 0, 0);
@@ -11938,6 +11950,9 @@ PUBLIC int gobj_remove_trace_filter(GCLASS *gclass, const char *attr, const char
     if(empty_string(value)) {
         json_array_clear(jn_list);
         kw_delete(gclass->__jn_trace_filter__, attr);
+        if(json_object_size(gclass->__jn_trace_filter__)==0) {
+            JSON_DECREF(gclass->__jn_trace_filter__)
+        }
         return 0;
     }
 
@@ -12099,12 +12114,30 @@ PUBLIC uint32_t gobj_trace_level(hgobj gobj_)
     }
     uint32_t bitmask = __global_trace_level__;
     if(gobj) {
-        bitmask |= gobj->__gobj_trace_level__;
-        if (gobj->gclass) {
-            bitmask |= gobj->gclass->__gclass_trace_level__;
+        if(!gobj->gclass->__jn_trace_filter__ || !gobj->hsdata_attr) {
+            bitmask |= gobj->__gobj_trace_level__;
+            if(gobj->gclass) {
+                bitmask |= gobj->gclass->__gclass_trace_level__;
+            }
+        } else {
+            const char *attr; json_t *jn_list_values;
+            json_object_foreach(gobj->gclass->__jn_trace_filter__, attr, jn_list_values) {
+                int idx; json_t *jn_value;
+                json_array_foreach(jn_list_values, idx, jn_value) {
+                    const char *value = json_string_value(jn_value);
+                    // TODO consider other types than str
+                    // TODO int attr_type = gobj_attr_type(gobj, attr);
+                    const char *value_ = gobj_read_str_attr(gobj, attr);
+                    if(value && value_ && strcmp(value, value_)==0) {
+                        bitmask |= gobj->__gobj_trace_level__;
+                        if(gobj->gclass) {
+                            bitmask |= gobj->gclass->__gclass_trace_level__;
+                        }
+                        break;
+                    }
+                }
+            }
         }
-//        if (json_object_size(gobj->gclass.__jn_trace_filter__)) {
-//        }
     }
 
     return bitmask;
