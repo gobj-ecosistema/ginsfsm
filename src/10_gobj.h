@@ -1093,6 +1093,9 @@ Possible values for config arguments:
 * "__trans_filter__": string or string's list
     Transform kw to publish with transformation filters
 
+* "__own_event__": bool
+    If __own_event__ defined and gobj_send_event inside of gobj_publish_event return -1 don't continue publishing
+
 
 Subdictionaries to use in gobj_subscribe_event() kw
 ===================================================
