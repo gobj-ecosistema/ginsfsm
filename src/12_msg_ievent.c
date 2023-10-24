@@ -427,6 +427,7 @@ PRIVATE const char *msg_type_list[] = {
     "__unsubscribing__",
     "__query__",
     "__response__",
+    "__answer__",
     "__order__",
     "__first_shot__",
     0
