@@ -354,7 +354,20 @@ PUBLIC int msg_iev_push_stack(
         jn_stack = json_array();
         kw_set_subdict_value(kw, "__md_iev__", stack, jn_stack);
     }
-    return json_array_insert_new(jn_stack, 0, jn_user_info);
+    if(json_is_array(jn_stack)) {
+        return json_array_insert_new(jn_stack, 0, jn_user_info);
+    } else {
+        log_error(LOG_OPT_TRACE_STACK,
+            "gobj",         "%s", __FILE__,
+            "function",     "%s", __FUNCTION__,
+            "msgset",       "%s", MSGSET_INTERNAL_ERROR,
+            "msg",          "%s", "jn_stack is not a list",
+            "stack",        "%s", stack,
+            NULL
+        );
+        log_debug_json(0, kw, "jn_stack is not a list");
+        return -1;
+    }
 }
 
 /***************************************************************************
@@ -367,16 +380,17 @@ PUBLIC json_t *msg_iev_get_stack( // return is not yours!
 )
 {
     json_t *jn_stack = kw_get_subdict_value(kw, "__md_iev__", stack, 0, 0);
-    if(!jn_stack) {
+    if(!jn_stack || !json_is_array(jn_stack)) {
         if(print_not_found) {
             log_error(0,
                 "gobj",         "%s", __FILE__,
                 "function",     "%s", __FUNCTION__,
                 "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-                "msg",          "%s", "stack NOT EXIST.",
+                "msg",          "%s", "stack NOT EXIST or is not an array",
                 "stack",        "%s", stack,
                 NULL
             );
+            log_debug_json(0, kw, "stack NOT EXIST or is not an array");
         }
         return 0;
     }
@@ -397,15 +411,16 @@ PUBLIC json_t * msg_iev_pop_stack(
      *  Recover the current item
      *-----------------------------------*/
     json_t *jn_stack = kw_get_subdict_value(kw, "__md_iev__", stack, 0, 0);
-    if(!jn_stack) {
+    if(!jn_stack || !json_is_array(jn_stack)) {
         log_error(0,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_INTERNAL_ERROR,
-            "msg",          "%s", "stack NOT EXIST.",
+            "msg",          "%s", "stack NOT EXIST or is not an array",
             "stack",        "%s", stack,
             NULL
         );
+        log_debug_json(0, kw, "stack NOT EXIST or is not an array");
         return 0;
     }
     json_t *jn_user_info = json_array_get(jn_stack, 0);
