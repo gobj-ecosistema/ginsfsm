@@ -6292,7 +6292,7 @@ PUBLIC hsdata gobj_subscribe_event(
     );
     int size = rc_iter_size(dl_subs);
     if(size > 0) {
-        log_error(LOG_OPT_TRACE_STACK,
+        log_warning(0,
             "gobj",         "%s", __FILE__,
             "function",     "%s", __FUNCTION__,
             "msgset",       "%s", MSGSET_PARAMETER_ERROR,
