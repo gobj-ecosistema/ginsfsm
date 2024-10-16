@@ -4075,7 +4075,12 @@ PUBLIC BOOL gobj_check_required_attrs(
     not_found_cb_t not_found_cb // Called when the key not exist in hsdata
 )
 {
+    // Lo dejo como está, pero no se están comprobando los required attrs en Yuneta <= 6.0
     const char **keys = sdata_keys(gobj_hsdata(gobj), SDF_REQUIRED, 0);
+
+    // WARNING collateral damage!!! until now this didn't work well
+    // const char **keys = sdata_keys(sdata_schema(gobj_hsdata(gobj)) , SDF_REQUIRED, 0);
+
     if(keys) {
         while(*keys) {
             const char *name = *keys;
